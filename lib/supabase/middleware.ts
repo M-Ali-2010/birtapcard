@@ -40,11 +40,29 @@ const ALL_DASHBOARD_PATHS = [
 ]
 
 export async function updateSession(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  // Без ключей Supabase клиент бросает исключение и каждый запрос падает с голым
+  // 500 Internal Server Error. Отдаём вместо этого понятный ответ — доступ при
+  // этом всё равно закрыт для всех, никакого fail-open.
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error(
+      'Supabase env vars missing: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY. ' +
+      'Задайте их в настройках проекта и пересоберите деплой.'
+    )
+    return new NextResponse(
+      'Приложение не настроено: не заданы NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY.\n' +
+      'Добавьте переменные окружения и пересоберите деплой (NEXT_PUBLIC_* подставляются на этапе сборки).',
+      { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } }
+    )
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {

@@ -1,133 +1,57 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { clearProfileCache, useProfile } from '@/lib/hooks'
+import { Icon } from '@/components/ui/icons'
+import { useTheme } from '@/components/ui/theme'
+import {
+  AccessDenied, Avatar, Badge, Button, Field, IconButton, Note,
+  Panel, Segmented, Skeleton, roleLabel,
+} from '@/components/ui/kit'
+import { useToast } from '@/components/ui/toast'
 
-// ─── Типы ───────────────────────────────────────────────────────────────────
+/* ─── Индикатор надёжности пароля ────────────────────────────────────────── */
 
-type Profile = {
-  id: string
-  user_id: string
-  full_name: string | null
-  role: string | null
-  company_id: string | null
-  companies?: { name: string } | null
+function strengthOf(pwd: string) {
+  let score = 0
+  if (pwd.length >= 8) score++
+  if (pwd.length >= 12) score++
+  if (/[A-ZА-Я]/.test(pwd) && /[a-zа-я]/.test(pwd)) score++
+  if (/\d/.test(pwd) && /[^\w\s]/.test(pwd)) score++
+  return Math.min(score, 4)
 }
 
-// ─── Хелперы (дублируются в каждой странице) ─────────────────────────────────
+const STRENGTH = [
+  { label: 'Слишком короткий', color: 'var(--danger)' },
+  { label: 'Слабый', color: 'var(--danger)' },
+  { label: 'Нормальный', color: 'var(--orange)' },
+  { label: 'Хороший', color: 'var(--blue)' },
+  { label: 'Надёжный', color: 'var(--mint)' },
+]
 
-function inputStyle(): React.CSSProperties {
-  return {
-    width: '100%', padding: '10px 12px', background: 'var(--bg2)', border: '1px solid var(--border)',
-    borderRadius: 8, color: 'var(--text)', fontSize: 13.5, fontFamily: 'inherit',
-    outline: 'none', transition: 'border-color 0.18s',
-  }
-}
-
-function FormField({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{
-        fontSize: 12, fontWeight: 600, color: 'var(--text-dim)', marginBottom: 6,
-        display: 'block', textTransform: 'uppercase', letterSpacing: 0.5,
-      }}>
-        {label}
-      </label>
-      {children}
-      {hint && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{hint}</div>}
-    </div>
-  )
-}
-
-function PrimaryButton({ children, onClick, disabled }: {
-  children: React.ReactNode; onClick?: () => void; disabled?: boolean
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6,
-        padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-        cursor: disabled ? 'default' : 'pointer', border: 'none', fontFamily: 'inherit',
-        background: disabled ? 'var(--border)' : 'var(--mint)',
-        color: disabled ? 'var(--text-muted)' : 'var(--bg)',
-        transition: 'all 0.18s',
-      }}
-    >
-      {children}
-    </button>
-  )
-}
-
-function Panel({ title, sub, children }: {
-  title?: string; sub?: string; children: React.ReactNode
-}) {
-  return (
-    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
-      {title && (
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</div>
-          {sub && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{sub}</div>}
-        </div>
-      )}
-      {children}
-    </div>
-  )
-}
-
-function StatusMsg({ msg }: { msg: { type: 'ok' | 'err'; text: string } | null }) {
-  if (!msg) return null
-  return (
-    <div style={{
-      marginBottom: 14, padding: '8px 12px', borderRadius: 8, fontSize: 12.5, fontWeight: 500,
-      background: msg.type === 'ok' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-      color: msg.type === 'ok' ? 'var(--success)' : 'var(--danger)',
-      border: `1px solid ${msg.type === 'ok' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`,
-    }}>
-      {msg.text}
-    </div>
-  )
-}
-
-const ROLE_LABEL: Record<string, string> = {
-  super_admin: 'Super Admin',
-  owner: 'Владелец',
-  branch_manager: 'Менеджер филиала',
-}
-
-const ROLE_COLOR: Record<string, string> = {
-  super_admin: 'var(--mint)',
-  owner: 'var(--orange)',
-  branch_manager: 'var(--blue)',
-}
-
-// ─── Главная страница ────────────────────────────────────────────────────────
+/* ─── Страница ───────────────────────────────────────────────────────────── */
 
 export default function SettingsPage() {
-  const supabase = createClient()
+  const { profile, loaded: profileLoaded, role, isSuperAdmin } = useProfile()
+  const { mode, setMode } = useTheme()
+  const { success, error: errorToast } = useToast()
 
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [email, setEmail] = useState<string>('')
   const [loading, setLoading] = useState(true)
-
-  // Форма профиля
+  const [email, setEmail] = useState('')
+  const [companyName, setCompanyName] = useState<string | null>(null)
   const [fullName, setFullName] = useState('')
   const [savingProfile, setSavingProfile] = useState(false)
-  const [profileMsg, setProfileMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
 
-  // Форма смены пароля
-  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [savingPassword, setSavingPassword] = useState(false)
-  const [passwordMsg, setPasswordMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
   const [showNew, setShowNew] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setLoading(false); return }
 
@@ -135,284 +59,242 @@ export default function SettingsPage() {
 
     const { data: prof } = await supabase
       .from('profiles')
-      .select('id, user_id, full_name, role, company_id, companies!company_id(name)')
+      .select('full_name, companies!company_id(name)')
       .eq('user_id', user.id)
       .single()
 
     if (prof) {
-      const company = Array.isArray(prof.companies)
-        ? (prof.companies[0] ?? null)
-        : (prof.companies ?? null)
-      setProfile({ ...prof, companies: company } as Profile)
+      const company = Array.isArray(prof.companies) ? (prof.companies[0] ?? null) : (prof.companies ?? null)
+      setCompanyName((company as { name: string } | null)?.name ?? null)
       setFullName(prof.full_name ?? '')
     }
     setLoading(false)
-  }, [supabase])
+  }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { if (profileLoaded) load() }, [profileLoaded, load])
 
   async function handleSaveProfile() {
     if (!profile) return
     setSavingProfile(true)
-    setProfileMsg(null)
+    const supabase = createClient()
     const { error } = await supabase
       .from('profiles')
       .update({ full_name: fullName.trim() })
       .eq('id', profile.id)
     setSavingProfile(false)
+
     if (error) {
-      setProfileMsg({ type: 'err', text: 'Ошибка при сохранении имени' })
+      errorToast('Ошибка при сохранении имени')
     } else {
-      setProfileMsg({ type: 'ok', text: 'Имя успешно обновлено' })
+      success('Имя обновлено')
+      clearProfileCache()
       await load()
     }
-    setTimeout(() => setProfileMsg(null), 3000)
   }
 
   async function handleSavePassword() {
-    setPasswordMsg(null)
-    if (!newPassword) {
-      setPasswordMsg({ type: 'err', text: 'Введите новый пароль' })
-      return
-    }
-    if (newPassword.length < 8) {
-      setPasswordMsg({ type: 'err', text: 'Пароль должен быть не менее 8 символов' })
-      return
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordMsg({ type: 'err', text: 'Пароли не совпадают' })
-      return
-    }
+    if (!newPassword) { errorToast('Введите новый пароль'); return }
+    if (newPassword.length < 8) { errorToast('Пароль должен быть не менее 8 символов'); return }
+    if (newPassword !== confirmPassword) { errorToast('Пароли не совпадают'); return }
+
     setSavingPassword(true)
+    const supabase = createClient()
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     setSavingPassword(false)
+
     if (error) {
-      setPasswordMsg({ type: 'err', text: error.message ?? 'Ошибка при смене пароля' })
+      errorToast(error.message ?? 'Ошибка при смене пароля')
     } else {
-      setPasswordMsg({ type: 'ok', text: 'Пароль успешно изменён' })
-      setCurrentPassword('')
+      success('Пароль изменён')
       setNewPassword('')
       setConfirmPassword('')
     }
-    setTimeout(() => setPasswordMsg(null), 4000)
   }
 
-  if (loading) {
+  if (!profileLoaded || loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Загрузка...</div>
+      <div className="stack" style={{ maxWidth: 760 }}>
+        <Skeleton h={104} r={18} />
+        <Skeleton h={260} r={18} />
+        <Skeleton h={260} r={18} />
       </div>
     )
   }
 
-  const role = profile?.role ?? 'branch_manager'
-  const roleColor = ROLE_COLOR[role] ?? 'var(--text-muted)'
+  if (!isSuperAdmin) return <AccessDenied what="Настройки" />
 
-  // Инициалы для аватара
-  const initials = (fullName || email || '?')
-    .split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+  const strength = strengthOf(newPassword)
+  const mismatch = !!confirmPassword && confirmPassword !== newPassword
 
   return (
-    <div style={{ maxWidth: 700 }}>
+    <div className="stack" style={{ maxWidth: 760 }}>
 
-      {/* Аватар + инфо */}
-      <div style={{
-        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12,
-        padding: 24, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 20,
-      }}>
-        <div style={{
-          width: 64, height: 64, borderRadius: '50%', flexShrink: 0,
-          background: `${roleColor}22`,
-          border: `2px solid ${roleColor}55`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 22, fontWeight: 700, color: roleColor,
-        }}>
-          {initials}
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>
-            {fullName || '—'}
-          </div>
-          <div style={{ fontSize: 12.5, color: 'var(--text-muted)', marginBottom: 6 }}>{email}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{
-              fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 5,
-              background: `${roleColor}18`, color: roleColor, letterSpacing: 0.3,
-            }}>
-              {ROLE_LABEL[role] ?? role}
-            </span>
-            {profile?.companies && (
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                · {(profile.companies as { name: string }).name}
-              </span>
-            )}
+      {/* Шапка профиля */}
+      <div className="card" style={{ padding: 18 }}>
+        <div className="row" style={{ gap: 16 }}>
+          <Avatar name={fullName || email} role={role ?? undefined} size={62} />
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div className="truncate" style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.01em' }}>
+              {fullName || '—'}
+            </div>
+            <div className="truncate" style={{ fontSize: 12.5, color: 'var(--text-muted)', margin: '3px 0 8px' }}>
+              {email}
+            </div>
+            <div className="row row--wrap" style={{ gap: 7 }}>
+              <Badge tone={role === 'super_admin' ? 'purple' : role === 'owner' ? 'mint' : 'blue'}>
+                {roleLabel(role)}
+              </Badge>
+              {companyName && <Badge tone="muted">{companyName}</Badge>}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Профиль */}
-      <div style={{ marginBottom: 16 }}>
-        <Panel title="Личные данные" sub="Имя, отображаемое в системе">
-          <FormField label="Полное имя">
-            <input
-              style={inputStyle()}
-              value={fullName}
-              onChange={e => setFullName(e.target.value)}
-              placeholder="Введите ваше имя"
-              onFocus={e => (e.target.style.borderColor = 'var(--mint)')}
-              onBlur={e => (e.target.style.borderColor = 'var(--border)')}
-            />
-          </FormField>
+      {/* Внешний вид */}
+      <Panel title="Внешний вид" sub="Тема интерфейса запоминается на этом устройстве">
+        <Segmented
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'dark', label: '🌙 Тёмная' },
+            { value: 'light', label: '☀️ Светлая' },
+            { value: 'system', label: '⚙️ Как в системе' },
+          ]}
+        />
+      </Panel>
 
-          <FormField label="Email">
-            <input
-              style={{ ...inputStyle(), opacity: 0.6, cursor: 'not-allowed' }}
-              value={email}
-              readOnly
-            />
-          </FormField>
+      {/* Личные данные */}
+      <Panel title="Личные данные" sub="Имя, которое видят другие пользователи">
+        <Field label="Полное имя">
+          <input className="input" value={fullName}
+            onChange={e => setFullName(e.target.value)} placeholder="Введите ваше имя" />
+        </Field>
 
-          <div style={{
-            padding: '8px 12px', borderRadius: 8, fontSize: 12, marginBottom: 16,
-            background: 'rgba(59,130,246,0.08)', color: 'var(--blue)',
-            border: '1px solid rgba(59,130,246,0.15)',
-          }}>
-            ℹ️ Email изменить нельзя — он привязан к вашей учётной записи.
-          </div>
+        <Field label="Email" hint="Email привязан к учётной записи и не меняется здесь.">
+          <input className="input" value={email} readOnly />
+        </Field>
 
-          <StatusMsg msg={profileMsg} />
-
-          <PrimaryButton onClick={handleSaveProfile} disabled={savingProfile || !fullName.trim()}>
-            {savingProfile ? 'Сохраняем...' : '💾 Сохранить имя'}
-          </PrimaryButton>
-        </Panel>
-      </div>
+        <Button variant="primary" icon="save" loading={savingProfile}
+          disabled={!fullName.trim()} onClick={handleSaveProfile}>
+          Сохранить имя
+        </Button>
+      </Panel>
 
       {/* Смена пароля */}
       <Panel title="Смена пароля" sub="Минимум 8 символов">
-        <FormField label="Новый пароль">
+        <Field label="Новый пароль">
           <div style={{ position: 'relative' }}>
             <input
-              style={inputStyle()}
+              className="input"
               type={showNew ? 'text' : 'password'}
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
               placeholder="Введите новый пароль"
-              onFocus={e => (e.target.style.borderColor = 'var(--mint)')}
-              onBlur={e => (e.target.style.borderColor = 'var(--border)')}
+              style={{ paddingRight: 44 }}
+              autoComplete="new-password"
             />
             <button
               type="button"
               onClick={() => setShowNew(v => !v)}
+              aria-label={showNew ? 'Скрыть пароль' : 'Показать пароль'}
               style={{
-                position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                position: 'absolute', right: 8, top: '50%', translate: '0 -50%',
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--text-muted)', fontSize: 14, padding: '0 4px',
+                color: 'var(--text-muted)', padding: 6, display: 'flex',
               }}
             >
-              {showNew ? '🙈' : '👁️'}
+              <Icon name={showNew ? 'eyeOff' : 'eye'} size={16} />
             </button>
           </div>
-        </FormField>
+        </Field>
 
-        <FormField label="Подтверждение пароля">
-          <div style={{ position: 'relative' }}>
-            <input
-              style={{
-                ...inputStyle(),
-                borderColor: confirmPassword && confirmPassword !== newPassword
-                  ? 'var(--danger)' : undefined,
-              }}
-              type={showConfirm ? 'text' : 'password'}
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              placeholder="Повторите новый пароль"
-              onFocus={e => (e.target.style.borderColor = 'var(--mint)')}
-              onBlur={e => (e.target.style.borderColor = confirmPassword && confirmPassword !== newPassword ? 'var(--danger)' : 'var(--border)')}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirm(v => !v)}
-              style={{
-                position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--text-muted)', fontSize: 14, padding: '0 4px',
-              }}
-            >
-              {showConfirm ? '🙈' : '👁️'}
-            </button>
-          </div>
-          {confirmPassword && confirmPassword !== newPassword && (
-            <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>Пароли не совпадают</div>
-          )}
-        </FormField>
-
-        {/* Индикатор силы пароля */}
         {newPassword && (
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-              {[1, 2, 3, 4].map(i => {
-                const strength = newPassword.length >= 12 ? 4 : newPassword.length >= 10 ? 3 : newPassword.length >= 8 ? 2 : 1
-                return (
-                  <div key={i} style={{
-                    flex: 1, height: 3, borderRadius: 2,
-                    background: i <= strength
-                      ? strength >= 4 ? 'var(--mint)' : strength >= 3 ? 'var(--blue)' : strength >= 2 ? 'var(--orange)' : 'var(--danger)'
-                      : 'var(--border)',
-                    transition: 'background 0.2s',
-                  }} />
-                )
-              })}
+          <div style={{ marginTop: -6, marginBottom: 15 }}>
+            <div className="row" style={{ gap: 4, marginBottom: 6 }}>
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} style={{
+                  flex: 1, height: 3, borderRadius: 2,
+                  background: i <= strength ? STRENGTH[strength].color : 'var(--border)',
+                  transition: 'background .25s',
+                }} />
+              ))}
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              {newPassword.length < 8 ? 'Слабый — нужно 8+ символов'
-                : newPassword.length < 10 ? 'Нормальный'
-                : newPassword.length < 12 ? 'Хороший'
-                : 'Надёжный'}
+            <div style={{ fontSize: 11.5, color: STRENGTH[strength].color }}>
+              {STRENGTH[strength].label}
             </div>
           </div>
         )}
 
-        <StatusMsg msg={passwordMsg} />
+        <Field label="Подтверждение пароля" error={mismatch ? 'Пароли не совпадают' : undefined}>
+          <div style={{ position: 'relative' }}>
+            <input
+              className={`input${mismatch ? ' input--error' : ''}`}
+              type={showConfirm ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              placeholder="Повторите новый пароль"
+              style={{ paddingRight: 44 }}
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(v => !v)}
+              aria-label={showConfirm ? 'Скрыть пароль' : 'Показать пароль'}
+              style={{
+                position: 'absolute', right: 8, top: '50%', translate: '0 -50%',
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--text-muted)', padding: 6, display: 'flex',
+              }}
+            >
+              <Icon name={showConfirm ? 'eyeOff' : 'eye'} size={16} />
+            </button>
+          </div>
+        </Field>
 
-        <PrimaryButton
+        <Button
+          variant="primary" icon="key" loading={savingPassword}
+          disabled={!newPassword || newPassword !== confirmPassword || newPassword.length < 8}
           onClick={handleSavePassword}
-          disabled={savingPassword || !newPassword || newPassword !== confirmPassword}
         >
-          {savingPassword ? 'Меняем пароль...' : '🔒 Изменить пароль'}
-        </PrimaryButton>
+          Изменить пароль
+        </Button>
       </Panel>
 
       {/* Информация об аккаунте */}
-      <div style={{
-        marginTop: 16,
-        background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 20,
-      }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 14 }}>
-          ℹ️ Информация об аккаунте
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <Panel title="Аккаунт" sub="Служебная информация">
+        <div className="stack" style={{ gap: 0 }}>
           {[
-            ['Роль в системе', ROLE_LABEL[role] ?? role],
-            ['Компания', (profile?.companies as { name: string } | null)?.name ?? '—'],
-            ['ID пользователя', profile?.user_id ?? '—'],
-          ].map(([key, val]) => (
-            <div key={key} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '8px 0', borderBottom: '1px solid var(--border)',
+            { key: 'Роль в системе', value: roleLabel(role) },
+            { key: 'Ресторан', value: companyName ?? '—' },
+            { key: 'ID пользователя', value: profile?.user_id ?? '—', mono: true },
+          ].map(row => (
+            <div key={row.key} className="row" style={{
+              justifyContent: 'space-between', gap: 14,
+              padding: '11px 0', borderBottom: '1px solid var(--border-soft)',
             }}>
-              <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{key}</span>
-              <span style={{
-                fontSize: key === 'ID пользователя' ? 11 : 12.5,
-                color: 'var(--text-dim)',
-                fontFamily: key === 'ID пользователя' ? 'var(--font-mono, monospace)' : 'inherit',
-              }}>
-                {val}
+              <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{row.key}</span>
+              <span className={`truncate ${row.mono ? 'mono' : ''}`}
+                style={{ fontSize: row.mono ? 11.5 : 13, color: 'var(--text-dim)' }}>
+                {row.value}
               </span>
+              {row.mono && row.value !== '—' && (
+                <IconButton
+                  icon="copy" small title="Скопировать ID"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(row.value)
+                    success('ID скопирован')
+                  }}
+                />
+              )}
             </div>
           ))}
         </div>
-      </div>
+      </Panel>
+
+      <Note tone="info">
+        Права доступа настраиваются в разделе «Пользователи». Если нужно сменить email —
+        это делается в консоли Supabase (Authentication → Users).
+      </Note>
     </div>
   )
 }

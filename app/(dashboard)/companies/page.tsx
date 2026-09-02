@@ -1,9 +1,18 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useProfile } from '@/lib/hooks'
+import { REFRESH_EVENT } from '@/components/nav-config'
+import { plural, shortDate, slugify } from '@/lib/format'
+import { Icon } from '@/components/ui/icons'
+import {
+  AccessDenied, Button, EmptyState, Field, IconButton, KpiCard, KpiSkeleton,
+  Modal, Note, Panel, SearchInput, SkeletonRows, StatusBadge, Switch, useConfirm,
+} from '@/components/ui/kit'
+import { useToast } from '@/components/ui/toast'
 
-// ─── Типы ───────────────────────────────────────────────────────────────────
+/* ─── Типы ───────────────────────────────────────────────────────────────── */
 
 type Company = {
   id: string
@@ -16,186 +25,14 @@ type Company = {
   branches?: { id: string }[] | null
 }
 
-type Profile = { role: string | null; user_id: string }
-
-// ─── Вспомогательные компоненты (стиль идентичен дашборду/аналитике) ───────
-
-function KpiCard({
-  label, value, sub, accent, icon,
-}: {
-  label: string; value: string | number; sub: string
-  accent: 'mint' | 'orange' | 'blue' | 'purple'; icon: string
-}) {
-  const colors = {
-    mint:   { val: 'var(--mint)',   dim: 'var(--mint-dim)',       bar: 'linear-gradient(90deg, var(--mint), transparent)' },
-    orange: { val: 'var(--orange)', dim: 'var(--orange-dim)',     bar: 'linear-gradient(90deg, var(--orange), transparent)' },
-    blue:   { val: 'var(--blue)',   dim: 'rgba(59,130,246,0.12)', bar: 'linear-gradient(90deg, var(--blue), transparent)' },
-    purple: { val: 'var(--purple)', dim: 'rgba(139,92,246,0.12)', bar: 'linear-gradient(90deg, var(--purple), transparent)' },
-  }
-  const c = colors[accent]
-  return (
-    <div style={{
-      background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12,
-      padding: '18px 20px', position: 'relative', overflow: 'hidden',
-      transition: 'border-color 0.2s',
-    }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = c.val)}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
-    >
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: c.bar }} />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontSize: 11.5, color: 'var(--text-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-          {label}
-        </span>
-        <span style={{ width: 32, height: 32, borderRadius: 8, background: c.dim, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>
-          {icon}
-        </span>
-      </div>
-      <div style={{
-        fontFamily: 'var(--font-mono), JetBrains Mono, monospace',
-        fontSize: 28, fontWeight: 600, lineHeight: 1, marginBottom: 6, color: c.val,
-      }}>
-        {value}
-      </div>
-      <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>{sub}</div>
-    </div>
-  )
-}
-
-function Panel({ title, sub, children, action }: {
-  title?: string; sub?: string; children: React.ReactNode; action?: React.ReactNode
-}) {
-  return (
-    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-      {(title || action) && (
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18 }}>
-          <div>
-            {title && <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</div>}
-            {sub && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{sub}</div>}
-          </div>
-          {action}
-        </div>
-      )}
-      {children}
-    </div>
-  )
-}
-
-function inputStyle(): React.CSSProperties {
-  return {
-    width: '100%', padding: '10px 12px', background: 'var(--bg2)', border: '1px solid var(--border)',
-    borderRadius: 8, color: 'var(--text)', fontSize: 13.5, fontFamily: 'inherit',
-    outline: 'none', transition: 'border-color 0.18s',
-  }
-}
-
-function FormField({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{
-        fontSize: 12, fontWeight: 600, color: 'var(--text-dim)', marginBottom: 6,
-        display: 'block', textTransform: 'uppercase', letterSpacing: 0.5,
-      }}>
-        {label}
-      </label>
-      {children}
-    </div>
-  )
-}
-
-function PrimaryButton({ children, onClick, disabled, type = 'button' }: {
-  children: React.ReactNode; onClick?: () => void; disabled?: boolean; type?: 'button' | 'submit'
-}) {
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6,
-        padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-        cursor: disabled ? 'default' : 'pointer', border: 'none', fontFamily: 'inherit',
-        background: disabled ? 'var(--border)' : 'var(--mint)',
-        color: disabled ? 'var(--text-muted)' : 'var(--bg)',
-        transition: 'all 0.18s',
-      }}
-    >
-      {children}
-    </button>
-  )
-}
-
-function GhostButton({ children, onClick, danger }: {
-  children: React.ReactNode; onClick?: () => void; danger?: boolean
-}) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6,
-        padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-        cursor: 'pointer', fontFamily: 'inherit',
-        background: 'var(--card2)', border: '1px solid var(--border)',
-        color: danger ? 'var(--danger)' : 'var(--text-dim)',
-        transition: 'all 0.18s',
-      }}
-      onMouseEnter={e => { e.currentTarget.style.color = danger ? 'var(--danger)' : 'var(--text)'; e.currentTarget.style.borderColor = danger ? 'var(--danger)' : 'var(--text-muted)' }}
-      onMouseLeave={e => { e.currentTarget.style.color = danger ? 'var(--danger)' : 'var(--text-dim)'; e.currentTarget.style.borderColor = 'var(--border)' }}
-    >
-      {children}
-    </button>
-  )
-}
-
-// Переключатель active (визуально как toggle-switch)
-function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
-  return (
-    <button
-      onClick={onChange}
-      disabled={disabled}
-      role="switch"
-      aria-checked={checked}
-      style={{
-        width: 40, height: 22, borderRadius: 11, border: 'none', position: 'relative',
-        background: checked ? 'var(--mint)' : 'var(--border)', cursor: disabled ? 'default' : 'pointer',
-        transition: 'background 0.2s', flexShrink: 0, padding: 0,
-      }}
-    >
-      <span style={{
-        position: 'absolute', top: 2, left: checked ? 20 : 2,
-        width: 18, height: 18, borderRadius: '50%', background: '#fff',
-        transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-      }} />
-    </button>
-  )
-}
-
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9а-яё\s-]/gi, '')
-    .replace(/[а-яё]/g, ch => {
-      const map: Record<string, string> = {
-        а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i',
-        й: 'i', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't',
-        у: 'u', ф: 'f', х: 'h', ц: 'c', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya',
-      }
-      return map[ch] ?? ''
-    })
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
-// ─── Модальное окно создания/редактирования ─────────────────────────────────
+/* ─── Модалка создания / редактирования ──────────────────────────────────── */
 
 function CompanyModal({
   company, onClose, onSaved,
 }: {
   company: Company | null
   onClose: () => void
-  onSaved: () => void
+  onSaved: (msg: string) => void
 }) {
   const isEdit = !!company
   const [name, setName] = useState(company?.name ?? '')
@@ -224,127 +61,67 @@ function CompanyModal({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(isEdit ? { id: company!.id, ...payload } : payload),
     })
-    const json = await res.json()
+    const json = await res.json().catch(() => ({}))
 
     if (!res.ok) { setError(json.error ?? 'Не удалось сохранить'); setSaving(false); return }
 
     setSaving(false)
-    onSaved()
+    onSaved(isEdit ? 'Ресторан обновлён' : 'Ресторан создан')
   }
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
-        zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
-      }}
+    <Modal
+      icon={isEdit ? 'edit' : 'plus'}
+      title={isEdit ? 'Редактировать ресторан' : 'Новый ресторан'}
+      sub={isEdit ? company!.name : 'Добавьте заведение в платформу'}
+      onClose={onClose}
+      footer={
+        <>
+          <Button onClick={onClose}>Отмена</Button>
+          <Button variant="primary" onClick={handleSave} loading={saving} icon="check">
+            {isEdit ? 'Сохранить' : 'Создать'}
+          </Button>
+        </>
+      }
     >
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{
-          background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16,
-          padding: 28, width: 480, maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto',
-        }}
-      >
-        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span>{isEdit ? '✏️ Редактировать ресторан' : '➕ Новый ресторан'}</span>
-          <button
-            onClick={onClose}
-            style={{
-              marginLeft: 'auto', background: 'var(--card2)', border: '1px solid var(--border)',
-              color: 'var(--text-muted)', width: 28, height: 28, borderRadius: 7, cursor: 'pointer',
-              fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            ✕
-          </button>
-        </div>
+      <Field label="Название">
+        <input className="input" value={name} autoFocus
+          onChange={e => handleNameChange(e.target.value)} placeholder="Grand Registan" />
+      </Field>
 
-        <FormField label="Название">
-          <input
-            style={inputStyle()}
-            value={name}
-            onChange={e => handleNameChange(e.target.value)}
-            placeholder="Grand Registan"
-            autoFocus
-          />
-        </FormField>
+      <Field label="Slug" hint="Используется в ссылках. Генерируется автоматически из названия.">
+        <input className="input mono" value={slug}
+          onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)) }}
+          placeholder="grand-registan" />
+      </Field>
 
-        <FormField label="Slug (используется в ссылках)">
-          <input
-            style={inputStyle()}
-            value={slug}
-            onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)) }}
-            placeholder="grand-registan"
-          />
-        </FormField>
+      <Field label="Логотип" hint="Ссылка на изображение — необязательно.">
+        <input className="input" value={logoUrl}
+          onChange={e => setLogoUrl(e.target.value)} placeholder="https://…" />
+      </Field>
 
-        <FormField label="Логотип (URL, необязательно)">
-          <input
-            style={inputStyle()}
-            value={logoUrl}
-            onChange={e => setLogoUrl(e.target.value)}
-            placeholder="https://..."
-          />
-        </FormField>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, padding: '4px 0' }}>
-          <span style={{ fontSize: 13, color: 'var(--text-dim)' }}>Ресторан активен</span>
-          <Toggle checked={active} onChange={() => setActive(v => !v)} />
-        </div>
-
-        {error && (
-          <div style={{
-            background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-            borderRadius: 8, padding: '10px 14px', fontSize: 12.5, color: 'var(--danger)', marginBottom: 16,
-          }}>
-            {error}
-          </div>
-        )}
-
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-          <GhostButton onClick={onClose}>Отмена</GhostButton>
-          <PrimaryButton onClick={handleSave} disabled={saving}>
-            {saving ? 'Сохранение…' : isEdit ? 'Сохранить' : 'Создать'}
-          </PrimaryButton>
-        </div>
+      <div style={{ marginBottom: 15 }}>
+        <Switch checked={active} onChange={setActive} label="Ресторан активен" />
       </div>
-    </div>
+
+      {error && <div style={{ marginBottom: 14 }}><Note tone="danger">{error}</Note></div>}
+    </Modal>
   )
 }
 
-// ─── Главный компонент ───────────────────────────────────────────────────────
+/* ─── Страница ───────────────────────────────────────────────────────────── */
 
 export default function CompaniesPage() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [profileLoaded, setProfileLoaded] = useState(false)
+  const { loaded: profileLoaded, isSuperAdmin } = useProfile()
+  const confirm = useConfirm()
+  const { toast, success, error: errorToast } = useToast()
+
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Company | null>(null)
-  const [toggling, setToggling] = useState<string | null>(null)
-  const [deleting, setDeleting] = useState<string | null>(null)
-  const [rowError, setRowError] = useState<string | null>(null)
-
-  // Загрузка профиля (для проверки роли)
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { setProfileLoaded(true); return }
-      const { data } = await supabase
-        .from('profiles')
-        .select('role, user_id')
-        .eq('user_id', user.id)
-        .single()
-      setProfile(data as Profile | null)
-      setProfileLoaded(true)
-    })
-  }, [])
-
-  const canManage = profile?.role === 'super_admin'
-  const canEdit = profile?.role === 'super_admin'
+  const [busyId, setBusyId] = useState<string | null>(null)
 
   const loadCompanies = useCallback(async () => {
     setLoading(true)
@@ -357,19 +134,25 @@ export default function CompaniesPage() {
     setLoading(false)
   }, [])
 
-  useEffect(() => { loadCompanies() }, [loadCompanies])
+  useEffect(() => { if (isSuperAdmin) loadCompanies() }, [isSuperAdmin, loadCompanies])
+
+  useEffect(() => {
+    window.addEventListener(REFRESH_EVENT, loadCompanies)
+    return () => window.removeEventListener(REFRESH_EVENT, loadCompanies)
+  }, [loadCompanies])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     if (!q) return companies
-    return companies.filter(c => c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q))
+    return companies.filter(c =>
+      c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q))
   }, [companies, search])
 
   const activeCount = companies.filter(c => c.active).length
   const totalBranches = companies.reduce((acc, c) => acc + (c.branches?.length ?? 0), 0)
 
   async function handleToggleActive(c: Company) {
-    setToggling(c.id)
+    setBusyId(c.id)
     const res = await fetch('/api/companies/manage', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -377,21 +160,35 @@ export default function CompaniesPage() {
     })
     if (res.ok) {
       setCompanies(prev => prev.map(x => x.id === c.id ? { ...x, active: !x.active } : x))
+      toast(!c.active ? `«${c.name}» включён` : `«${c.name}» отключён`, { kind: 'info' })
+    } else {
+      errorToast('Не удалось изменить статус')
     }
-    setToggling(null)
+    setBusyId(null)
   }
 
   async function handleDelete(c: Company) {
     const branchCount = c.branches?.length ?? 0
-    const ok = window.confirm(
-      branchCount > 0
-        ? `У ресторана «${c.name}» есть ${branchCount} филиал(а). Сначала удалите все его филиалы в разделе «Филиалы», затем удалите ресторан.`
-        : `Удалить ресторан «${c.name}»?\n\nЭто действие нельзя отменить.`
-    )
-    if (!ok || branchCount > 0) return
 
-    setDeleting(c.id)
-    setRowError(null)
+    if (branchCount > 0) {
+      await confirm({
+        title: 'Сначала удалите филиалы',
+        text: `У ресторана «${c.name}» ещё ${branchCount} ${plural(branchCount, ['филиал', 'филиала', 'филиалов'])}. Удалите их в разделе «Филиалы», затем возвращайтесь сюда.`,
+        confirmLabel: 'Понятно',
+        cancelLabel: 'Закрыть',
+      })
+      return
+    }
+
+    const ok = await confirm({
+      title: `Удалить «${c.name}»?`,
+      text: 'Ресторан будет удалён безвозвратно. Это действие нельзя отменить.',
+      confirmLabel: 'Удалить',
+      danger: true,
+    })
+    if (!ok) return
+
+    setBusyId(c.id)
     try {
       const res = await fetch('/api/companies/manage', {
         method: 'DELETE',
@@ -403,143 +200,100 @@ export default function CompaniesPage() {
         throw new Error(err.error || 'Не удалось удалить ресторан')
       }
       setCompanies(prev => prev.filter(x => x.id !== c.id))
+      success('Ресторан удалён', c.name)
     } catch (e) {
-      setRowError(e instanceof Error ? e.message : 'Не удалось удалить ресторан')
+      errorToast(e instanceof Error ? e.message : 'Не удалось удалить ресторан')
     }
-    setDeleting(null)
+    setBusyId(null)
   }
 
-  function openCreate() {
-    setEditing(null)
-    setModalOpen(true)
-  }
-
-  function openEdit(c: Company) {
-    setEditing(c)
-    setModalOpen(true)
-  }
-
-  function handleSaved() {
-    setModalOpen(false)
-    setEditing(null)
-    loadCompanies()
-  }
-
-  // Пока профиль не загружен — показываем заглушку загрузки
   if (!profileLoaded) {
-    return <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Загрузка…</div>
+    return <div className="grid grid--kpi-3"><KpiSkeleton count={3} /></div>
   }
 
-  // Доступ только для super_admin / owner
-  if (!canManage) {
-    return (
-      <Panel>
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>🔒</div>
-          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Доступ ограничен</div>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            Раздел «Рестораны» доступен только Super Admin.
-          </div>
-        </div>
-      </Panel>
-    )
-  }
+  if (!isSuperAdmin) return <AccessDenied what="Рестораны" />
 
   return (
-    <div>
-      {/* KPI */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 16 }}>
-        <KpiCard label="Всего ресторанов" value={loading ? '…' : companies.length} sub="Подключено к платформе" accent="mint" icon="🏪" />
-        <KpiCard label="Активных" value={loading ? '…' : activeCount} sub={`Неактивных: ${companies.length - activeCount}`} accent="blue" icon="✅" />
-        <KpiCard label="Филиалов всего" value={loading ? '…' : totalBranches} sub="По всем ресторанам" accent="purple" icon="📍" />
-      </div>
+    <div className="stack">
 
-      {/* Топбар: поиск + добавить */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Поиск по названию или slug…"
-          style={{ ...inputStyle(), width: 280 }}
-        />
-        {canEdit && (
-          <PrimaryButton onClick={openCreate}>
-            <span style={{ fontSize: 14 }}>+</span> Добавить ресторан
-          </PrimaryButton>
+      <div className="grid grid--kpi-3">
+        {loading ? <KpiSkeleton count={3} /> : (
+          <>
+            <KpiCard label="Ресторанов" icon="restaurants" accent="mint"
+              value={companies.length} sub="Подключено к платформе" />
+            <KpiCard label="Активных" icon="check" accent="blue"
+              value={activeCount} sub={`Отключено: ${companies.length - activeCount}`} />
+            <KpiCard label="Филиалов" icon="branches" accent="purple"
+              value={totalBranches} sub="По всем ресторанам" />
+          </>
         )}
       </div>
 
-      {/* Список ресторанов */}
-      {rowError && (
-        <div style={{
-          background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-          borderRadius: 10, padding: '12px 16px', fontSize: 12.5, color: 'var(--danger)', marginBottom: 16,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-        }}>
-          <span>{rowError}</span>
-          <button onClick={() => setRowError(null)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: 14 }}>✕</button>
+      <div className="toolbar" style={{ marginBottom: 0 }}>
+        <SearchInput value={search} onChange={setSearch} placeholder="Поиск по названию или slug…" />
+        <div className="toolbar__spacer">
+          <Button variant="primary" icon="plus" onClick={() => { setEditing(null); setModalOpen(true) }}>
+            Добавить ресторан
+          </Button>
         </div>
-      )}
-      <Panel title="Рестораны" sub={`${filtered.length} из ${companies.length}`}>
+      </div>
+
+      <Panel
+        title="Рестораны"
+        sub={search ? `Найдено ${filtered.length} из ${companies.length}` : `Всего ${companies.length}`}
+      >
         {loading ? (
-          <div style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>Загрузка…</div>
+          <SkeletonRows rows={4} height={58} />
         ) : filtered.length === 0 ? (
-          <div style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>
-            {companies.length === 0 ? 'Пока нет ни одного ресторана' : 'Ничего не найдено'}
-          </div>
+          <EmptyState
+            icon={companies.length === 0 ? 'restaurants' : 'search'}
+            title={companies.length === 0 ? 'Пока нет ресторанов' : 'Ничего не найдено'}
+            text={companies.length === 0
+              ? 'Добавьте первое заведение — после этого можно будет создавать филиалы и генерировать QR-коды.'
+              : 'Попробуйте изменить запрос.'}
+            action={companies.length === 0 && (
+              <Button variant="primary" icon="plus" onClick={() => { setEditing(null); setModalOpen(true) }}>
+                Добавить ресторан
+              </Button>
+            )}
+          />
         ) : (
-          filtered.map((c, i) => (
-            <div
-              key={c.id}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                padding: '14px 4px',
-                borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
-              }}
-            >
-              {/* Логотип */}
-              <div style={{
-                width: 44, height: 44, borderRadius: 10, flexShrink: 0,
-                background: c.logo_url ? `url(${c.logo_url}) center/cover` : 'linear-gradient(135deg, #1A2140, #0D1528)',
-                border: '1px solid var(--border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
-              }}>
-                {!c.logo_url && '🏪'}
-              </div>
-
-              {/* Инфо */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{c.name}</span>
-                  <span style={{
-                    fontSize: 10.5, fontWeight: 600, padding: '2px 7px', borderRadius: 4,
-                    background: c.active ? 'var(--mint-dim)' : 'rgba(239,68,68,0.12)',
-                    color: c.active ? 'var(--mint)' : 'var(--danger)',
-                  }}>
-                    {c.active ? 'Активен' : 'Отключен'}
-                  </span>
+          filtered.map(c => {
+            const branchCount = c.branches?.length ?? 0
+            return (
+              <div key={c.id} className="row-item">
+                <div
+                  className="thumb"
+                  style={c.logo_url ? { background: `url(${c.logo_url}) center/cover` } : undefined}
+                >
+                  {!c.logo_url && <Icon name="restaurants" size={20} style={{ color: 'var(--text-muted)' }} />}
                 </div>
-                <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
-                  /{c.slug} · {c.branches?.length ?? 0} филиал{(c.branches?.length ?? 0) === 1 ? '' : (c.branches?.length ?? 0) >= 2 && (c.branches?.length ?? 0) <= 4 ? 'а' : 'ов'}
-                </div>
-              </div>
 
-              {/* Действия — только Super Admin */}
-              {canEdit && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <Toggle
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="row" style={{ gap: 8 }}>
+                    <span className="truncate" style={{ fontSize: 14, fontWeight: 650 }}>{c.name}</span>
+                    <StatusBadge active={c.active} />
+                  </div>
+                  <div className="truncate" style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 3 }}>
+                    /{c.slug} · {branchCount} {plural(branchCount, ['филиал', 'филиала', 'филиалов'])} · c {shortDate(c.created_at)}
+                  </div>
+                </div>
+
+                <div className="row" style={{ gap: 8, flexShrink: 0 }}>
+                  <Switch
                     checked={c.active}
-                    disabled={toggling === c.id}
+                    disabled={busyId === c.id}
                     onChange={() => handleToggleActive(c)}
                   />
-                  <GhostButton onClick={() => openEdit(c)}>Редактировать</GhostButton>
-                  <GhostButton danger onClick={() => handleDelete(c)}>
-                    {deleting === c.id ? '…' : 'Удалить'}
-                  </GhostButton>
+                  <IconButton icon="edit" title="Редактировать"
+                    onClick={() => { setEditing(c); setModalOpen(true) }} />
+                  <IconButton icon="trash" title="Удалить" danger
+                    disabled={busyId === c.id}
+                    onClick={() => handleDelete(c)} />
                 </div>
-              )}
-            </div>
-          ))
+              </div>
+            )
+          })
         )}
       </Panel>
 
@@ -547,7 +301,12 @@ export default function CompaniesPage() {
         <CompanyModal
           company={editing}
           onClose={() => { setModalOpen(false); setEditing(null) }}
-          onSaved={handleSaved}
+          onSaved={(msg) => {
+            setModalOpen(false)
+            setEditing(null)
+            success(msg)
+            loadCompanies()
+          }}
         />
       )}
     </div>

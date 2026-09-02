@@ -3,11 +3,16 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { clearProfileCache } from '@/lib/hooks'
+import { Icon, Logo } from '@/components/ui/icons'
+import { Button, Field, Note } from '@/components/ui/kit'
+import { ThemeToggle } from '@/components/ui/theme'
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -19,126 +24,116 @@ export default function LoginPage() {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-    setLoading(false)
-
     if (error) {
+      setLoading(false)
       setError('Неверный email или пароль')
       return
     }
 
+    clearProfileCache()
     router.push('/dashboard')
     router.refresh()
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#070C1A',
-        fontFamily: 'Inter, sans-serif',
-      }}
-    >
-      <div
-        style={{
-          width: 380,
-          background: '#111827',
-          border: '1px solid #1E2D4A',
-          borderRadius: 16,
-          padding: '36px 32px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, #00D4AA, #00A882)',
-            }}
-          />
+    <div style={{
+      minHeight: '100dvh',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 'max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom))',
+      position: 'relative',
+    }}>
+      <div style={{ position: 'absolute', top: 16, right: 16 }}>
+        <ThemeToggle />
+      </div>
+
+      <div style={{ width: '100%', maxWidth: 400 }}>
+
+        {/* Логотип */}
+        <div className="row" style={{ gap: 12, justifyContent: 'center', marginBottom: 24 }}>
+          <Logo size={46} />
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#E2E8F0' }}>BirTapCard</div>
-            <div
-              style={{
-                fontSize: 10,
-                color: '#00D4AA',
-                fontWeight: 500,
-                letterSpacing: 1,
-                textTransform: 'uppercase',
-              }}
-            >
+            <div style={{ fontSize: 20, fontWeight: 750, letterSpacing: '-0.02em' }}>BirTapCard</div>
+            <div style={{
+              fontSize: 10, color: 'var(--mint)', fontWeight: 700,
+              letterSpacing: 1.6, textTransform: 'uppercase',
+            }}>
               Аналитика
             </div>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <label style={labelStyle}>Email</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={inputStyle}
-            placeholder="you@company.uz"
-          />
+        <div className="card" style={{ padding: 26, boxShadow: 'var(--sh-3)' }}>
+          <h1 style={{ fontSize: 19, fontWeight: 700, margin: '0 0 5px', letterSpacing: '-0.01em' }}>
+            Вход в систему
+          </h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 22px' }}>
+            NFC и QR аналитика для ваших заведений
+          </p>
 
-          <label style={{ ...labelStyle, marginTop: 16 }}>Пароль</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={inputStyle}
-            placeholder="••••••••"
-          />
+          <form onSubmit={handleSubmit}>
+            <Field label="Email">
+              <div className="search">
+                <span className="search__icon"><Icon name="user" size={15} /></span>
+                <input
+                  className="input"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  inputMode="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="you@company.uz"
+                />
+              </div>
+            </Field>
 
-          {error && (
-            <div style={{ color: '#EF4444', fontSize: 13, marginTop: 12 }}>{error}</div>
-          )}
+            <Field label="Пароль">
+              <div style={{ position: 'relative' }}>
+                <input
+                  className="input"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  style={{ paddingRight: 44 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                  style={{
+                    position: 'absolute', right: 8, top: '50%', translate: '0 -50%',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'var(--text-muted)', padding: 6, display: 'flex',
+                  }}
+                >
+                  <Icon name={showPassword ? 'eyeOff' : 'eye'} size={16} />
+                </button>
+              </div>
+            </Field>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              marginTop: 24,
-              padding: '11px 0',
-              borderRadius: 8,
-              border: 'none',
-              background: loading ? '#0A9C82' : '#00D4AA',
-              color: '#070C1A',
-              fontWeight: 700,
-              fontSize: 14,
-              cursor: loading ? 'default' : 'pointer',
-            }}
-          >
-            {loading ? 'Входим…' : 'Войти'}
-          </button>
-        </form>
+            {error && (
+              <div style={{ marginBottom: 14 }}>
+                <Note tone="danger">{error}</Note>
+              </div>
+            )}
+
+            <Button type="submit" variant="primary" block loading={loading} icon="chevronRight">
+              {loading ? 'Входим…' : 'Войти'}
+            </Button>
+          </form>
+        </div>
+
+        <p style={{
+          textAlign: 'center', fontSize: 11.5, color: 'var(--text-muted)',
+          marginTop: 18, lineHeight: 1.6,
+        }}>
+          Доступ выдаёт администратор сети.<br />
+          Забыли пароль — обратитесь к нему.
+        </p>
       </div>
     </div>
   )
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 12,
-  color: '#94A3B8',
-  marginBottom: 6,
-  fontWeight: 500,
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '10px 12px',
-  borderRadius: 8,
-  border: '1px solid #1E2D4A',
-  background: '#0D1528',
-  color: '#E2E8F0',
-  fontSize: 14,
-  outline: 'none',
 }

@@ -1,15 +1,25 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import QRCode from 'qrcode'
+import { useProfile } from '@/lib/hooks'
+import { REFRESH_EVENT } from '@/components/nav-config'
+import { slugify } from '@/lib/format'
+import { Icon } from '@/components/ui/icons'
+import {
+  AccessDenied, Button, CopyField, EmptyState, Field, IconButton, KpiCard, KpiSkeleton,
+  Modal, Note, Panel, SearchInput, SkeletonRows, StatusBadge, Switch, useConfirm,
+} from '@/components/ui/kit'
+import { useToast } from '@/components/ui/toast'
+import { QrPreviewModal } from '@/components/qr-preview-modal'
 
-// ─── Конфигурация ───────────────────────────────────────────────────────────
+/* ─── Конфигурация ───────────────────────────────────────────────────────── */
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/+$/, '')
-const QR_BUCKET = 'qr-codes'
 
-// ─── Типы ───────────────────────────────────────────────────────────────────
+/* ─── Типы ───────────────────────────────────────────────────────────────── */
 
 type CompanyOption = { id: string; name: string; active: boolean }
 
@@ -29,226 +39,9 @@ type Branch = {
   companies?: { name: string; slug: string } | null
 }
 
-type Profile = { role: string | null; user_id: string }
+/* ─── Генерация и загрузка QR (через API — обходит RLS) ──────────────────── */
 
-// ─── Вспомогательные компоненты (стиль идентичен companies/dashboard/analytics) ──
-
-function KpiCard({
-  label, value, sub, accent, icon,
-}: {
-  label: string; value: string | number; sub: string
-  accent: 'mint' | 'orange' | 'blue' | 'purple'; icon: string
-}) {
-  const colors = {
-    mint:   { val: 'var(--mint)',   dim: 'var(--mint-dim)',       bar: 'linear-gradient(90deg, var(--mint), transparent)' },
-    orange: { val: 'var(--orange)', dim: 'var(--orange-dim)',     bar: 'linear-gradient(90deg, var(--orange), transparent)' },
-    blue:   { val: 'var(--blue)',   dim: 'rgba(59,130,246,0.12)', bar: 'linear-gradient(90deg, var(--blue), transparent)' },
-    purple: { val: 'var(--purple)', dim: 'rgba(139,92,246,0.12)', bar: 'linear-gradient(90deg, var(--purple), transparent)' },
-  }
-  const c = colors[accent]
-  return (
-    <div style={{
-      background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12,
-      padding: '18px 20px', position: 'relative', overflow: 'hidden',
-      transition: 'border-color 0.2s',
-    }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = c.val)}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
-    >
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: c.bar }} />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontSize: 11.5, color: 'var(--text-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-          {label}
-        </span>
-        <span style={{ width: 32, height: 32, borderRadius: 8, background: c.dim, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>
-          {icon}
-        </span>
-      </div>
-      <div style={{
-        fontFamily: 'var(--font-mono), JetBrains Mono, monospace',
-        fontSize: 28, fontWeight: 600, lineHeight: 1, marginBottom: 6, color: c.val,
-      }}>
-        {value}
-      </div>
-      <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>{sub}</div>
-    </div>
-  )
-}
-
-function Panel({ title, sub, children, action }: {
-  title?: string; sub?: string; children: React.ReactNode; action?: React.ReactNode
-}) {
-  return (
-    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-      {(title || action) && (
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18 }}>
-          <div>
-            {title && <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</div>}
-            {sub && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{sub}</div>}
-          </div>
-          {action}
-        </div>
-      )}
-      {children}
-    </div>
-  )
-}
-
-function inputStyle(): React.CSSProperties {
-  return {
-    width: '100%', padding: '10px 12px', background: 'var(--bg2)', border: '1px solid var(--border)',
-    borderRadius: 8, color: 'var(--text)', fontSize: 13.5, fontFamily: 'inherit',
-    outline: 'none', transition: 'border-color 0.18s',
-  }
-}
-
-function FormField({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
-  return (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{
-        fontSize: 12, fontWeight: 600, color: 'var(--text-dim)', marginBottom: 6,
-        display: 'block', textTransform: 'uppercase', letterSpacing: 0.5,
-      }}>
-        {label}
-      </label>
-      {children}
-      {hint && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{hint}</div>}
-    </div>
-  )
-}
-
-function PrimaryButton({ children, onClick, disabled, type = 'button' }: {
-  children: React.ReactNode; onClick?: () => void; disabled?: boolean; type?: 'button' | 'submit'
-}) {
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6,
-        padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-        cursor: disabled ? 'default' : 'pointer', border: 'none', fontFamily: 'inherit',
-        background: disabled ? 'var(--border)' : 'var(--mint)',
-        color: disabled ? 'var(--text-muted)' : 'var(--bg)',
-        transition: 'all 0.18s',
-      }}
-    >
-      {children}
-    </button>
-  )
-}
-
-function GhostButton({ children, onClick, danger, disabled }: {
-  children: React.ReactNode; onClick?: () => void; danger?: boolean; disabled?: boolean
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6,
-        padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-        cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit',
-        background: 'var(--card2)', border: '1px solid var(--border)',
-        color: disabled ? 'var(--text-muted)' : danger ? 'var(--danger)' : 'var(--text-dim)',
-        opacity: disabled ? 0.6 : 1,
-        transition: 'all 0.18s',
-      }}
-      onMouseEnter={e => { if (!disabled) { e.currentTarget.style.color = danger ? 'var(--danger)' : 'var(--text)'; e.currentTarget.style.borderColor = danger ? 'var(--danger)' : 'var(--text-muted)' } }}
-      onMouseLeave={e => { if (!disabled) { e.currentTarget.style.color = danger ? 'var(--danger)' : 'var(--text-dim)'; e.currentTarget.style.borderColor = 'var(--border)' } }}
-    >
-      {children}
-    </button>
-  )
-}
-
-function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
-  return (
-    <button
-      onClick={onChange}
-      disabled={disabled}
-      role="switch"
-      aria-checked={checked}
-      style={{
-        width: 40, height: 22, borderRadius: 11, border: 'none', position: 'relative',
-        background: checked ? 'var(--mint)' : 'var(--border)', cursor: disabled ? 'default' : 'pointer',
-        transition: 'background 0.2s', flexShrink: 0, padding: 0,
-      }}
-    >
-      <span style={{
-        position: 'absolute', top: 2, left: checked ? 20 : 2,
-        width: 18, height: 18, borderRadius: '50%', background: '#fff',
-        transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-      }} />
-    </button>
-  )
-}
-
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9а-яё\s-]/gi, '')
-    .replace(/[а-яё]/g, ch => {
-      const map: Record<string, string> = {
-        а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i',
-        й: 'i', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't',
-        у: 'u', ф: 'f', х: 'h', ц: 'c', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya',
-      }
-      return map[ch] ?? ''
-    })
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
-// Короткое поле "значение + копировать" для ссылок и токенов
-function CopyField({ value, mono = true }: { value: string; mono?: boolean }) {
-  const [copied, setCopied] = useState(false)
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(value)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    } catch {
-      // буфер обмена недоступен — молча игнорируем
-    }
-  }
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-      <div style={{
-        flex: 1, minWidth: 0, padding: '7px 10px', background: 'var(--bg2)',
-        border: '1px solid var(--border)', borderRadius: 7,
-        fontFamily: mono ? 'var(--font-mono), JetBrains Mono, monospace' : 'inherit',
-        fontSize: 11.5, color: 'var(--text-dim)', overflow: 'hidden',
-        textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-      }}>
-        {value}
-      </div>
-      <button
-        onClick={handleCopy}
-        title="Скопировать"
-        style={{
-          flexShrink: 0, width: 30, height: 30, borderRadius: 7, cursor: 'pointer',
-          background: copied ? 'var(--mint-dim)' : 'var(--card2)',
-          border: '1px solid var(--border)', color: copied ? 'var(--mint)' : 'var(--text-muted)',
-          fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'all 0.18s',
-        }}
-      >
-        {copied ? '✓' : '⧉'}
-      </button>
-    </div>
-  )
-}
-
-// Генерация PNG QR-кода в браузере и загрузка через API-роут (обходит RLS)
-async function generateAndUploadQr(
-  _supabase: unknown,
-  branchId: string,
-  qrUrl: string
-): Promise<string> {
+async function generateAndUploadQr(branchId: string, qrUrl: string): Promise<string> {
   const imageBase64 = await QRCode.toDataURL(qrUrl, {
     width: 512,
     margin: 2,
@@ -271,7 +64,7 @@ async function generateAndUploadQr(
   return publicUrl
 }
 
-// ─── Модальное окно создания/редактирования филиала ─────────────────────────
+/* ─── Модалка филиала ────────────────────────────────────────────────────── */
 
 function BranchModal({
   branch, companies, defaultCompanyId, onClose, onSaved,
@@ -280,7 +73,7 @@ function BranchModal({
   companies: CompanyOption[]
   defaultCompanyId: string | null
   onClose: () => void
-  onSaved: () => void
+  onSaved: (msg: string) => void
 }) {
   const isEdit = !!branch
   const [companyId, setCompanyId] = useState(branch?.company_id ?? defaultCompanyId ?? companies[0]?.id ?? '')
@@ -291,7 +84,7 @@ function BranchModal({
   const [slugTouched, setSlugTouched] = useState(isEdit)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [step, setStep] = useState<string>('') // текст текущего шага сохранения (для длинной операции с QR)
+  const [step, setStep] = useState('')
 
   function handleNameChange(v: string) {
     setName(v)
@@ -330,10 +123,8 @@ function BranchModal({
         setStep('Создаём филиал и токены…')
         const nfcToken = crypto.randomUUID()
         const qrToken = crypto.randomUUID()
-        const nfcUrl = `${SITE_URL}/r/nfc/${nfcToken}`
         const qrUrl = `${SITE_URL}/r/qr/${qrToken}`
 
-        // Создаём через API-роут (обходит RLS через Service Role)
         const createRes = await fetch('/api/branches/manage', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -354,7 +145,7 @@ function BranchModal({
         const inserted = await createRes.json()
 
         setStep('Генерируем QR-код…')
-        const publicUrl = await generateAndUploadQr(null, inserted.id, qrUrl)
+        const publicUrl = await generateAndUploadQr(inserted.id, qrUrl)
 
         setStep('Сохраняем QR-код…')
         const patchRes = await fetch('/api/branches/manage', {
@@ -369,220 +160,114 @@ function BranchModal({
       }
 
       setSaving(false)
-      onSaved()
+      onSaved(isEdit ? 'Филиал обновлён' : 'Филиал создан, QR-код готов')
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Не удалось сохранить филиал'
-      setError(msg)
+      setError(e instanceof Error ? e.message : 'Не удалось сохранить филиал')
       setSaving(false)
       setStep('')
     }
   }
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
-        zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
-      }}
-    >
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{
-          background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16,
-          padding: 28, width: 480, maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto',
-        }}
-      >
-        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span>{isEdit ? '✏️ Редактировать филиал' : '➕ Новый филиал'}</span>
-          <button
-            onClick={onClose}
-            style={{
-              marginLeft: 'auto', background: 'var(--card2)', border: '1px solid var(--border)',
-              color: 'var(--text-muted)', width: 28, height: 28, borderRadius: 7, cursor: 'pointer',
-              fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            ✕
-          </button>
-        </div>
-
-        <FormField label="Ресторан">
-          <select
-            style={inputStyle()}
-            value={companyId}
-            onChange={e => setCompanyId(e.target.value)}
-          >
-            {companies.length === 0 && <option value="">Нет ресторанов</option>}
-            {companies.map(c => (
-              <option key={c.id} value={c.id}>
-                {c.name}{!c.active ? ' (отключен)' : ''}
-              </option>
-            ))}
-          </select>
-        </FormField>
-
-        <FormField label="Название филиала">
-          <input
-            style={inputStyle()}
-            value={name}
-            onChange={e => handleNameChange(e.target.value)}
-            placeholder="Grand Registan — Чорсу"
-            autoFocus
-          />
-        </FormField>
-
-        <FormField label="Slug (используется в ссылках)">
-          <input
-            style={inputStyle()}
-            value={slug}
-            onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)) }}
-            placeholder="chorsu"
-          />
-        </FormField>
-
-        <FormField
-          label="Ссылка на отзывы Google"
-          hint="После сканирования NFC/QR клиент будет редиректнут именно сюда."
-        >
-          <input
-            style={inputStyle()}
-            value={googleUrl}
-            onChange={e => setGoogleUrl(e.target.value)}
-            placeholder="https://g.page/r/.../review"
-          />
-        </FormField>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, padding: '4px 0' }}>
-          <span style={{ fontSize: 13, color: 'var(--text-dim)' }}>Филиал активен</span>
-          <Toggle checked={active} onChange={() => setActive(v => !v)} />
-        </div>
-
-        {!isEdit && (
-          <div style={{
-            background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.25)',
-            borderRadius: 8, padding: '10px 14px', fontSize: 12, color: 'var(--text-dim)', marginBottom: 16,
-          }}>
-            При создании автоматически будут сгенерированы NFC- и QR-токены и QR-код для печати.
-          </div>
-        )}
-
-        {error && (
-          <div style={{
-            background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-            borderRadius: 8, padding: '10px 14px', fontSize: 12.5, color: 'var(--danger)', marginBottom: 16,
-          }}>
-            {error}
-          </div>
-        )}
-
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', alignItems: 'center' }}>
+    <Modal
+      icon={isEdit ? 'edit' : 'plus'}
+      title={isEdit ? 'Редактировать филиал' : 'Новый филиал'}
+      sub={isEdit ? branch!.companies?.name ?? undefined : 'Токены и QR-код создадутся автоматически'}
+      onClose={onClose}
+      footer={
+        <>
           {saving && step && (
             <span style={{ fontSize: 11.5, color: 'var(--text-muted)', marginRight: 'auto' }}>{step}</span>
           )}
-          <GhostButton onClick={onClose} disabled={saving}>Отмена</GhostButton>
-          <PrimaryButton onClick={handleSave} disabled={saving || companies.length === 0}>
-            {saving ? 'Сохранение…' : isEdit ? 'Сохранить' : 'Создать'}
-          </PrimaryButton>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Модалка просмотра QR-кода (увеличенно + скачать) ───────────────────────
-
-function QrPreviewModal({ branch, onClose }: { branch: Branch; onClose: () => void }) {
-  return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
-        zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
-      }}
+          <Button onClick={onClose} disabled={saving}>Отмена</Button>
+          <Button
+            variant="primary" icon="check" loading={saving}
+            disabled={companies.length === 0}
+            onClick={handleSave}
+          >
+            {isEdit ? 'Сохранить' : 'Создать'}
+          </Button>
+        </>
+      }
     >
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{
-          background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16,
-          padding: 24, width: 340, maxWidth: '95vw', textAlign: 'center',
-        }}
+      <Field label="Ресторан">
+        <select className="select" value={companyId} onChange={e => setCompanyId(e.target.value)}>
+          {companies.length === 0 && <option value="">Нет ресторанов</option>}
+          {companies.map(c => (
+            <option key={c.id} value={c.id}>{c.name}{!c.active ? ' (отключен)' : ''}</option>
+          ))}
+        </select>
+      </Field>
+
+      <Field label="Название филиала">
+        <input className="input" value={name} autoFocus
+          onChange={e => handleNameChange(e.target.value)}
+          placeholder="Grand Registan — Чорсу" />
+      </Field>
+
+      <Field label="Slug" hint="Используется в ссылках.">
+        <input className="input mono" value={slug}
+          onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)) }}
+          placeholder="chorsu" />
+      </Field>
+
+      <Field
+        label="Ссылка на отзывы Google"
+        hint="После скана NFC или QR гость попадёт именно сюда."
       >
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{branch.name}</div>
-        <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginBottom: 16 }}>QR-код для печати на табличке</div>
+        <input className="input" value={googleUrl} inputMode="url"
+          onChange={e => setGoogleUrl(e.target.value)}
+          placeholder="https://g.page/r/…/review" />
+      </Field>
 
-        <div style={{
-          background: '#fff', borderRadius: 12, padding: 16, display: 'inline-flex',
-          alignItems: 'center', justifyContent: 'center',
-        }}>
-          {branch.qr_image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={branch.qr_image_url} alt={`QR-код ${branch.name}`} width={260} height={260} style={{ display: 'block' }} />
-          ) : (
-            <div style={{ width: 260, height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: 12 }}>
-              QR-код не сгенерирован
-            </div>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-          <GhostButton onClick={onClose}>Закрыть</GhostButton>
-          {branch.qr_image_url && (
-            <a
-              href={branch.qr_image_url}
-              download={`qr-${branch.slug}.png`}
-              style={{ flex: 1, textDecoration: 'none' }}
-            >
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                background: 'var(--mint)', color: 'var(--bg)', cursor: 'pointer',
-              }}>
-                ⬇ Скачать PNG
-              </div>
-            </a>
-          )}
-        </div>
+      <div style={{ marginBottom: 15 }}>
+        <Switch checked={active} onChange={setActive} label="Филиал активен" />
       </div>
-    </div>
+
+      {!isEdit && (
+        <div style={{ marginBottom: 14 }}>
+          <Note tone="info">
+            При создании автоматически сгенерируются NFC- и QR-токены, а также QR-код для печати.
+          </Note>
+        </div>
+      )}
+
+      {error && <div style={{ marginBottom: 14 }}><Note tone="danger">{error}</Note></div>}
+    </Modal>
   )
 }
 
-// ─── Главный компонент ───────────────────────────────────────────────────────
+/* ─── Страница ───────────────────────────────────────────────────────────── */
 
 export default function BranchesPage() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [profileLoaded, setProfileLoaded] = useState(false)
+  return (
+    <Suspense fallback={<div className="grid grid--kpi-3"><KpiSkeleton count={3} /></div>}>
+      <BranchesView />
+    </Suspense>
+  )
+}
+
+function BranchesView() {
+  const { loaded: profileLoaded, isSuperAdmin } = useProfile()
+  const confirm = useConfirm()
+  const { success, error: errorToast, toast } = useToast()
+  const params = useSearchParams()
+
   const [companies, setCompanies] = useState<CompanyOption[]>([])
   const [branches, setBranches] = useState<Branch[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [companyFilter, setCompanyFilter] = useState<string>('all')
+  const [companyFilter, setCompanyFilter] = useState<string>(params.get('company') ?? 'all')
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Branch | null>(null)
-  const [toggling, setToggling] = useState<string | null>(null)
-  const [regenerating, setRegenerating] = useState<string | null>(null)
-  const [deleting, setDeleting] = useState<string | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [regenId, setRegenId] = useState<string | null>(null)
   const [qrPreview, setQrPreview] = useState<Branch | null>(null)
-  const [rowError, setRowError] = useState<string | null>(null)
 
-  // Загрузка профиля (для проверки роли)
   useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { setProfileLoaded(true); return }
-      const { data } = await supabase
-        .from('profiles')
-        .select('role, user_id')
-        .eq('user_id', user.id)
-        .single()
-      setProfile(data as Profile | null)
-      setProfileLoaded(true)
-    })
-  }, [])
-
-  const canManage = profile?.role === 'super_admin'
-  const canEdit = profile?.role === 'super_admin'
+    const c = params.get('company')
+    if (c) setCompanyFilter(c)
+  }, [params])
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -601,7 +286,12 @@ export default function BranchesPage() {
     setLoading(false)
   }, [])
 
-  useEffect(() => { if (canManage) loadData() }, [canManage, loadData])
+  useEffect(() => { if (isSuperAdmin) loadData() }, [isSuperAdmin, loadData])
+
+  useEffect(() => {
+    window.addEventListener(REFRESH_EVENT, loadData)
+    return () => window.removeEventListener(REFRESH_EVENT, loadData)
+  }, [loadData])
 
   const filtered = useMemo(() => {
     let list = branches
@@ -611,8 +301,7 @@ export default function BranchesPage() {
       list = list.filter(b =>
         b.name.toLowerCase().includes(q) ||
         b.slug.toLowerCase().includes(q) ||
-        (b.companies?.name ?? '').toLowerCase().includes(q)
-      )
+        (b.companies?.name ?? '').toLowerCase().includes(q))
     }
     return list
   }, [branches, companyFilter, search])
@@ -621,7 +310,7 @@ export default function BranchesPage() {
   const withoutQrCount = branches.filter(b => !b.qr_image_url).length
 
   async function handleToggleActive(b: Branch) {
-    setToggling(b.id)
+    setBusyId(b.id)
     const res = await fetch('/api/branches/manage', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -629,18 +318,18 @@ export default function BranchesPage() {
     })
     if (res.ok) {
       setBranches(prev => prev.map(x => x.id === b.id ? { ...x, active: !x.active } : x))
+      toast(!b.active ? `«${b.name}» включён` : `«${b.name}» отключён`, { kind: 'info' })
     } else {
       const err = await res.json().catch(() => ({}))
-      setRowError(err.error || 'Ошибка обновления')
+      errorToast(err.error || 'Ошибка обновления')
     }
-    setToggling(null)
+    setBusyId(null)
   }
 
   async function handleRegenerateQr(b: Branch) {
-    setRegenerating(b.id)
-    setRowError(null)
+    setRegenId(b.id)
     try {
-      const publicUrl = await generateAndUploadQr(null, b.id, b.qr_url)
+      const publicUrl = await generateAndUploadQr(b.id, b.qr_url)
       const patchRes = await fetch('/api/branches/manage', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -651,20 +340,23 @@ export default function BranchesPage() {
         throw new Error(err.error || 'Не удалось сохранить QR')
       }
       setBranches(prev => prev.map(x => x.id === b.id ? { ...x, qr_image_url: publicUrl } : x))
+      success('QR-код обновлён', b.name)
     } catch (e) {
-      setRowError(e instanceof Error ? e.message : 'Не удалось перегенерировать QR-код')
+      errorToast(e instanceof Error ? e.message : 'Не удалось перегенерировать QR-код')
     }
-    setRegenerating(null)
+    setRegenId(null)
   }
 
   async function handleDelete(b: Branch) {
-    const ok = window.confirm(
-      `Удалить филиал «${b.name}»?\n\nNFC-табличка и QR-код перестанут работать. История сканирований сохранится в базе. Это действие нельзя отменить.`
-    )
+    const ok = await confirm({
+      title: `Удалить филиал «${b.name}»?`,
+      text: 'NFC-табличка и QR-код перестанут работать. История сканирований останется в базе. Действие необратимо.',
+      confirmLabel: 'Удалить',
+      danger: true,
+    })
     if (!ok) return
 
-    setDeleting(b.id)
-    setRowError(null)
+    setBusyId(b.id)
     try {
       const delRes = await fetch('/api/branches/manage', {
         method: 'DELETE',
@@ -676,176 +368,131 @@ export default function BranchesPage() {
         throw new Error(err.error || 'Не удалось удалить филиал')
       }
       setBranches(prev => prev.filter(x => x.id !== b.id))
+      success('Филиал удалён', b.name)
     } catch (e) {
-      setRowError(e instanceof Error ? e.message : 'Не удалось удалить филиал')
+      errorToast(e instanceof Error ? e.message : 'Не удалось удалить филиал')
     }
-    setDeleting(null)
-  }
-
-  function openCreate() {
-    setEditing(null)
-    setModalOpen(true)
-  }
-
-  function openEdit(b: Branch) {
-    setEditing(b)
-    setModalOpen(true)
-  }
-
-  function handleSaved() {
-    setModalOpen(false)
-    setEditing(null)
-    loadData()
+    setBusyId(null)
   }
 
   if (!profileLoaded) {
-    return <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Загрузка…</div>
+    return <div className="grid grid--kpi-3"><KpiSkeleton count={3} /></div>
   }
 
-  if (!canManage) {
-    return null
-  }
+  if (!isSuperAdmin) return <AccessDenied what="Филиалы" />
 
   return (
-    <div>
-      {/* KPI */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 16 }}>
-        <KpiCard label="Всего филиалов" value={loading ? '…' : branches.length} sub="По всем ресторанам" accent="mint" icon="📍" />
-        <KpiCard label="Активных" value={loading ? '…' : activeCount} sub={`Неактивных: ${branches.length - activeCount}`} accent="blue" icon="✅" />
-        <KpiCard label="Без QR-кода" value={loading ? '…' : withoutQrCount} sub="Требуют генерации" accent="orange" icon="⬛" />
+    <div className="stack">
+
+      <div className="grid grid--kpi-3">
+        {loading ? <KpiSkeleton count={3} /> : (
+          <>
+            <KpiCard label="Филиалов" icon="branches" accent="mint"
+              value={branches.length} sub="По всем ресторанам" />
+            <KpiCard label="Активных" icon="check" accent="blue"
+              value={activeCount} sub={`Отключено: ${branches.length - activeCount}`} />
+            <KpiCard label="Без QR-кода" icon="qrcodes" accent="orange"
+              value={withoutQrCount} sub="Требуют генерации" />
+          </>
+        )}
       </div>
 
-      {/* Топбар: фильтры + добавить */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div className="toolbar" style={{ marginBottom: 0 }}>
         <select
+          className="select"
           value={companyFilter}
           onChange={e => setCompanyFilter(e.target.value)}
-          style={{ ...inputStyle(), width: 220 }}
+          style={{ width: 'auto', maxWidth: 240 }}
         >
           <option value="all">Все рестораны</option>
-          {companies.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
+          {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Поиск по названию или slug…"
-          style={{ ...inputStyle(), width: 260 }}
-        />
-        <div style={{ marginLeft: 'auto' }}>
-          {canEdit && (
-            <PrimaryButton onClick={openCreate} disabled={companies.length === 0}>
-              <span style={{ fontSize: 14 }}>+</span> Добавить филиал
-            </PrimaryButton>
-          )}
+
+        <SearchInput value={search} onChange={setSearch} placeholder="Поиск филиала…" />
+
+        <div className="toolbar__spacer">
+          <Button
+            variant="primary" icon="plus"
+            disabled={companies.length === 0}
+            onClick={() => { setEditing(null); setModalOpen(true) }}
+          >
+            Добавить филиал
+          </Button>
         </div>
       </div>
 
       {companies.length === 0 && !loading && (
-        <div style={{
-          background: 'rgba(255,107,53,0.08)', border: '1px solid rgba(255,107,53,0.25)',
-          borderRadius: 10, padding: '12px 16px', fontSize: 12.5, color: 'var(--text-dim)', marginBottom: 16,
-        }}>
+        <Note tone="warning">
           Сначала добавьте хотя бы один ресторан в разделе «Рестораны» — филиал привязывается к ресторану.
-        </div>
+        </Note>
       )}
 
-      {rowError && (
-        <div style={{
-          background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-          borderRadius: 10, padding: '12px 16px', fontSize: 12.5, color: 'var(--danger)', marginBottom: 16,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-        }}>
-          <span>{rowError}</span>
-          <button onClick={() => setRowError(null)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: 14 }}>✕</button>
-        </div>
-      )}
-
-      {/* Список филиалов */}
-      <Panel title="Филиалы" sub={`${filtered.length} из ${branches.length}`}>
+      <Panel
+        title="Филиалы"
+        sub={search || companyFilter !== 'all'
+          ? `Найдено ${filtered.length} из ${branches.length}`
+          : `Всего ${branches.length}`}
+      >
         {loading ? (
-          <div style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>Загрузка…</div>
+          <SkeletonRows rows={3} height={128} />
         ) : filtered.length === 0 ? (
-          <div style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>
-            {branches.length === 0 ? 'Пока нет ни одного филиала' : 'Ничего не найдено'}
-          </div>
+          <EmptyState
+            icon={branches.length === 0 ? 'branches' : 'search'}
+            title={branches.length === 0 ? 'Пока нет филиалов' : 'Ничего не найдено'}
+            text={branches.length === 0
+              ? 'Создайте первый филиал — токены NFC/QR и QR-код сгенерируются автоматически.'
+              : 'Измените запрос или сбросьте фильтр по ресторану.'}
+          />
         ) : (
-          filtered.map((b, i) => (
-            <div
-              key={b.id}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '52px 1fr 200px 200px auto',
-                alignItems: 'center', gap: 14,
-                padding: '14px 4px',
-                borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
-              }}
-            >
-              {/* QR-миниатюра */}
-              <button
-                onClick={() => setQrPreview(b)}
-                title="Показать QR-код"
-                style={{
-                  width: 44, height: 44, borderRadius: 9, flexShrink: 0, padding: 4,
-                  background: '#fff', border: '1px solid var(--border)', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-                }}
-              >
-                {b.qr_image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={b.qr_image_url} alt="QR" width={36} height={36} style={{ display: 'block' }} />
-                ) : (
-                  <span style={{ fontSize: 16 }}>⬛</span>
-                )}
-              </button>
+          <div className="stack" style={{ gap: 12 }}>
+            {filtered.map(b => (
+              <div key={b.id} className="card" style={{ padding: 13 }}>
+                <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
+                  <button
+                    onClick={() => setQrPreview(b)}
+                    title="Показать QR-код"
+                    className="thumb"
+                    style={{ background: '#fff', padding: 4, cursor: 'pointer' }}
+                  >
+                    {b.qr_image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={b.qr_image_url} alt="QR" width={38} height={38} style={{ display: 'block' }} />
+                    ) : (
+                      <Icon name="qrcodes" size={20} style={{ color: '#94A3B8' }} />
+                    )}
+                  </button>
 
-              {/* Инфо */}
-              <div style={{ minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{b.name}</span>
-                  <span style={{
-                    fontSize: 10.5, fontWeight: 600, padding: '2px 7px', borderRadius: 4,
-                    background: b.active ? 'var(--mint-dim)' : 'rgba(239,68,68,0.12)',
-                    color: b.active ? 'var(--mint)' : 'var(--danger)',
-                  }}>
-                    {b.active ? 'Активен' : 'Отключен'}
-                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="row" style={{ gap: 8 }}>
+                      <span className="truncate" style={{ fontSize: 14, fontWeight: 650 }}>{b.name}</span>
+                      <StatusBadge active={b.active} />
+                    </div>
+                    <div className="truncate" style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 3 }}>
+                      {b.companies?.name ?? '—'} · /{b.slug}
+                    </div>
+                  </div>
+
+                  <div className="row" style={{ gap: 7, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <Switch checked={b.active} disabled={busyId === b.id} onChange={() => handleToggleActive(b)} />
+                    <IconButton
+                      icon="refresh" title="Перегенерировать QR"
+                      disabled={regenId === b.id}
+                      onClick={() => handleRegenerateQr(b)}
+                    />
+                    <IconButton icon="edit" title="Редактировать"
+                      onClick={() => { setEditing(b); setModalOpen(true) }} />
+                    <IconButton icon="trash" title="Удалить" danger
+                      disabled={busyId === b.id} onClick={() => handleDelete(b)} />
+                  </div>
                 </div>
-                <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
-                  🏪 {b.companies?.name ?? '—'} · /{b.slug}
+
+                <div className="grid grid--2" style={{ gap: 10, marginTop: 12 }}>
+                  <CopyField value={b.nfc_url} label="NFC-ссылка" compact />
+                  <CopyField value={b.qr_url} label="QR-ссылка" compact />
                 </div>
               </div>
-
-              {/* NFC ссылка */}
-              <div>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>NFC-ссылка</div>
-                <CopyField value={b.nfc_url} />
-              </div>
-
-              {/* QR ссылка */}
-              <div>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>QR-ссылка</div>
-                <CopyField value={b.qr_url} />
-              </div>
-
-              {/* Действия */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifySelf: 'end' }}>
-                {canEdit && <Toggle checked={b.active} disabled={toggling === b.id} onChange={() => handleToggleActive(b)} />}
-                {canEdit && (
-                  <GhostButton onClick={() => handleRegenerateQr(b)} disabled={regenerating === b.id}>
-                    {regenerating === b.id ? '…' : '↻ QR'}
-                  </GhostButton>
-                )}
-                {canEdit && <GhostButton onClick={() => openEdit(b)}>Редактировать</GhostButton>}
-                {canEdit && (
-                  <GhostButton danger onClick={() => handleDelete(b)} disabled={deleting === b.id}>
-                    {deleting === b.id ? '…' : 'Удалить'}
-                  </GhostButton>
-                )}
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </Panel>
 
@@ -855,12 +502,24 @@ export default function BranchesPage() {
           companies={companies}
           defaultCompanyId={companyFilter !== 'all' ? companyFilter : null}
           onClose={() => { setModalOpen(false); setEditing(null) }}
-          onSaved={handleSaved}
+          onSaved={(msg) => {
+            setModalOpen(false)
+            setEditing(null)
+            success(msg)
+            loadData()
+          }}
         />
       )}
 
       {qrPreview && (
-        <QrPreviewModal branch={qrPreview} onClose={() => setQrPreview(null)} />
+        <QrPreviewModal
+          title={qrPreview.name}
+          sub={qrPreview.companies?.name ?? undefined}
+          imageUrl={qrPreview.qr_image_url}
+          url={qrPreview.qr_url}
+          slug={qrPreview.slug}
+          onClose={() => setQrPreview(null)}
+        />
       )}
     </div>
   )

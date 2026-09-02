@@ -146,7 +146,9 @@ export async function sendDocument(
       form.append('caption', caption)
       form.append('parse_mode', 'Markdown')
     }
-    const blob = new Blob([content], { type: 'application/octet-stream' })
+    // Buffer → Uint8Array: Blob не принимает Buffer<ArrayBufferLike> по типам TS
+    const part = typeof content === 'string' ? content : new Uint8Array(content)
+    const blob = new Blob([part], { type: 'application/octet-stream' })
     form.append('document', blob, filename)
 
     const res = await fetch(botUrl('sendDocument'), { method: 'POST', body: form })

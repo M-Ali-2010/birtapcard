@@ -1,20 +1,22 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell,
+  Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
+import { useIsMobile, useProfile, usePersistentState } from '@/lib/hooks'
+import { REFRESH_EVENT } from '@/components/nav-config'
+import { nf, pct, relTime } from '@/lib/format'
+import { Icon } from '@/components/ui/icons'
+import { ChartLegend, ChartTooltip, Donut } from '@/components/ui/charts'
+import {
+  Badge, Button, EmptyState, IconButton, KpiCard, KpiSkeleton,
+  Panel, Segmented, Skeleton, SkeletonRows,
+} from '@/components/ui/kit'
+import { useToast } from '@/components/ui/toast'
 
-// ─── Типы ───────────────────────────────────────────────────────────────────
-
-type UserProfile = {
-  user_id: string
-  role: string | null
-  company_id: string | null
-  branch_id: string | null
-}
+/* ─── Типы ───────────────────────────────────────────────────────────────── */
 
 type ScanEvent = {
   id: string
@@ -28,150 +30,64 @@ type ScanEvent = {
 }
 
 type DayPoint = { day: string; nfc: number; qr: number; total: number }
-type DevicePoint = { name: string; value: number; color: string }
-type LangPoint = { name: string; value: number; color: string }
+type Slice = { name: string; value: number; color: string }
 type BranchStat = { name: string; company: string; scans: number }
 
-// ─── Вспомогательные компоненты ─────────────────────────────────────────────
-
-function KpiCard({
-  label, value, delta, deltaUp, accent, icon,
-}: {
-  label: string; value: string | number; delta: string
-  deltaUp: boolean; accent: 'mint' | 'orange' | 'blue' | 'purple'; icon: string
-}) {
-  const colors = {
-    mint:   { val: 'var(--mint)',   dim: 'var(--mint-dim)',               bar: 'linear-gradient(90deg, var(--mint), transparent)' },
-    orange: { val: 'var(--orange)', dim: 'var(--orange-dim)',             bar: 'linear-gradient(90deg, var(--orange), transparent)' },
-    blue:   { val: 'var(--blue)',   dim: 'rgba(59,130,246,0.12)',         bar: 'linear-gradient(90deg, var(--blue), transparent)' },
-    purple: { val: 'var(--purple)', dim: 'rgba(139,92,246,0.12)',         bar: 'linear-gradient(90deg, var(--purple), transparent)' },
-  }
-  const c = colors[accent]
-  return (
-    <div style={{
-      background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12,
-      padding: '18px 20px', position: 'relative', overflow: 'hidden',
-      transition: 'border-color 0.2s',
-    }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = c.val)}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
-    >
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-        background: c.bar,
-      }} />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontSize: 11.5, color: 'var(--text-muted)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-          {label}
-        </span>
-        <span style={{ width: 32, height: 32, borderRadius: 8, background: c.dim, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>
-          {icon}
-        </span>
-      </div>
-      <div style={{
-        fontFamily: 'var(--font-mono), JetBrains Mono, monospace',
-        fontSize: 28, fontWeight: 600, lineHeight: 1, marginBottom: 6, color: c.val,
-      }}>
-        {value}
-      </div>
-      <div style={{ fontSize: 11.5, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-        <span style={{ color: deltaUp ? 'var(--success)' : 'var(--danger)' }}>
-          {deltaUp ? '↑' : '↓'} {delta}
-        </span>
-        <span>vs вчера</span>
-      </div>
-    </div>
-  )
+const DEVICE_LABELS: Record<string, string> = {
+  mobile: 'Мобильный', desktop: 'Десктоп', tablet: 'Планшет', unknown: 'Неизвестно',
 }
-
-function Panel({ title, sub, children, action }: {
-  title: string; sub?: string; children: React.ReactNode; action?: React.ReactNode
-}) {
-  return (
-    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18 }}>
-        <div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</div>
-          {sub && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{sub}</div>}
-        </div>
-        {action}
-      </div>
-      {children}
-    </div>
-  )
+const DEVICE_COLORS: Record<string, string> = {
+  mobile: 'var(--mint)', desktop: 'var(--blue)', tablet: 'var(--orange)', unknown: 'var(--text-muted)',
 }
-
-function ChartTooltip({ active, payload, label }: {
-  active?: boolean; payload?: { value: number; name: string; color: string }[]; label?: string
-}) {
-  if (!active || !payload?.length) return null
-  return (
-    <div style={{
-      background: 'var(--card2)', border: '1px solid var(--border)',
-      borderRadius: 8, padding: '10px 14px', fontSize: 12,
-    }}>
-      <div style={{ color: 'var(--text-muted)', marginBottom: 6 }}>{label}</div>
-      {payload.map((p) => (
-        <div key={p.name} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: p.color, display: 'inline-block' }} />
-          <span style={{ color: 'var(--text-dim)' }}>{p.name === 'nfc' ? 'NFC' : 'QR'}:</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--text)' }}>{p.value}</span>
-        </div>
-      ))}
-    </div>
-  )
+const LANG_NAMES: Record<string, string> = {
+  ru: 'Русский', uz: 'Узбекский', en: 'Английский', kk: 'Казахский',
 }
+const LANG_COLORS = ['var(--purple)', 'var(--blue)', 'var(--orange)', 'var(--mint)', 'var(--text-muted)']
 
-// ─── Главный компонент ───────────────────────────────────────────────────────
+/* ─── Страница ───────────────────────────────────────────────────────────── */
 
 export default function DashboardPage() {
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [profileLoaded, setProfileLoaded] = useState(false)
+  const { profile, loaded: profileLoaded, role } = useProfile()
+  const isMobile = useIsMobile()
+  const { toast } = useToast()
 
   const [events, setEvents] = useState<ScanEvent[]>([])
   const [dayData, setDayData] = useState<DayPoint[]>([])
-  const [deviceData, setDeviceData] = useState<DevicePoint[]>([])
-  const [langData, setLangData] = useState<LangPoint[]>([])
+  const [deviceData, setDeviceData] = useState<Slice[]>([])
+  const [langData, setLangData] = useState<Slice[]>([])
   const [topBranches, setTopBranches] = useState<BranchStat[]>([])
   const [loading, setLoading] = useState(true)
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null)
+
   const [aiText, setAiText] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
-  const [tab, setTab] = useState<'7' | '30' | '90'>('7')
 
-  // Загрузка профиля
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { setProfileLoaded(true); return }
-      const { data } = await supabase
-        .from('profiles')
-        .select('user_id, role, company_id, branch_id')
-        .eq('user_id', user.id)
-        .single()
-      setProfile(data as UserProfile | null)
-      setProfileLoaded(true)
-    })
-  }, [])
+  const [tab, setTab] = usePersistentState<'7' | '30' | '90'>('btc-dash-range', '7')
+  const [live, setLive] = usePersistentState<boolean>('btc-dash-live', false)
+
+  /* ── Показатели за сегодня / вчера ────────────────────────────────────── */
 
   const todayStr = new Date().toISOString().slice(0, 10)
   const yesterdayStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
-  const todayNfc    = events.filter(e => e.scanned_at.startsWith(todayStr) && e.scan_type === 'nfc').length
-  const todayQr     = events.filter(e => e.scanned_at.startsWith(todayStr) && e.scan_type === 'qr').length
-  const todayUniq   = events.filter(e => e.scanned_at.startsWith(todayStr) && e.is_unique).length
-  const todayTotal  = todayNfc + todayQr
-  const conversion  = todayTotal > 0 ? Math.round((todayUniq / todayTotal) * 100) : 0
-  const yestNfc     = events.filter(e => e.scanned_at.startsWith(yesterdayStr) && e.scan_type === 'nfc').length
-  const yestQr      = events.filter(e => e.scanned_at.startsWith(yesterdayStr) && e.scan_type === 'qr').length
-  const yestUniq    = events.filter(e => e.scanned_at.startsWith(yesterdayStr) && e.is_unique).length
+  const todayNfc   = events.filter(e => e.scanned_at.startsWith(todayStr) && e.scan_type === 'nfc').length
+  const todayQr    = events.filter(e => e.scanned_at.startsWith(todayStr) && e.scan_type === 'qr').length
+  const todayUniq  = events.filter(e => e.scanned_at.startsWith(todayStr) && e.is_unique).length
+  const todayTotal = todayNfc + todayQr
+  const conversion = pct(todayUniq, todayTotal)
+  const yestNfc    = events.filter(e => e.scanned_at.startsWith(yesterdayStr) && e.scan_type === 'nfc').length
+  const yestQr     = events.filter(e => e.scanned_at.startsWith(yesterdayStr) && e.scan_type === 'qr').length
+  const yestUniq   = events.filter(e => e.scanned_at.startsWith(yesterdayStr) && e.is_unique).length
 
-  const loadData = useCallback(async () => {
+  /* ── Загрузка данных (фильтрация по роли сохранена) ───────────────────── */
+
+  const loadData = useCallback(async (silent = false) => {
     if (!profileLoaded || !profile) return
-    setLoading(true)
+    if (!silent) setLoading(true)
+
     const supabase = createClient()
     const days = parseInt(tab)
     const since = new Date(Date.now() - days * 86400000).toISOString()
 
-    // Строим запрос с фильтрацией по роли
     let query = supabase
       .from('scan_events')
       .select('id, branch_id, scan_type, device, browser_lang, is_unique, scanned_at, branches(name, companies(name))')
@@ -180,10 +96,10 @@ export default function DashboardPage() {
       .limit(500)
 
     if (profile.role === 'branch_manager' && profile.branch_id) {
-      // Branch manager видит только свой филиал
+      // Менеджер видит только свой филиал
       query = query.eq('branch_id', profile.branch_id)
     } else if (profile.role === 'owner' && profile.company_id) {
-      // Owner видит все филиалы своей компании (RLS дополнительно защищает на уровне БД)
+      // Владелец — все филиалы своей компании (RLS дублирует ограничение)
       const { data: branchIds } = await supabase
         .from('branches')
         .select('id')
@@ -192,17 +108,12 @@ export default function DashboardPage() {
       if (ids.length > 0) {
         query = query.in('branch_id', ids)
       } else {
-        // Нет филиалов — возвращаем пустые данные
-        setEvents([])
-        setDayData([])
-        setDeviceData([])
-        setLangData([])
-        setTopBranches([])
+        setEvents([]); setDayData([]); setDeviceData([]); setLangData([]); setTopBranches([])
         setLoading(false)
         return
       }
     }
-    // super_admin — без фильтра, видит всё
+    // super_admin — без фильтра
 
     const { data: rawEvents } = await query
     const ev: ScanEvent[] = (rawEvents as ScanEvent[] | null) ?? []
@@ -222,26 +133,21 @@ export default function DashboardPage() {
       }
     })
     setDayData(Object.entries(byDay).map(([day, v]) => ({
-      day: day.slice(5),
+      day: day.slice(5).split('-').reverse().join('.'),
       nfc: v.nfc, qr: v.qr, total: v.nfc + v.qr,
     })))
 
     // Устройства
     const devCount: Record<string, number> = {}
     ev.forEach(e => { devCount[e.device] = (devCount[e.device] ?? 0) + 1 })
-    const devColors: Record<string, string> = {
-      mobile:  'var(--mint)',
-      desktop: 'var(--blue)',
-      tablet:  'var(--orange)',
-      unknown: 'var(--text-muted)',
-    }
-    const devLabels: Record<string, string> = {
-      mobile: 'Мобильный', desktop: 'Десктоп', tablet: 'Планшет', unknown: 'Неизвестно'
-    }
     setDeviceData(
       Object.entries(devCount)
         .sort((a, b) => b[1] - a[1])
-        .map(([k, v]) => ({ name: devLabels[k] ?? k, value: v, color: devColors[k] ?? 'var(--purple)' }))
+        .map(([k, v]) => ({
+          name: DEVICE_LABELS[k] ?? k,
+          value: v,
+          color: DEVICE_COLORS[k] ?? 'var(--purple)',
+        }))
     )
 
     // Языки
@@ -250,13 +156,11 @@ export default function DashboardPage() {
       const l = (e.browser_lang ?? 'unknown').split('-')[0].toLowerCase()
       langCount[l] = (langCount[l] ?? 0) + 1
     })
-    const langColors = ['var(--purple)', 'var(--blue)', 'var(--orange)', 'var(--mint)', 'var(--text-muted)']
-    const langNames: Record<string, string> = { ru: 'Русский', uz: 'Узбекский', en: 'Английский', kk: 'Казахский' }
     setLangData(
       Object.entries(langCount)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5)
-        .map(([k, v], i) => ({ name: langNames[k] ?? k.toUpperCase(), value: v, color: langColors[i] }))
+        .map(([k, v], i) => ({ name: LANG_NAMES[k] ?? k.toUpperCase(), value: v, color: LANG_COLORS[i] }))
     )
 
     // Топ филиалов
@@ -264,8 +168,11 @@ export default function DashboardPage() {
     ev.forEach(e => {
       const id = e.branch_id
       if (!branchCount[id]) {
-        const b = e.branches
-        branchCount[id] = { name: b?.name ?? '—', company: b?.companies?.name ?? '—', count: 0 }
+        branchCount[id] = {
+          name: e.branches?.name ?? '—',
+          company: e.branches?.companies?.name ?? '—',
+          count: 0,
+        }
       }
       branchCount[id].count++
     })
@@ -276,12 +183,27 @@ export default function DashboardPage() {
         .map(v => ({ name: v.name, company: v.company, scans: v.count }))
     )
 
+    setUpdatedAt(new Date())
     setLoading(false)
   }, [tab, profile, profileLoaded])
 
+  useEffect(() => { if (profileLoaded) loadData() }, [loadData, profileLoaded])
+
+  // Обновление из шапки / палитры команд / жеста «потяните вниз»
   useEffect(() => {
-    if (profileLoaded) loadData()
-  }, [loadData, profileLoaded])
+    const handler = () => loadData(true)
+    window.addEventListener(REFRESH_EVENT, handler)
+    return () => window.removeEventListener(REFRESH_EVENT, handler)
+  }, [loadData])
+
+  // Живой режим: тихое обновление раз в минуту
+  useEffect(() => {
+    if (!live) return
+    const id = setInterval(() => loadData(true), 60000)
+    return () => clearInterval(id)
+  }, [live, loadData])
+
+  /* ── AI-инсайты ──────────────────────────────────────────────────────── */
 
   async function loadAi() {
     setAiLoading(true)
@@ -304,88 +226,141 @@ export default function DashboardPage() {
     setAiLoading(false)
   }
 
+  const sparkNfc = useMemo(() => dayData.map(d => d.nfc), [dayData])
+  const sparkQr = useMemo(() => dayData.map(d => d.qr), [dayData])
+  const sparkTotal = useMemo(() => dayData.map(d => d.total), [dayData])
   const maxBranch = Math.max(...topBranches.map(b => b.scans), 1)
+  const periodTotal = dayData.reduce((s, d) => s + d.total, 0)
 
   if (!profileLoaded) {
-    return <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Загрузка…</div>
+    return (
+      <div className="stack">
+        <div className="grid grid--kpi"><KpiSkeleton /></div>
+        <Skeleton h={280} r={18} />
+      </div>
+    )
   }
 
   return (
-    <div>
-      {/* Табы периода */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 24, background: 'var(--card)', padding: 4, borderRadius: 10, width: 'fit-content' }}>
-        {(['7', '30', '90'] as const).map(t => (
-          <button key={t}
-            onClick={() => setTab(t)}
-            style={{
-              padding: '7px 16px', borderRadius: 7, fontSize: 13, fontWeight: 500,
-              cursor: 'pointer', border: 'none', fontFamily: 'inherit',
-              background: tab === t ? 'var(--bg2)' : 'transparent',
-              color: tab === t ? 'var(--text)' : 'var(--text-muted)',
-              transition: 'all 0.18s',
+    <div className="stack">
+
+      {/* ── Период + живой режим ──────────────────────────────────────── */}
+      <div className="toolbar" style={{ marginBottom: 0 }}>
+        <Segmented
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: '7', label: '7 дней' },
+            { value: '30', label: '30 дней' },
+            { value: '90', label: '90 дней' },
+          ]}
+        />
+
+        <div className="toolbar__spacer row" style={{ gap: 8 }}>
+          {updatedAt && (
+            <span className="hide-xs" style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>
+              обновлено {updatedAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+          <button
+            className={`btn btn--${live ? 'outline' : 'ghost'}`}
+            onClick={() => {
+              setLive(v => !v)
+              toast(live ? 'Живой режим выключен' : 'Живой режим включён', {
+                kind: 'info',
+                desc: live ? undefined : 'Данные обновляются каждую минуту',
+              })
             }}
+            style={live ? { color: 'var(--success)', borderColor: 'color-mix(in srgb, var(--success) 40%, transparent)' } : undefined}
+            title="Автообновление раз в минуту"
           >
-            {t === '7' ? '7 дней' : t === '30' ? '30 дней' : '90 дней'}
+            {live ? <span className="live-dot" /> : <Icon name="zap" size={15} />}
+            Live
           </button>
-        ))}
+        </div>
       </div>
 
-      {/* KPI карточки */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
-        <KpiCard label="NFC сканы" value={loading ? '…' : todayNfc} delta={`${Math.abs(todayNfc - yestNfc)}`} deltaUp={todayNfc >= yestNfc} accent="mint"   icon="📡" />
-        <KpiCard label="QR сканы"  value={loading ? '…' : todayQr}  delta={`${Math.abs(todayQr - yestQr)}`}   deltaUp={todayQr >= yestQr}   accent="orange" icon="🔲" />
-        <KpiCard label="Уникальных" value={loading ? '…' : todayUniq} delta={`${Math.abs(todayUniq - yestUniq)}`} deltaUp={todayUniq >= yestUniq} accent="blue" icon="👤" />
-        <KpiCard label="Конверсия" value={loading ? '…' : `${conversion}%`} delta={`${conversion}%`} deltaUp={conversion >= 50} accent="purple" icon="📈" />
+      {/* ── KPI ───────────────────────────────────────────────────────── */}
+      <div className="grid grid--kpi">
+        {loading ? <KpiSkeleton /> : (
+          <>
+            <KpiCard
+              label="NFC сканы" icon="nfc" accent="mint"
+              value={todayNfc} spark={sparkNfc}
+              delta={{ value: todayNfc - yestNfc, label: 'vs вчера' }}
+            />
+            <KpiCard
+              label="QR сканы" icon="qrcodes" accent="orange"
+              value={todayQr} spark={sparkQr}
+              delta={{ value: todayQr - yestQr, label: 'vs вчера' }}
+            />
+            <KpiCard
+              label="Уникальных" icon="user" accent="blue"
+              value={todayUniq} spark={sparkTotal}
+              delta={{ value: todayUniq - yestUniq, label: 'vs вчера' }}
+            />
+            <KpiCard
+              label="Конверсия" icon="target" accent="purple"
+              value={conversion} suffix="%"
+              sub={`${nf(todayUniq)} из ${nf(todayTotal)} сканов сегодня`}
+            />
+          </>
+        )}
       </div>
 
-      {/* AI-инсайты — только для super_admin и owner */}
-      {(profile?.role === 'super_admin' || profile?.role === 'owner') && (
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(0,212,170,0.06), rgba(59,130,246,0.06))',
-          border: '1px solid rgba(0,212,170,0.2)', borderRadius: 12, padding: 20,
-          marginBottom: 16, position: 'relative', overflow: 'hidden',
-        }}>
-          <div style={{ position: 'absolute', top: -40, right: -40, width: 120, height: 120,
-            background: 'radial-gradient(circle, rgba(0,212,170,0.1), transparent 70%)',
-            pointerEvents: 'none' }} />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{
-                background: 'linear-gradient(135deg, var(--mint), var(--blue))',
-                color: 'var(--bg)', fontSize: 10, fontWeight: 700, padding: '2px 8px',
-                borderRadius: 4, letterSpacing: 0.5,
-              }}>✦ AI INSIGHTS</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Анализ за сегодня</span>
-            </div>
-            <button
-              onClick={loadAi}
-              disabled={aiLoading}
+      {/* ── AI-инсайты (super_admin и owner) ──────────────────────────── */}
+      {(role === 'super_admin' || role === 'owner') && (
+        <div className="spotlight">
+          <div className="row row--wrap" style={{ marginBottom: 12, position: 'relative' }}>
+            <span
+              className="badge"
               style={{
-                background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 6,
-                padding: '5px 12px', fontSize: 12, fontWeight: 600,
-                color: aiLoading ? 'var(--text-muted)' : 'var(--mint)',
-                cursor: aiLoading ? 'default' : 'pointer', fontFamily: 'inherit',
+                background: 'linear-gradient(135deg, var(--mint), var(--blue))',
+                color: '#04121C', fontWeight: 800, letterSpacing: 0.4,
               }}
             >
-              {aiLoading ? 'Анализирую…' : aiText ? '↺ Обновить' : '✦ Анализировать'}
-            </button>
+              <Icon name="sparkles" size={12} strokeWidth={2.2} /> AI INSIGHTS
+            </span>
+            <span style={{ fontSize: 13.5, fontWeight: 650 }}>Анализ за сегодня</span>
+            <div className="toolbar__spacer row" style={{ gap: 8 }}>
+              {aiText && !aiLoading && (
+                <IconButton
+                  icon="copy" title="Скопировать" small
+                  onClick={() => {
+                    navigator.clipboard?.writeText(aiText.replace(/\*\*/g, ''))
+                    toast('Инсайты скопированы', { kind: 'success' })
+                  }}
+                />
+              )}
+              <Button
+                size="sm"
+                variant={aiText ? 'ghost' : 'primary'}
+                icon={aiText ? 'refresh' : 'sparkles'}
+                loading={aiLoading}
+                onClick={loadAi}
+              >
+                {aiLoading ? 'Анализирую…' : aiText ? 'Обновить' : 'Анализировать'}
+              </Button>
+            </div>
           </div>
-          <div style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--text-dim)' }}>
+
+          <div style={{ fontSize: 13.5, lineHeight: 1.75, color: 'var(--text-dim)', position: 'relative' }}>
             {aiLoading ? (
               <span style={{ color: 'var(--text-muted)' }}>
-                Анализирую данные
-                <span style={{ display: 'inline-flex', gap: 3, marginLeft: 6 }}>
+                Изучаю статистику
+                <span style={{ display: 'inline-flex', gap: 4, marginLeft: 7 }}>
                   {[0, 1, 2].map(i => (
                     <span key={i} style={{
-                      display: 'inline-block', width: 4, height: 4, borderRadius: '50%',
-                      background: 'var(--mint)',
-                      animation: `btc-blink 1.4s ${i * 0.2}s infinite`,
+                      width: 4, height: 4, borderRadius: '50%', background: 'var(--mint)',
+                      display: 'inline-block', animation: `blink 1.4s ${i * 0.2}s infinite`,
                     }} />
                   ))}
                 </span>
               </span>
             ) : aiText ? (
-              <span dangerouslySetInnerHTML={{ __html: aiText.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--text)">$1</strong>') }} />
+              <span dangerouslySetInnerHTML={{
+                __html: aiText.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--text)">$1</strong>'),
+              }} />
             ) : (
               <span style={{ color: 'var(--text-muted)' }}>
                 Нажмите «Анализировать» — AI изучит статистику и даст рекомендации по улучшению конверсии.
@@ -395,171 +370,140 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* График + Топ филиалов */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, marginBottom: 16 }}>
-
-        {/* Линейный график */}
-        <Panel title="Сканирования по дням" sub={`За последние ${tab} дней`}>
+      {/* ── График + топ филиалов ─────────────────────────────────────── */}
+      <div className="grid grid--main">
+        <Panel
+          title="Сканирования по дням"
+          sub={`За последние ${tab} дней · всего ${nf(periodTotal)}`}
+        >
           {loading ? (
-            <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-              Загрузка…
-            </div>
+            <Skeleton h={isMobile ? 190 : 224} r={12} />
           ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={dayData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="day" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-                <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} tickLine={false} axisLine={false} />
-                <Tooltip content={<ChartTooltip />} />
-                <Line type="monotone" dataKey="nfc" stroke="var(--mint)"   strokeWidth={2} dot={false} name="nfc" />
-                <Line type="monotone" dataKey="qr"  stroke="var(--orange)" strokeWidth={2} dot={false} name="qr" />
-              </LineChart>
+            <ResponsiveContainer width="100%" height={isMobile ? 190 : 224}>
+              <AreaChart data={dayData} margin={{ top: 6, right: 6, left: -22, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gNfc" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--mint)" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="var(--mint)" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="gQr" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--orange)" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="var(--orange)" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="var(--border)" strokeDasharray="3 5" vertical={false} />
+                <XAxis
+                  dataKey="day" tickLine={false} axisLine={false}
+                  tick={{ fill: 'var(--text-muted)', fontSize: 10.5 }}
+                  interval="preserveStartEnd" minTickGap={18}
+                />
+                <YAxis
+                  tickLine={false} axisLine={false} width={44} allowDecimals={false}
+                  tick={{ fill: 'var(--text-muted)', fontSize: 10.5 }}
+                />
+                <Tooltip
+                  content={<ChartTooltip labels={{ nfc: 'NFC', qr: 'QR' }} />}
+                  cursor={{ stroke: 'var(--border-strong)', strokeWidth: 1 }}
+                />
+                <Area
+                  type="monotone" dataKey="nfc" name="nfc"
+                  stroke="var(--mint)" strokeWidth={2.2} fill="url(#gNfc)"
+                  activeDot={{ r: 4, strokeWidth: 0 }}
+                />
+                <Area
+                  type="monotone" dataKey="qr" name="qr"
+                  stroke="var(--orange)" strokeWidth={2.2} fill="url(#gQr)"
+                  activeDot={{ r: 4, strokeWidth: 0 }}
+                />
+              </AreaChart>
             </ResponsiveContainer>
           )}
-          <div style={{ display: 'flex', gap: 20, marginTop: 12 }}>
-            {[{ color: 'var(--mint)', label: 'NFC' }, { color: 'var(--orange)', label: 'QR' }].map(l => (
-              <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 20, height: 2, background: l.color, borderRadius: 1, display: 'inline-block' }} />
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{l.label}</span>
-              </div>
-            ))}
-          </div>
+          <ChartLegend items={[
+            { color: 'var(--mint)', label: 'NFC' },
+            { color: 'var(--orange)', label: 'QR' },
+          ]} />
         </Panel>
 
-        {/* Топ филиалов */}
         <Panel title="Топ филиалов" sub="По количеству сканов">
           {loading ? (
-            <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Загрузка…</div>
+            <SkeletonRows rows={4} height={42} />
           ) : topBranches.length === 0 ? (
-            <div style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', padding: '20px 0' }}>
-              Нет данных
-            </div>
+            <EmptyState icon="branches" title="Нет данных" text="За выбранный период сканирований не было." />
           ) : (
             topBranches.map((b, i) => (
-              <div key={b.name} style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: '10px 0', borderBottom: i < topBranches.length - 1 ? '1px solid var(--border)' : 'none',
-              }}>
-                <span style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 11,
-                  color: 'var(--text-muted)', width: 20, textAlign: 'center',
-                }}>
-                  {String(i + 1).padStart(2, '0')}
+              <div key={`${b.name}-${i}`} className="row" style={{ padding: '10px 0', gap: 12, borderBottom: i < topBranches.length - 1 ? '1px solid var(--border-soft)' : 'none' }}>
+                <span
+                  className="mono"
+                  style={{
+                    width: 22, height: 22, borderRadius: 7, display: 'grid', placeItems: 'center',
+                    fontSize: 10.5, fontWeight: 700, flexShrink: 0,
+                    background: i === 0 ? 'var(--mint-dim)' : 'var(--card2)',
+                    color: i === 0 ? 'var(--mint)' : 'var(--text-muted)',
+                  }}
+                >
+                  {i + 1}
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{b.company}</div>
-                  <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, marginTop: 4 }}>
-                    <div style={{ height: 4, borderRadius: 2, background: 'var(--mint)', width: `${Math.round((b.scans / maxBranch) * 100)}%`, transition: 'width 0.6s ease' }} />
+                  <div className="truncate" style={{ fontSize: 13, fontWeight: 600 }}>{b.name}</div>
+                  <div className="truncate" style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{b.company}</div>
+                  <div className="bar">
+                    <div className="bar__fill" style={{ width: `${Math.round((b.scans / maxBranch) * 100)}%` }} />
                   </div>
                 </div>
-                <span style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 12,
-                  fontWeight: 600, color: 'var(--text)', textAlign: 'right', width: 40,
-                }}>
-                  {b.scans}
-                </span>
+                <span className="mono" style={{ fontSize: 12.5, fontWeight: 700 }}>{b.scans}</span>
               </div>
             ))
           )}
         </Panel>
       </div>
 
-      {/* Устройства + Языки + Лента событий */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-
-        {/* Устройства */}
-        <Panel title="Устройства">
-          {!loading && deviceData.length > 0 ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-              <PieChart width={100} height={100}>
-                <Pie data={deviceData} cx={45} cy={45} innerRadius={28} outerRadius={45}
-                  dataKey="value" strokeWidth={0}>
-                  {deviceData.map((d, i) => <Cell key={i} fill={d.color} />)}
-                </Pie>
-              </PieChart>
-              <div style={{ flex: 1 }}>
-                {deviceData.map(d => (
-                  <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: d.color, flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: 'var(--text-dim)', flex: 1 }}>{d.name}</span>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600 }}>{d.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Загрузка…</div>
-          )}
+      {/* ── Устройства · языки · лента ────────────────────────────────── */}
+      <div className="grid grid--3">
+        <Panel title="Устройства" sub="Распределение сканов">
+          {loading ? <Skeleton h={120} r={12} />
+            : deviceData.length === 0
+              ? <EmptyState icon="device" title="Нет данных" />
+              : <Donut data={deviceData} centerLabel="сканов" />}
         </Panel>
 
-        {/* Языки */}
-        <Panel title="Языки">
-          {!loading && langData.length > 0 ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-              <PieChart width={100} height={100}>
-                <Pie data={langData} cx={45} cy={45} innerRadius={28} outerRadius={45}
-                  dataKey="value" strokeWidth={0}>
-                  {langData.map((d, i) => <Cell key={i} fill={d.color} />)}
-                </Pie>
-              </PieChart>
-              <div style={{ flex: 1 }}>
-                {langData.map(d => (
-                  <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: d.color, flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: 'var(--text-dim)', flex: 1 }}>{d.name}</span>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600 }}>{d.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Загрузка…</div>
-          )}
+        <Panel title="Языки" sub="Язык браузера гостя">
+          {loading ? <Skeleton h={120} r={12} />
+            : langData.length === 0
+              ? <EmptyState icon="globe" title="Нет данных" />
+              : <Donut data={langData} centerLabel="сканов" />}
         </Panel>
 
-        {/* Лента событий */}
-        <Panel title="Последние события">
+        <Panel
+          title="Последние события"
+          sub="В реальном времени"
+          action={live ? <Badge tone="success" dot>live</Badge> : undefined}
+        >
           {loading ? (
-            <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Загрузка…</div>
+            <SkeletonRows rows={4} height={38} />
           ) : events.length === 0 ? (
-            <div style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', padding: '20px 0' }}>Нет событий</div>
+            <EmptyState icon="zap" title="Событий пока нет" />
           ) : (
             events.slice(0, 6).map(e => {
-              const t = new Date(e.scanned_at)
-              const hm = t.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
               const isNfc = e.scan_type === 'nfc'
               return (
-                <div key={e.id} style={{
-                  display: 'flex', alignItems: 'flex-start', gap: 10,
-                  padding: '10px 0',
-                  borderBottom: '1px solid var(--border)',
-                }}>
-                  <span style={{
-                    width: 6, height: 6, borderRadius: '50%', marginTop: 5, flexShrink: 0,
-                    background: isNfc ? 'var(--mint)' : 'var(--orange)',
-                  }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 500, marginBottom: 2 }}>
-                      {e.branches?.name ?? '—'}
-                      <span style={{
-                        marginLeft: 6, display: 'inline-flex', alignItems: 'center',
-                        padding: '1px 6px', borderRadius: 4, fontSize: 10.5, fontWeight: 600,
-                        background: isNfc ? 'var(--mint-dim)' : 'var(--orange-dim)',
-                        color: isNfc ? 'var(--mint)' : 'var(--orange)',
-                      }}>
-                        {isNfc ? 'NFC' : 'QR'}
+                <div key={e.id} className="row" style={{ alignItems: 'flex-start', gap: 10, padding: '9px 0', borderBottom: '1px solid var(--border-soft)' }}>
+                  <span
+                    className="dot"
+                    style={{ marginTop: 6, background: isNfc ? 'var(--mint)' : 'var(--orange)' }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="row" style={{ gap: 6 }}>
+                      <span className="truncate" style={{ fontSize: 12.5, fontWeight: 600 }}>
+                        {e.branches?.name ?? '—'}
                       </span>
+                      <Badge tone={isNfc ? 'mint' : 'orange'}>{isNfc ? 'NFC' : 'QR'}</Badge>
                     </div>
-                    <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>
-                      {e.device} · {e.is_unique ? 'Уникальный' : 'Повтор'}
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {DEVICE_LABELS[e.device] ?? e.device} · {e.is_unique ? 'уникальный' : 'повтор'}
                     </div>
                   </div>
-                  <span style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 11,
-                    color: 'var(--text-muted)', whiteSpace: 'nowrap',
-                  }}>
-                    {hm}
+                  <span className="mono" style={{ fontSize: 10.5, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                    {relTime(e.scanned_at)}
                   </span>
                 </div>
               )
@@ -567,13 +511,6 @@ export default function DashboardPage() {
           )}
         </Panel>
       </div>
-
-      <style>{`
-        @keyframes btc-blink {
-          0%, 80%, 100% { opacity: 0; }
-          40% { opacity: 1; }
-        }
-      `}</style>
     </div>
   )
 }
