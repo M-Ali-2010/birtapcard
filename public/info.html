@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BirTapCard — отзывы в Google становятся проще</title>
+<meta name="description" content="NFC + QR карточка на кассе. 15 секунд — и довольный гость оставляет отзыв в Google. Плюс личный кабинет с аналитикой по филиалам.">
+<meta name="theme-color" content="#05070E">
+
+<!-- Превью для Telegram/WhatsApp. После деплоя замените домен на свой -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="BirTapCard — отзывы в Google становятся проще">
+<meta property="og:description" content="Одно касание телефоном — и гость оставляет отзыв. NFC + QR карточка на кассу и аналитика по филиалам.">
+<meta property="og:url" content="https://birtapcard.vercel.app/info">
+<meta property="og:image" content="https://birtapcard.vercel.app/card.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#05070E; --bg2:#0A101F; --card:#0E1526; --card2:#131C33;
+  --border:rgba(120,160,220,.13); --border2:rgba(120,160,220,.26);
+  --mint:#00D9AE; --mint2:#00F5C4; --mint-dim:rgba(0,217,174,.12);
+  --orange:#FF6B35; --orange-dim:rgba(255,107,53,.13);
+  --blue:#3B82F6; --blue-dim:rgba(59,130,246,.13);
+  --purple:#8B5CF6; --purple-dim:rgba(139,92,246,.13);
+  --gold:#F5A524;
+  --text:#EDF2FA; --muted:#8B9BB8; --dim:#55637F;
+  --gblue:#4285F4; --gred:#EA4335; --gyellow:#FBBC05; --ggreen:#34A853;
+  --r:16px; --r-lg:22px;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+
+html{background:var(--bg);-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg); color:var(--text);
+  font-size:16px; line-height:1.55; letter-spacing:-.01em;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom));
+}
+body::before{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(70vw 50vh at 80% -5%, rgba(0,217,174,.13), transparent 65%),
+    radial-gradient(60vw 45vh at 10% 25%, rgba(59,130,246,.10), transparent 62%),
+    radial-gradient(70vw 50vh at 90% 75%, rgba(139,92,246,.09), transparent 62%);
+}
+img{max-width:100%;height:auto;display:block}
+.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+
+/* ─── Каркас ─────────────────────────────────────────── */
+.wrap{width:100%;max-width:560px;margin:0 auto;padding:0 18px}
+section{padding:52px 0;position:relative}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--mint);margin-bottom:14px
+}
+.eyebrow i{width:20px;height:1px;background:var(--mint);opacity:.5;display:block}
+h2{font-size:27px;line-height:1.18;font-weight:800;letter-spacing:-.035em;margin-bottom:12px}
+h2 em{font-style:normal;color:var(--mint)}
+.lead{color:var(--muted);font-size:15px;line-height:1.62;margin-bottom:26px}
+
+/* ─── Шапка ──────────────────────────────────────────── */
+.top{
+  position:sticky;top:0;z-index:60;
+  background:rgba(5,7,14,.78);backdrop-filter:blur(16px) saturate(150%);
+  -webkit-backdrop-filter:blur(16px) saturate(150%);
+  border-bottom:1px solid var(--border)
+}
+.top-in{display:flex;align-items:center;gap:10px;height:58px}
+.logo{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
+.logo-mark{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--mint2),#00A882);
+  box-shadow:0 6px 18px -6px rgba(0,217,174,.55)
+}
+.logo-name{font-size:15px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.logo-sub{font-size:8.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--mint)}
+.lang{display:flex;gap:2px;padding:3px;background:var(--card);border:1px solid var(--border);border-radius:11px}
+.lang button{
+  padding:6px 11px;border:0;border-radius:8px;background:transparent;
+  color:var(--dim);font:700 12px/1 'Inter',sans-serif;cursor:pointer;
+  transition:.18s var(--ease);-webkit-tap-highlight-color:transparent
+}
+.lang button.on{background:var(--mint);color:#04121C}
+
+/* ─── Обложка ────────────────────────────────────────── */
+.hero{padding:34px 0 42px;text-align:center}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:99px;
+  background:var(--mint-dim);border:1px solid rgba(0,217,174,.3);
+  font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mint);
+  margin-bottom:20px
+}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:var(--mint);animation:ping 2s infinite}
+@keyframes ping{0%,100%{opacity:1}50%{opacity:.25}}
+h1{font-size:38px;line-height:1.06;font-weight:900;letter-spacing:-.045em;margin-bottom:16px}
+h1 em{font-style:normal;background:linear-gradient(120deg,var(--mint2),var(--mint) 55%,#5EEAD4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);font-size:16px;line-height:1.6;margin:0 auto 26px;max-width:400px}
+
+.card-shot{
+  position:relative;margin:0 auto 26px;max-width:290px;border-radius:24px;overflow:hidden;
+  border:1px solid var(--border2);
+  box-shadow:0 30px 70px -25px rgba(0,0,0,.9),0 0 0 1px rgba(0,217,174,.1)
+}
+.card-shot::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(5,7,14,.55),transparent 45%)
+}
+.card-shot.crop{aspect-ratio:5/6}
+.card-shot.crop img{width:100%;height:100%;object-fit:cover;object-position:center 42%}
+.card-shot .tag{
+  position:absolute;left:12px;bottom:12px;z-index:2;
+  display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:99px;
+  background:rgba(5,7,14,.7);backdrop-filter:blur(8px);border:1px solid var(--border2);
+  font-size:11px;font-weight:700;color:var(--text)
+}
+
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:24px}
+.stat{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 8px;
+  text-align:center
+}
+.stat b{display:block;font:800 22px/1 'JetBrains Mono',monospace;color:var(--mint);letter-spacing:-.03em;margin-bottom:5px}
+.stat span{display:block;font-size:10.5px;line-height:1.35;color:var(--muted)}
+
+.cta-row{display:flex;flex-direction:column;gap:10px}
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:15px 22px;border-radius:14px;border:1px solid transparent;
+  font:700 15px/1 'Inter',sans-serif;text-decoration:none;cursor:pointer;
+  transition:.2s var(--ease);-webkit-tap-highlight-color:transparent
+}
+.btn:active{transform:scale(.975)}
+.btn-p{background:linear-gradient(135deg,var(--mint2),#00B189);color:#04121C;box-shadow:0 14px 34px -12px rgba(0,217,174,.65)}
+.btn-g{background:var(--card);border-color:var(--border2);color:var(--text)}
+
+/* ─── Полоса доверия ─────────────────────────────────── */
+.trust{
+  background:linear-gradient(135deg,rgba(0,217,174,.09),rgba(59,130,246,.06));
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:22px 0
+}
+.trust-in{display:flex;align-items:center;gap:14px}
+.trust b{font:800 34px/1 'JetBrains Mono',monospace;color:var(--mint);letter-spacing:-.04em}
+.trust span{font-size:13.5px;line-height:1.45;color:var(--text);font-weight:600}
+.trust small{display:block;color:var(--muted);font-weight:400;font-size:12px;margin-top:3px}
+
+/* ─── Карточки ───────────────────────────────────────── */
+.cards{display:grid;gap:11px}
+.c{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:17px;position:relative;overflow:hidden
+}
+.c-ico{
+  width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  margin-bottom:12px;font-size:19px
+}
+.c h3{font-size:15.5px;font-weight:700;margin-bottom:6px;letter-spacing:-.02em}
+.c p{font-size:13.5px;line-height:1.55;color:var(--muted)}
+.i-mint{background:var(--mint-dim);color:var(--mint)}
+.i-orange{background:var(--orange-dim);color:var(--orange)}
+.i-blue{background:var(--blue-dim);color:var(--blue)}
+.i-purple{background:var(--purple-dim);color:var(--purple)}
+
+/* ─── Большие цифры ──────────────────────────────────── */
+.bigstats{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.bs{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 15px;position:relative;overflow:hidden}
+.bs::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--mint),transparent)}
+.bs b{display:block;font:800 30px/1 'JetBrains Mono',monospace;letter-spacing:-.05em;color:var(--mint);margin-bottom:8px}
+.bs span{font-size:12px;line-height:1.45;color:var(--muted)}
+.bs.o::before{background:linear-gradient(90deg,var(--orange),transparent)} .bs.o b{color:var(--orange)}
+.bs.b::before{background:linear-gradient(90deg,var(--blue),transparent)}   .bs.b b{color:var(--blue)}
+.bs.p::before{background:linear-gradient(90deg,var(--purple),transparent)} .bs.p b{color:var(--purple)}
+.note{font-size:11.5px;line-height:1.5;color:var(--dim);margin-top:14px}
+
+/* ─── Шаги ───────────────────────────────────────────── */
+.steps{position:relative;padding-left:38px}
+.steps::before{content:'';position:absolute;left:13px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--mint),rgba(0,217,174,.05))}
+.step{position:relative;padding-bottom:22px}
+.step:last-child{padding-bottom:0}
+.step .n{
+  position:absolute;left:-38px;top:0;width:28px;height:28px;border-radius:50%;
+  display:grid;place-items:center;background:var(--bg);border:2px solid var(--mint);
+  font:800 11px/1 'JetBrains Mono',monospace;color:var(--mint)
+}
+.step h3{font-size:15.5px;font-weight:700;margin-bottom:4px;letter-spacing:-.02em}
+.step p{font-size:13.5px;color:var(--muted);line-height:1.5}
+.step .t{
+  display:inline-block;margin-top:7px;padding:3px 9px;border-radius:99px;
+  background:var(--card2);font:700 11px/1.4 'JetBrains Mono',monospace;color:var(--mint)
+}
+
+/* ─── Сравнение NFC/QR ───────────────────────────────── */
+.vs{display:grid;gap:11px}
+.vs-col{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:17px}
+.vs-col.hi{border-color:rgba(0,217,174,.35);background:linear-gradient(160deg,rgba(0,217,174,.07),var(--card))}
+.vs-h{display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.vs-h b{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.vs-b{font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;background:var(--mint);color:#04121C;letter-spacing:.05em}
+.vs-col ul{list-style:none;display:grid;gap:9px}
+.vs-col li{display:flex;gap:9px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.vs-col li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--mint);flex-shrink:0;margin-top:7px}
+.vs-col:not(.hi) li::before{background:var(--dim)}
+
+/* ─── Дашборд-макет ──────────────────────────────────── */
+.dash{
+  background:linear-gradient(165deg,var(--card),#0A1120);
+  border:1px solid var(--border2);border-radius:var(--r-lg);padding:14px;
+  box-shadow:0 24px 60px -22px rgba(0,0,0,.85)
+}
+.dash-top{display:flex;align-items:center;gap:8px;margin-bottom:13px}
+.dash-top .d{width:8px;height:8px;border-radius:50%;background:var(--mint);animation:ping 2s infinite}
+.dash-top b{font-size:12.5px;font-weight:700}
+.dash-top span{margin-left:auto;font-size:10.5px;color:var(--dim)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px}
+.kpi{background:rgba(255,255,255,.028);border:1px solid var(--border);border-radius:12px;padding:11px;position:relative;overflow:hidden}
+.kpi i{display:block;font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.kpi b{display:block;font:800 21px/1 'JetBrains Mono',monospace;letter-spacing:-.04em}
+.kpi u{display:block;text-decoration:none;font-size:10px;color:var(--muted);margin-top:5px}
+.kpi svg{position:absolute;right:0;bottom:0;left:0;height:26px;opacity:.5}
+.chart{background:rgba(255,255,255,.028);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:9px}
+.chart-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.chart-h b{font-size:12px;font-weight:700}
+.chart-h span{font-size:10px;color:var(--dim)}
+.bars{display:flex;align-items:flex-end;gap:5px;height:62px}
+.bars div{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(var(--mint),rgba(0,217,174,.25));transform-origin:bottom;animation:grow .9s var(--ease) backwards}
+@keyframes grow{from{transform:scaleY(.05)}}
+.tops{background:rgba(255,255,255,.028);border:1px solid var(--border);border-radius:12px;padding:12px}
+.tops>b{display:block;font-size:12px;margin-bottom:10px}
+.top-row{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.top-row:last-child{margin-bottom:0}
+.top-row i{font-style:normal;width:18px;height:18px;border-radius:6px;background:var(--card2);color:var(--dim);font:700 9.5px/18px 'JetBrains Mono',monospace;text-align:center;flex-shrink:0}
+.top-row:first-of-type i{background:var(--mint-dim);color:var(--mint)}
+.top-row span{flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top-row em{font-style:normal;font:700 11.5px/1 'JetBrains Mono',monospace;color:var(--muted)}
+.bar-line{height:3px;border-radius:2px;background:rgba(255,255,255,.07);margin-top:4px;overflow:hidden}
+.bar-line i{display:block;height:100%;background:linear-gradient(90deg,#00A882,var(--mint));border-radius:2px}
+
+/* ─── Список возможностей ────────────────────────────── */
+.feats{display:grid;gap:9px}
+.feat{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.feat .ck{width:22px;height:22px;border-radius:7px;background:var(--mint-dim);color:var(--mint);display:grid;place-items:center;flex-shrink:0;font-size:12px;font-weight:900}
+.feat b{display:block;font-size:14.5px;font-weight:700;margin-bottom:3px;letter-spacing:-.02em}
+.feat span{font-size:13px;line-height:1.5;color:var(--muted)}
+
+/* ─── Метрики-чипы ───────────────────────────────────── */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  display:flex;align-items:center;gap:7px;padding:10px 13px;border-radius:12px;
+  background:var(--card);border:1px solid var(--border);font-size:13px;font-weight:600
+}
+.chip s{text-decoration:none;color:var(--mint);font-size:14px}
+
+/* ─── Таблица сравнения ──────────────────────────────── */
+.cmp{display:grid;gap:8px}
+.cmp-row{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 15px}
+.cmp-row>b{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:9px}
+.cmp-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmp-two div{font-size:13px}
+.cmp-two i{display:block;font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+.cmp-two .bad{color:var(--muted)}
+.cmp-two .good{color:var(--mint);font-weight:700}
+
+/* ─── Для кого ───────────────────────────────────────── */
+.who{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.who div{
+  display:flex;align-items:center;gap:9px;padding:13px;border-radius:13px;
+  background:var(--card);border:1px solid var(--border);font-size:13px;font-weight:600
+}
+.who span{font-size:17px}
+
+/* ─── FAQ ────────────────────────────────────────────── */
+.faq{display:grid;gap:8px}
+details{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+details[open]{border-color:var(--border2)}
+summary{
+  list-style:none;cursor:pointer;padding:15px 46px 15px 16px;position:relative;
+  font-size:14.5px;font-weight:650;line-height:1.45;-webkit-tap-highlight-color:transparent
+}
+summary::-webkit-details-marker{display:none}
+summary::after{
+  content:'+';position:absolute;right:15px;top:50%;transform:translateY(-50%);
+  width:24px;height:24px;border-radius:8px;background:var(--card2);color:var(--mint);
+  display:grid;place-items:center;font-size:16px;font-weight:400;transition:.2s
+}
+details[open] summary::after{content:'−';background:var(--mint);color:#04121C}
+details p{padding:0 16px 16px;font-size:13.5px;line-height:1.6;color:var(--muted)}
+
+/* ─── Финал ──────────────────────────────────────────── */
+.final{
+  background:linear-gradient(160deg,rgba(0,217,174,.12),rgba(59,130,246,.07));
+  border:1px solid rgba(0,217,174,.25);border-radius:var(--r-lg);padding:26px 20px;text-align:center
+}
+.final h2{font-size:25px;margin-bottom:10px}
+.final p{color:var(--muted);font-size:14.5px;margin-bottom:22px}
+.contacts{display:grid;gap:9px;margin-top:20px}
+.person{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px}
+.p-head{display:flex;align-items:center;gap:12px;margin-bottom:13px}
+.p-av{
+  width:44px;height:44px;border-radius:14px;flex-shrink:0;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--mint2),#00A882);color:#04121C;
+  font:800 15px/1 'Inter',sans-serif;letter-spacing:-.02em
+}
+.p-av.b{background:linear-gradient(135deg,#60A5FA,var(--blue));color:#041024}
+.p-head b{display:block;font-size:15.5px;font-weight:700;letter-spacing:-.02em}
+.p-head span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
+.p-links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.p-links a{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 8px;border-radius:11px;text-decoration:none;
+  background:var(--card2);border:1px solid var(--border);color:var(--text);
+  font-size:12.5px;font-weight:650;transition:.18s var(--ease);
+  -webkit-tap-highlight-color:transparent;white-space:nowrap
+}
+.p-links a:active{transform:scale(.97)}
+.p-links a.tg{background:var(--mint-dim);border-color:rgba(0,217,174,.28);color:var(--mint)}
+.insta{
+  display:flex;align-items:center;gap:13px;padding:15px;border-radius:var(--r);
+  text-decoration:none;color:var(--text);
+  background:linear-gradient(135deg,rgba(225,48,108,.13),rgba(139,92,246,.10));
+  border:1px solid rgba(225,48,108,.28)
+}
+.insta .ci{width:42px;height:42px;border-radius:13px;background:rgba(225,48,108,.18);display:grid;place-items:center;font-size:19px;flex-shrink:0}
+.ct{
+  display:flex;align-items:center;gap:12px;padding:14px 15px;border-radius:14px;
+  background:var(--card);border:1px solid var(--border);text-decoration:none;color:var(--text);
+  transition:.2s var(--ease)
+}
+.ct:active{transform:scale(.98)}
+.ct .ci{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:17px;flex-shrink:0}
+.ct b{display:block;font-size:14px;font-weight:700}
+.ct span{font-size:11.5px;color:var(--muted)}
+.ct .arw{margin-left:auto;color:var(--dim);font-size:17px}
+
+footer{padding:28px 0 40px;text-align:center;border-top:1px solid var(--border);margin-top:36px}
+footer b{font-size:14px;font-weight:800}
+footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
+
+/* ─── Нижняя кнопка ──────────────────────────────────── */
+.sticky{
+  position:fixed;left:0;right:0;bottom:0;z-index:70;
+  padding:11px 18px calc(11px + env(safe-area-inset-bottom));
+  background:rgba(5,7,14,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--border);
+  transform:translateY(120%);transition:transform .3s var(--ease)
+}
+.sticky.show{transform:none}
+.sticky .btn{max-width:560px;margin:0 auto}
+
+/* ─── Появление при скролле ──────────────────────────── */
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+  .js .rv{opacity:1;transform:none}
+}
+
+/* ─── Планшет / десктоп ──────────────────────────────── */
+@media (min-width:720px){
+  .wrap{max-width:900px;padding:0 32px}
+  section{padding:76px 0}
+  h1{font-size:60px}
+  h2{font-size:36px}
+  .hero{padding:56px 0 64px}
+  .hero p{font-size:18px;max-width:520px}
+  .card-shot{max-width:340px}
+  .stats3{gap:14px;max-width:560px;margin:0 auto 28px}
+  .stat b{font-size:28px}
+  .stat span{font-size:12px}
+  .cta-row{flex-direction:row;justify-content:center}
+  .btn{padding:16px 30px}
+  .cards{grid-template-columns:1fr 1fr;gap:14px}
+  .bigstats{grid-template-columns:repeat(4,1fr);gap:14px}
+  .vs{grid-template-columns:1fr 1fr;gap:14px}
+  .feats{grid-template-columns:1fr 1fr}
+  .who{grid-template-columns:repeat(4,1fr)}
+  .kpis{grid-template-columns:repeat(4,1fr)}
+  .contacts{grid-template-columns:1fr 1fr}
+  .sticky{display:none}
+  body{padding-bottom:0}
+  .trust b{font-size:44px}
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<!-- ═══ ШАПКА ═══ -->
+<header class="top">
+  <div class="wrap top-in">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#04121C" stroke-width="2.4" stroke-linecap="round">
+          <path d="M6.5 8.2a6 6 0 0 1 11 0"/><path d="M3.5 5.6a9.6 9.6 0 0 1 17 0"/>
+          <path d="M12 12.5v5"/><circle cx="12" cy="20" r="1.1" fill="#04121C" stroke="none"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-name">BirTapCard</div>
+        <div class="logo-sub" data-i="brand.sub">Reputation device</div>
+      </div>
+    </div>
+    <div class="lang">
+      <button id="btn-ru" class="on" onclick="setLang('ru')">RU</button>
+      <button id="btn-uz" onclick="setLang('uz')">UZ</button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ ОБЛОЖКА ═══ -->
+<section class="hero">
+  <div class="wrap">
+    <div class="pill"><span class="dot"></span><span data-i="hero.pill">NFC + QR для бизнеса</span></div>
+    <h1 data-i="hero.h1">Отзывы в Google становятся <em>проще</em></h1>
+    <p data-i="hero.sub">15 секунд — и довольный гость оставляет отзыв. Без приложений, без объяснений. Одно касание телефоном.</p>
+
+    <div class="card-shot crop">
+      <img src="card.jpg" alt="BirTapCard NFC карточка" width="506" height="900">
+      <div class="tag"><span>📍</span><span data-i="hero.tag">Стоит на кассе</span></div>
+    </div>
+
+    <div class="stats3">
+      <div class="stat"><b>15<small style="font-size:13px">сек</small></b><span data-i="hero.s1">от касания до отзыва</span></div>
+      <div class="stat"><b>0</b><span data-i="hero.s2">приложений ставить</span></div>
+      <div class="stat"><b>24/7</b><span data-i="hero.s3">аналитика в кабинете</span></div>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-p" href="https://t.me/Jrkhnv777" data-i="cta.main">Подключить заведение</a>
+      <a class="btn btn-g" href="#how" data-i="cta.how">Как это работает</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ДОВЕРИЕ ═══ -->
+<div class="trust">
+  <div class="wrap trust-in">
+    <b>35+</b>
+    <span data-i="trust.t">заведений в Самарканде уже работают с BirTapCard
+      <small data-i="trust.s">и первые рестораны Ташкента уже на подключении</small></span>
+  </div>
+</div>
+
+<!-- ═══ ПРОБЛЕМА ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="pr.eye">Проблема</span></div>
+    <h2 class="rv" data-i="pr.h">Довольные гости <em>не оставляют отзывов</em>. И дело не в том, что не хотят.</h2>
+    <p class="lead rv" data-i="pr.lead">Между «всё понравилось» и реальным отзывом в Google стоят четыре барьера. Каждый стоит вам репутации.</p>
+    <div class="cards">
+      <div class="c rv"><div class="c-ico i-orange">⏳</div><h3 data-i="pr.1h">Забывают сразу</h3><p data-i="pr.1p">Гость вышел за дверь — и мысль об отзыве ушла вместе с ним. Намерение живёт секунды.</p></div>
+      <div class="c rv"><div class="c-ico i-blue">🔀</div><h3 data-i="pr.2h">Слишком много шагов</h3><p data-i="pr.2p">Открыть карты, найти заведение, найти кнопку «отзывы» — пять-шесть действий убивают желание.</p></div>
+      <div class="c rv"><div class="c-ico i-purple">🤐</div><h3 data-i="pr.3h">Никто не попросил</h3><p data-i="pr.3p">Без понятного и своевременного напоминания отзыв просто не появится.</p></div>
+      <div class="c rv"><div class="c-ico i-mint">📵</div><h3 data-i="pr.4h">Технические барьеры</h3><p data-i="pr.4p">Севший телефон, плохой свет для QR, неудобная камера — и гость откладывает «на потом».</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ЦЕНА МОЛЧАНИЯ ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="ps.eye">Цена молчания</span></div>
+    <h2 class="rv" data-i="ps.h">Сколько стоит бизнесу <em>отсутствие отзывов</em></h2>
+    <p class="lead rv" data-i="ps.lead">Рейтинг в Google — первое, что видит новый гость. Разрыв в отзывах превращается в разрыв в выручке.</p>
+    <div class="bigstats">
+      <div class="bs rv"><b>93%</b><span data-i="ps.1">людей читают отзывы перед выбором заведения</span></div>
+      <div class="bs o rv"><b>+5–9%</b><span data-i="ps.2">к выручке даёт рост рейтинга на одну звезду</span></div>
+      <div class="bs b rv"><b>94%</b><span data-i="ps.3">избегают бизнес с плохими или устаревшими отзывами</span></div>
+      <div class="bs p rv"><b>1 : 10</b><span data-i="ps.4">довольные пишут отзывы в разы реже недовольных</span></div>
+    </div>
+    <p class="note rv" data-i="ps.note">По обобщённым данным открытых маркетинговых исследований поведения потребителей и репутации локального бизнеса.</p>
+  </div>
+</section>
+
+<!-- ═══ РЕШЕНИЕ ═══ -->
+<section id="how">
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="sol.eye">Решение</span></div>
+    <h2 class="rv" data-i="sol.h">BirTapCard убирает самое дорогое слово в бизнесе — <em>«потом»</em></h2>
+    <p class="lead rv" data-i="sol.lead">Карточка стоит у кассы. Гость оставляет отзыв за секунды — пока эмоция ещё свежая.</p>
+    <div class="steps rv">
+      <div class="step"><div class="n">01</div><h3 data-i="sol.1h">Гость оплатил заказ</h3><p data-i="sol.1p">Кассир: «Если всё понравилось — оставьте нам отзыв»</p></div>
+      <div class="step"><div class="n">02</div><h3 data-i="sol.2h">Поднёс телефон к NFC или отсканировал QR</h3><p data-i="sol.2p">Без приложений и регистрации</p><span class="t" data-i="t.2">+2 сек</span></div>
+      <div class="step"><div class="n">03</div><h3 data-i="sol.3h">Открылась страница отзывов Google</h3><p data-i="sol.3p">Ровно на нужном заведении и филиале</p><span class="t" data-i="t.3">+3 сек</span></div>
+      <div class="step"><div class="n">04</div><h3 data-i="sol.4h">Отзыв опубликован, рейтинг вырос</h3><p data-i="sol.4p">Звёзды и пара слов — всё, что нужно</p><span class="t" data-i="t.4">+10 сек</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ УСТРОЙСТВО ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="dev.eye">Устройство</span></div>
+    <h2 class="rv" data-i="dev.h">Один предмет у кассы. <em>Два способа</em>. Ноль трения.</h2>
+    <div class="card-shot rv" style="max-width:100%;margin-bottom:18px">
+      <img src="card-wide.jpg" alt="BirTapCard — NFC и QR на одной карточке" width="700" height="661">
+    </div>
+    <div class="cards">
+      <div class="c rv"><div class="c-ico i-mint">📶</div><h3 data-i="dev.1h">NFC-метка</h3><p data-i="dev.1p">Достаточно поднести телефон — Android и iPhone открывают страницу отзыва сами, без сканирования.</p></div>
+      <div class="c rv"><div class="c-ico i-blue">▦</div><h3 data-i="dev.2h">QR-код</h3><p data-i="dev.2p">Запасной способ для любого телефона — навёл камеру и готово, если NFC выключен.</p></div>
+      <div class="c rv"><div class="c-ico i-orange">🛡</div><h3 data-i="dev.3h">Прочный корпус</h3><p data-i="dev.3p">Компактная настольная карточка — не боится воды, солнца и ежедневного использования.</p></div>
+      <div class="c rv"><div class="c-ico i-purple">🔋</div><h3 data-i="dev.4h">Не требует питания</h3><p data-i="dev.4p">Ни батареек, ни интернета, ни зарядки. Метка пассивная — работает годами.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NFC vs QR ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="vs.eye">Технология</span></div>
+    <h2 class="rv" data-i="vs.h">Почему NFC быстрее обычного QR</h2>
+    <p class="lead rv" data-i="vs.lead">BirTapCard поддерживает оба способа — но именно NFC даёт то самое ощущение «мгновенно».</p>
+    <div class="vs">
+      <div class="vs-col hi rv">
+        <div class="vs-h"><b>NFC</b><span class="vs-b" data-i="vs.badge">Быстрее</span></div>
+        <ul>
+          <li data-i="vs.n1">Одно касание — не нужно наводить камеру и ловить фокус</li>
+          <li data-i="vs.n2">Страница отзыва открывается за 1–2 секунды</li>
+          <li data-i="vs.n3">Ощущается как премиальный, «умный» жест</li>
+        </ul>
+      </div>
+      <div class="vs-col rv">
+        <div class="vs-h"><b>QR</b></div>
+        <ul>
+          <li data-i="vs.q1">Работает на любом телефоне, даже без NFC-чипа</li>
+          <li data-i="vs.q2">Нужны камера, свет и наведение — дольше на 3–5 секунд</li>
+          <li data-i="vs.q3">Привычный и понятный всем способ</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ПЛАТФОРМА ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="pl.eye">Личный кабинет</span></div>
+    <h2 class="rv" data-i="pl.h">Карточка — это только начало. Главный продукт — <em>платформа</em>.</h2>
+    <p class="lead rv" data-i="pl.lead">Владелец получает кабинет: сканирования, конверсия, филиалы — в реальном времени, с телефона.</p>
+
+    <div class="dash rv">
+      <div class="dash-top"><span class="d"></span><b data-i="pl.dash">Аналитика · все филиалы</b><span data-i="pl.upd">обновлено сейчас</span></div>
+      <div class="kpis">
+        <div class="kpi"><i data-i="pl.k1">NFC сканы</i><b style="color:var(--mint)" data-count="4812">0</b><u>↑ 12% <span data-i="pl.week">за неделю</span></u>
+          <svg viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0,24 L15,20 L30,22 L45,12 L60,15 L75,7 L100,4" fill="none" stroke="#00D9AE" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>
+        <div class="kpi"><i data-i="pl.k2">QR сканы</i><b style="color:var(--orange)" data-count="2260">0</b><u>↑ 8% <span data-i="pl.week">за неделю</span></u>
+          <svg viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0,20 L20,24 L40,14 L55,18 L75,10 L100,8" fill="none" stroke="#FF6B35" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>
+        <div class="kpi"><i data-i="pl.k3">Уникальных</i><b style="color:var(--blue)" data-count="3940">0</b><u data-i="pl.k3s">живых гостей</u></div>
+        <div class="kpi"><i data-i="pl.k4">Конверсия</i><b style="color:var(--purple)" data-count="82" data-suffix="%">0</b><u data-i="pl.k4s">дошли до Google</u></div>
+      </div>
+      <div class="chart">
+        <div class="chart-h"><b data-i="pl.ch">Сканирования по дням</b><span data-i="pl.ch7">7 дней</span></div>
+        <div class="bars">
+          <div style="height:38%;animation-delay:.05s"></div><div style="height:55%;animation-delay:.1s"></div>
+          <div style="height:44%;animation-delay:.15s"></div><div style="height:72%;animation-delay:.2s"></div>
+          <div style="height:61%;animation-delay:.25s"></div><div style="height:88%;animation-delay:.3s"></div>
+          <div style="height:100%;animation-delay:.35s"></div>
+        </div>
+      </div>
+      <div class="tops">
+        <b data-i="pl.top">Лидеры среди филиалов</b>
+        <div><div class="top-row"><i>1</i><span>5Elements Coffee</span><em>1 240</em></div><div class="bar-line"><i style="width:100%"></i></div></div>
+        <div style="margin-top:9px"><div class="top-row"><i>2</i><span>Chapan &amp; Xmel</span><em>960</em></div><div class="bar-line"><i style="width:77%"></i></div></div>
+        <div style="margin-top:9px"><div class="top-row"><i>3</i><span>Nova Aesthetic</span><em>730</em></div><div class="bar-line"><i style="width:59%"></i></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ЧТО ПОЛУЧАЕТ ВЛАДЕЛЕЦ ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="ow.eye">Что получает владелец</span></div>
+    <h2 class="rv" data-i="ow.h">Инструмент роста репутации, а не просто <em>кусок пластика</em></h2>
+    <div class="feats">
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.1h">Статистика в реальном времени</b><span data-i="ow.1p">Каждое касание и скан видны в кабинете сразу же</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.2h">Аналитика по периодам</b><span data-i="ow.2p">День, неделя, месяц или любой выбранный диапазон</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.3h">Сравнение филиалов</b><span data-i="ow.3p">Видно, какая точка приносит больше отзывов</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.4h">Отчёт в Telegram каждое утро</b><span data-i="ow.4p">Сканы, уникальные гости, конверсия и лучший филиал — в 8:00</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.5h">Разделение NFC и QR</b><span data-i="ow.5p">Понятно, каким способом гости пользуются чаще</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.6h">Постоянные обновления</b><span data-i="ow.6p">Платформа растёт — новые функции без доплат за карточку</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ МЕТРИКИ ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="mt.eye">Метрики</span></div>
+    <h2 class="rv" data-i="mt.h">Что можно отслеживать</h2>
+    <div class="chips rv">
+      <div class="chip"><s>📊</s><span data-i="mt.1">Сканирования</span></div>
+      <div class="chip"><s>🎯</s><span data-i="mt.2">Конверсия</span></div>
+      <div class="chip"><s>👥</s><span data-i="mt.3">Уникальные гости</span></div>
+      <div class="chip"><s>🕒</s><span data-i="mt.4">Популярные часы</span></div>
+      <div class="chip"><s>📅</s><span data-i="mt.5">Дни недели</span></div>
+      <div class="chip"><s>🏆</s><span data-i="mt.6">Лучший филиал</span></div>
+      <div class="chip"><s>📱</s><span data-i="mt.7">Устройства гостей</span></div>
+      <div class="chip"><s>🌐</s><span data-i="mt.8">Языки</span></div>
+      <div class="chip"><s>📈</s><span data-i="mt.9">Динамика по дням</span></div>
+      <div class="chip"><s>📂</s><span data-i="mt.10">Выгрузка в CSV</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ СРАВНЕНИЕ ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="cm.eye">Сравнение</span></div>
+    <h2 class="rv" data-i="cm.h">Чем это лучше обычного <em>QR-стикера</em></h2>
+    <div class="cmp">
+      <div class="cmp-row rv"><b data-i="cm.r1">Способ считывания</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r1a">только QR</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r1b">NFC + QR</span></div></div></div>
+      <div class="cmp-row rv"><b data-i="cm.r2">Скорость</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad">4–6 сек</span></div><div><i>BirTapCard</i><span class="good">1–2 сек</span></div></div></div>
+      <div class="cmp-row rv"><b data-i="cm.r3">Аналитика сканирований</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.no">нет</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r3b">да, в реальном времени</span></div></div></div>
+      <div class="cmp-row rv"><b data-i="cm.r4">Сравнение филиалов</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.no">нет</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.yes">да</span></div></div></div>
+      <div class="cmp-row rv"><b data-i="cm.r5">Вид на кассе</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r5a">бумажный стикер</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r5b">премиальная карточка</span></div></div></div>
+      <div class="cmp-row rv"><b data-i="cm.r6">Долговечность</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r6a">выцветает, рвётся</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r6b">прочный корпус</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ДЛЯ КОГО ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="wh.eye">Для кого</span></div>
+    <h2 class="rv" data-i="wh.h">Подходит любому бизнесу, где есть касса и довольные гости</h2>
+    <div class="who rv">
+      <div><span>🍽</span><em style="font-style:normal" data-i="wh.1">Рестораны</em></div>
+      <div><span>☕</span><em style="font-style:normal" data-i="wh.2">Кофейни</em></div>
+      <div><span>💨</span><em style="font-style:normal" data-i="wh.3">Кальянные</em></div>
+      <div><span>🏨</span><em style="font-style:normal" data-i="wh.4">Гостиницы</em></div>
+      <div><span>💇</span><em style="font-style:normal" data-i="wh.5">Салоны красоты</em></div>
+      <div><span>🚗</span><em style="font-style:normal" data-i="wh.6">Автосервисы</em></div>
+      <div><span>🛍</span><em style="font-style:normal" data-i="wh.7">Магазины</em></div>
+      <div><span>🏪</span><em style="font-style:normal" data-i="wh.8">Сети и франшизы</em></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="fq.eye">Частые вопросы</span></div>
+    <h2 class="rv" data-i="fq.h">Коротко о главном</h2>
+    <div class="faq rv">
+      <details><summary data-i="fq.1q">Нужно ли гостю приложение или интернет?</summary><p data-i="fq.1a">Приложение — нет. Нужен только телефон с NFC или камерой. Интернет нужен, чтобы открылась страница Google — он есть у всех.</p></details>
+      <details><summary data-i="fq.2q">А если у меня несколько филиалов?</summary><p data-i="fq.2a">Каждый филиал получает свою карточку и свою ссылку. В кабинете вы видите и общую картину, и сравнение точек между собой.</p></details>
+      <details><summary data-i="fq.3q">Нужно ли устройству питание или зарядка?</summary><p data-i="fq.3a">Нет. NFC-метка полностью пассивная — питание ей не нужно, работает сколько угодно долго.</p></details>
+      <details><summary data-i="fq.4q">Как быстро всё запускается?</summary><p data-i="fq.4a">Обычно за один день: привязываем карточку к вашему профилю Google Business, настраиваем кабинет и передаём вам доступ.</p></details>
+      <details><summary data-i="fq.5q">Что если гость хочет оставить плохой отзыв?</summary><p data-i="fq.5a">Карточку показывают гостю, который остался доволен — это работа кассира или официанта. Инструмент усиливает то, что уже есть: довольных гостей.</p></details>
+      <details><summary data-i="fq.6q">Кто устанавливает карточку?</summary><p data-i="fq.6a">Мы. Привозим, ставим у кассы, подключаем кабинет и показываем персоналу, как предлагать её гостям.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ФИНАЛ ═══ -->
+<section>
+  <div class="wrap">
+    <div class="final rv">
+      <h2 data-i="fin.h">Каждый довольный гость может стать <em>новым отзывом</em></h2>
+      <p data-i="fin.p">Нужно лишь сделать этот шаг максимально простым. Мы уже это сделали — осталось поставить карточку к вам на кассу.</p>
+      <a class="btn btn-p" href="https://t.me/Jrkhnv777" data-i="cta.main2">Написать в Telegram</a>
+    </div>
+
+    <div class="contacts">
+
+      <div class="person">
+        <div class="p-head">
+          <div class="p-av">АИ</div>
+          <div>
+            <b>Алим Ибрагимов</b>
+            <span data-i="ct.f1">Основатель · Самарканд · привозит и устанавливает устройства</span>
+          </div>
+        </div>
+        <div class="p-links">
+          <a class="tg" href="https://t.me/Alimibragimov">✈️ @Alimibragimov</a>
+          <a href="tel:+998975791551">📞 +998 97 579 15 51</a>
+        </div>
+      </div>
+
+      <div class="person">
+        <div class="p-head">
+          <div class="p-av b">ТШ</div>
+          <div>
+            <b data-i="ct.f2n">Сооснователь</b>
+            <span data-i="ct.f2">Ташкент · подключение заведений и работа с сетями</span>
+          </div>
+        </div>
+        <div class="p-links">
+          <a class="tg" href="https://t.me/Jrkhnv777">✈️ @Jrkhnv777</a>
+          <a href="tel:+998337573333">📞 +998 33 757 33 33</a>
+        </div>
+      </div>
+
+      <a class="insta" href="https://www.instagram.com/birtapcard_official">
+        <span class="ci">📸</span>
+        <div style="flex:1;min-width:0">
+          <b style="display:block;font-size:14.5px">@birtapcard_official</b>
+          <span style="font-size:12px;color:var(--muted);line-height:1.4" data-i="ct.insta">Официальный Instagram проекта — каждый день показываем, в какие заведения ставим устройства</span>
+        </div>
+        <span class="arw">→</span>
+      </a>
+
+      <a class="ct" href="https://birtapcard.vercel.app">
+        <span class="ci i-orange">🖥</span>
+        <div><b data-i="ct.site">Личный кабинет</b><span>birtapcard.vercel.app</span></div>
+        <span class="arw">→</span>
+      </a>
+    </div>
+
+    <footer>
+      <b>BirTapCard</b>
+      <p data-i="foot">NFC + QR для роста репутации · Самарканд · Ташкент</p>
+    </footer>
+  </div>
+</section>
+
+<div class="sticky" id="sticky">
+  <a class="btn btn-p" href="https://t.me/Jrkhnv777" data-i="cta.sticky">Подключить заведение →</a>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   Узбекский перевод. Русский текст лежит прямо в разметке,
+   здесь только UZ — так его удобно править одним блоком.
+   ═══════════════════════════════════════════════════════ */
+const UZ = {
+'brand.sub':'Reputatsiya qurilmasi',
+
+'hero.pill':'Biznes uchun NFC + QR',
+'hero.h1':'Google\'da sharh qoldirish endi <em>oson</em>',
+'hero.sub':'15 soniya — va mamnun mehmon sharh qoldiradi. Ilovasiz, ortiqcha tushuntirishsiz. Telefonning bir teginishi.',
+'hero.tag':'Kassada turadi',
+'hero.s1':'teginishdan sharhgacha',
+'hero.s2':'o\'rnatiladigan ilova',
+'hero.s3':'kabinetdagi tahlil',
+'cta.main':'Muassasani ulash',
+'cta.how':'Bu qanday ishlaydi',
+'trust.t':'Samarqanddagi 35 muassasa allaqachon BirTapCard bilan ishlaydi',
+'trust.s':'Toshkentning birinchi restoranlari ham ulanish arafasida',
+
+'pr.eye':'Muammo',
+'pr.h':'Mamnun mehmonlar <em>sharh qoldirmaydi</em>. Sababi — xohlamagani emas.',
+'pr.lead':'«Hammasi yoqdi» degan his bilan Google\'dagi haqiqiy sharh o\'rtasida to\'rtta to\'siq turadi. Har biri obro\'ingizga zarar keltiradi.',
+'pr.1h':'Darrov unutadi',
+'pr.1p':'Mehmon eshikdan chiqdi — sharh haqidagi fikr ham u bilan birga yo\'qoladi. Niyat bir necha soniya yashaydi.',
+'pr.2h':'Qadamlar juda ko\'p',
+'pr.2p':'Xaritani ochish, muassasani topish, «sharhlar» tugmasini qidirish — besh-olti harakat istakni o\'ldiradi.',
+'pr.3h':'Hech kim so\'ramadi',
+'pr.3p':'Aniq va o\'z vaqtida aytilgan eslatmasiz sharh shunchaki paydo bo\'lmaydi.',
+'pr.4h':'Texnik to\'siqlar',
+'pr.4p':'Quvvati tugagan telefon, QR uchun yorug\'lik yetishmasligi, noqulay kamera — mehmon «keyinroq»ga qoldiradi.',
+
+'ps.eye':'Sukutning narxi',
+'ps.h':'Sharhlarning yo\'qligi biznesga <em>qanchaga tushadi</em>',
+'ps.lead':'Google\'dagi reyting — yangi mehmon ko\'radigan birinchi narsa. Sharhlardagi farq daromaddagi farqqa aylanadi.',
+'ps.1':'odam muassasa tanlashdan oldin sharhlarni o\'qiydi',
+'ps.2':'reyting bir yulduzga oshsa, daromad shuncha ortadi',
+'ps.3':'yomon yoki eskirgan sharhli bizneslardan chetlanadi',
+'ps.4':'mamnun mijozlar norozilarga qaraganda ancha kam yozadi',
+'ps.note':'Iste\'molchilar xulqi va mahalliy biznes obro\'si bo\'yicha ochiq marketing tadqiqotlarining umumlashtirilgan ma\'lumotlari asosida.',
+
+'sol.eye':'Yechim',
+'sol.h':'BirTapCard biznesdagi eng qimmat so\'zni yo\'q qiladi — <em>«keyinroq»</em>',
+'sol.lead':'Kartochka kassada turadi. Mehmon his-tuyg\'usi yangiligida, bir necha soniyada sharh qoldiradi.',
+'sol.1h':'Mehmon buyurtmani to\'ladi',
+'sol.1p':'Kassir: «Agar hammasi yoqqan bo\'lsa — bizga sharh qoldiring»',
+'sol.2h':'Telefonni NFC\'ga tegizadi yoki QR\'ni skanerlaydi',
+'sol.2p':'Ilova ham, ro\'yxatdan o\'tish ham kerak emas',
+'sol.3h':'Google sharhlar sahifasi ochiladi',
+'sol.3p':'Aynan kerakli muassasa va filial ustida',
+'sol.4h':'Sharh chop etildi, reyting o\'sdi',
+'sol.4p':'Yulduzlar va bir-ikki og\'iz so\'z — hammasi shu',
+'t.2':'+2 soniya','t.3':'+3 soniya','t.4':'+10 soniya',
+
+'dev.eye':'Qurilma',
+'dev.h':'Kassada bitta buyum. <em>Ikki usul</em>. Nol qarshilik.',
+'dev.1h':'NFC-yorliq',
+'dev.1p':'Telefonni yaqinlashtirish kifoya — Android ham, iPhone ham sharh sahifasini o\'zi ochadi, skanerlash shart emas.',
+'dev.2h':'QR-kod',
+'dev.2p':'Har qanday telefon uchun zaxira usul — NFC o\'chiq bo\'lsa, kamerani qaratish yetarli.',
+'dev.3h':'Mustahkam korpus',
+'dev.3p':'Ixcham stol kartochkasi — suvdan, quyoshdan va kundalik ishlatishdan qo\'rqmaydi.',
+'dev.4h':'Quvvat talab qilmaydi',
+'dev.4p':'Na batareya, na internet, na quvvatlash. Yorliq passiv — yillar davomida ishlaydi.',
+
+'vs.eye':'Texnologiya',
+'vs.h':'Nega NFC oddiy QR\'dan tezroq',
+'vs.lead':'BirTapCard ikkala usulni ham qo\'llab-quvvatlaydi — lekin «bir zumda» degan tuyg\'uni aynan NFC beradi.',
+'vs.badge':'Tezroq',
+'vs.n1':'Bir teginish — kamerani qaratish va fokus tutish shart emas',
+'vs.n2':'Sharh sahifasi 1–2 soniyada ochiladi',
+'vs.n3':'Premium, «aqlli» harakat sifatida his qilinadi',
+'vs.q1':'NFC chipisiz telefonda ham ishlaydi',
+'vs.q2':'Kamera, yorug\'lik va qaratish kerak — 3–5 soniya ko\'proq vaqt oladi',
+'vs.q3':'Hammaga tanish va tushunarli usul',
+
+'pl.eye':'Shaxsiy kabinet',
+'pl.h':'Kartochka — bu faqat boshlanishi. Asosiy mahsulot — <em>platforma</em>.',
+'pl.lead':'Biznes egasi kabinet oladi: skanerlashlar, konversiya, filiallar — real vaqtda, telefondan.',
+'pl.dash':'Tahlil · barcha filiallar',
+'pl.upd':'hozir yangilandi',
+'pl.k1':'NFC skanlar','pl.k2':'QR skanlar','pl.k3':'Noyob mehmon','pl.k3s':'jonli mehmonlar',
+'pl.k4':'Konversiya','pl.k4s':'Google\'ga o\'tdi','pl.week':'hafta ichida',
+'pl.ch':'Kunlar bo\'yicha skanerlashlar','pl.ch7':'7 kun','pl.top':'Filiallar yetakchilari',
+
+'ow.eye':'Biznes egasi nima oladi',
+'ow.h':'Oddiy plastik emas, <em>obro\' o\'stirish quroli</em>',
+'ow.1h':'Real vaqtdagi statistika','ow.1p':'Har bir teginish va skan kabinetda darhol ko\'rinadi',
+'ow.2h':'Davrlar bo\'yicha tahlil','ow.2p':'Kun, hafta, oy yoki o\'zingiz tanlagan istalgan oraliq',
+'ow.3h':'Filiallarni taqqoslash','ow.3p':'Qaysi nuqta ko\'proq sharh keltirishi ko\'rinib turadi',
+'ow.4h':'Har kuni ertalab Telegram hisoboti','ow.4p':'Skanlar, noyob mehmonlar, konversiya va eng yaxshi filial — soat 8:00 da',
+'ow.5h':'NFC va QR alohida','ow.5p':'Mehmonlar qaysi usuldan ko\'proq foydalanishi aniq ko\'rinadi',
+'ow.6h':'Doimiy yangilanishlar','ow.6p':'Platforma o\'sadi — yangi imkoniyatlar uchun qo\'shimcha to\'lov yo\'q',
+
+'mt.eye':'Ko\'rsatkichlar','mt.h':'Nimalarni kuzatish mumkin',
+'mt.1':'Skanerlashlar','mt.2':'Konversiya','mt.3':'Noyob mehmonlar','mt.4':'Faol soatlar',
+'mt.5':'Hafta kunlari','mt.6':'Eng yaxshi filial','mt.7':'Mehmon qurilmalari','mt.8':'Tillar',
+'mt.9':'Kunlik dinamika','mt.10':'CSV\'ga yuklash',
+
+'cm.eye':'Taqqoslash','cm.h':'Oddiy <em>QR-stikerdan</em> nimasi bilan ustun','cm.old':'Oddiy QR',
+'cm.r1':'O\'qish usuli','cm.r1a':'faqat QR','cm.r1b':'NFC + QR',
+'cm.r2':'Tezlik','cm.r3':'Skanerlash tahlili','cm.r3b':'bor, real vaqtda',
+'cm.no':'yo\'q','cm.yes':'bor','cm.r4':'Filiallarni taqqoslash',
+'cm.r5':'Kassadagi ko\'rinishi','cm.r5a':'qog\'oz stiker','cm.r5b':'premium kartochka',
+'cm.r6':'Chidamlilik','cm.r6a':'rangi o\'chadi, yirtiladi','cm.r6b':'mustahkam korpus',
+
+'wh.eye':'Kimlar uchun','wh.h':'Kassasi va mamnun mehmonlari bor har qanday biznesga mos keladi',
+'wh.1':'Restoranlar','wh.2':'Kofexonalar','wh.3':'Kalyanxonalar','wh.4':'Mehmonxonalar',
+'wh.5':'Go\'zallik salonlari','wh.6':'Avtoservislar','wh.7':'Do\'konlar','wh.8':'Tarmoq va franshizalar',
+
+'fq.eye':'Ko\'p beriladigan savollar','fq.h':'Eng muhimi haqida qisqacha',
+'fq.1q':'Mehmonga ilova yoki internet kerakmi?',
+'fq.1a':'Ilova — yo\'q. Faqat NFC yoki kamerasi bor telefon kerak. Google sahifasi ochilishi uchun internet kerak — u hammada bor.',
+'fq.2q':'Bir nechta filialim bo\'lsa-chi?',
+'fq.2a':'Har bir filial o\'z kartochkasi va o\'z havolasini oladi. Kabinetda umumiy manzara ham, nuqtalarni taqqoslash ham ko\'rinadi.',
+'fq.3q':'Qurilmaga quvvat yoki zaryad kerakmi?',
+'fq.3a':'Yo\'q. NFC-yorliq to\'liq passiv — unga quvvat kerak emas, xohlagancha uzoq ishlaydi.',
+'fq.4q':'Hammasi qancha vaqtda ishga tushadi?',
+'fq.4a':'Odatda bir kunda: kartochkani Google Business profilingizga bog\'laymiz, kabinetni sozlaymiz va sizga kirish huquqini beramiz.',
+'fq.5q':'Mehmon yomon sharh qoldirmoqchi bo\'lsa-chi?',
+'fq.5a':'Kartochka mamnun bo\'lgan mehmonga ko\'rsatiladi — bu kassir yoki ofitsiantning ishi. Vosita mavjud narsani kuchaytiradi: mamnun mehmonlarni.',
+'fq.6q':'Kartochkani kim o\'rnatadi?',
+'fq.6a':'Biz. Olib kelamiz, kassaga o\'rnatamiz, kabinetni ulaymiz va xodimlarga uni mehmonlarga qanday taklif qilishni ko\'rsatamiz.',
+
+'fin.h':'Har bir mamnun mehmon <em>yangi sharhga</em> aylanishi mumkin',
+'fin.p':'Faqat bu qadamni imkon qadar oson qilish kerak. Biz buni allaqachon qildik — endi kartochkani sizning kassangizga qo\'yish qoldi.',
+'cta.main2':'Telegram\'ga yozish','cta.sticky':'Muassasani ulash →',
+'ct.phone':'Telefon','ct.site':'Shaxsiy kabinet',
+'ct.f1':'Asoschi · Samarqand · qurilmalarni olib kelib o\'rnatadi',
+'ct.f2n':'Hammuassis',
+'ct.f2':'Toshkent · muassasalarni ulash va tarmoqlar bilan ishlash',
+'ct.insta':'Loyihaning rasmiy Instagram\'i — har kuni qurilma qaysi muassasalarga o\'rnatilishini ko\'rsatamiz',
+'foot':'Obro\' o\'sishi uchun NFC + QR · Samarqand · Toshkent'
+};
+
+/* ─── Переключение языка ─────────────────────────────── */
+const nodes = document.querySelectorAll('[data-i]');
+nodes.forEach(el => el.dataset.ruHtml = el.innerHTML);
+
+function setLang(l){
+  nodes.forEach(el => {
+    const k = el.dataset.i;
+    el.innerHTML = (l === 'uz' && UZ[k]) ? UZ[k] : el.dataset.ruHtml;
+  });
+  document.documentElement.lang = l === 'uz' ? 'uz' : 'ru';
+  document.getElementById('btn-ru').classList.toggle('on', l !== 'uz');
+  document.getElementById('btn-uz').classList.toggle('on', l === 'uz');
+  try { localStorage.setItem('btc-lang', l) } catch(e){}
+}
+
+(function initLang(){
+  let l = null;
+  try { l = localStorage.getItem('btc-lang') } catch(e){}
+  if (!l) l = (navigator.language || '').toLowerCase().startsWith('ru') ? 'ru' : 'uz';
+  if (l === 'uz') setLang('uz');
+})();
+
+/* ─── Появление блоков при прокрутке ─────────────────── */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target) } });
+}, { rootMargin: '0px 0px -8% 0px', threshold: .08 });
+document.querySelectorAll('.rv').forEach((el,i) => {
+  el.style.transitionDelay = (i % 4) * 55 + 'ms';
+  io.observe(el);
+});
+setTimeout(() => document.querySelectorAll('.rv:not(.in)').forEach(el => {
+  if (el.getBoundingClientRect().top < innerHeight) el.classList.add('in');
+}), 2500);
+
+/* ─── Счётчики в макете кабинета ─────────────────────── */
+const counters = document.querySelectorAll('[data-count]');
+const cio = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target, to = +el.dataset.count, sfx = el.dataset.suffix || '';
+    const final = () => { el.textContent = to.toLocaleString('ru-RU') + sfx };
+    cio.unobserve(el);
+    // в фоновой вкладке rAF заморожен — показываем итог сразу
+    if (document.hidden) { final(); return }
+    const t0 = performance.now(), dur = 1100;
+    (function tick(now){
+      const p = Math.min(1, (now - t0) / dur), v = Math.round(to * (1 - Math.pow(1 - p, 3)));
+      el.textContent = v.toLocaleString('ru-RU') + sfx;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+    // страховка: чем бы ни закончилась анимация, число будет верным
+    setTimeout(final, dur + 500);
+  });
+}, { threshold: .5 });
+counters.forEach(el => cio.observe(el));
+
+/* ─── Нижняя кнопка появляется после обложки ─────────── */
+const sticky = document.getElementById('sticky');
+addEventListener('scroll', () => {
+  sticky.classList.toggle('show', scrollY > innerHeight * .75);
+}, { passive: true });
+</script>
+</body>
+</html>

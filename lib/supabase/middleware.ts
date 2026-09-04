@@ -85,9 +85,11 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute = pathname.startsWith('/login')
   const isPublicScanRoute = pathname.startsWith('/r/')
   const isScanErrorRoute = pathname.startsWith('/scan-error')
+  // Презентация для клиентов — открыта всем, без авторизации
+  const isPublicInfoRoute = pathname.startsWith('/info')
 
   // Not authenticated → /login
-  if (!user && !isAuthRoute && !isPublicScanRoute && !isScanErrorRoute) {
+  if (!user && !isAuthRoute && !isPublicScanRoute && !isScanErrorRoute && !isPublicInfoRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
