@@ -68,7 +68,7 @@ body::before{
 #panel.on{display:block;animation:up .45s cubic-bezier(.16,1,.3,1) both}
 @keyframes up{from{opacity:0;transform:translateY(18px)}}
 .ig{
-  width:74px;height:74px;margin:0 auto 20px;border-radius:24px;display:grid;place-items:center;
+  width:74px;height:74px;margin:0 auto 20px;display:none;border-radius:24px;display:grid;place-items:center;
   background:linear-gradient(135deg,#F9CE34,#EE2A7B 45%,#6228D7);
   box-shadow:0 16px 40px -12px rgba(238,42,123,.6)
 }
@@ -78,7 +78,7 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
   background:rgba(0,217,174,.12);border:1px solid rgba(0,217,174,.28);
   color:#00D9AE;font-size:13px;font-weight:700
 }
-.sub{color:#8B9BB8;font-size:14.5px;line-height:1.55;margin-bottom:26px}
+.sub{color:#8B9BB8;font-size:13.5px;line-height:1.55;margin-top:20px}
 .btn{
   display:flex;align-items:center;justify-content:center;gap:9px;
   padding:16px 22px;border-radius:15px;text-decoration:none;
@@ -87,6 +87,16 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
   box-shadow:0 14px 34px -12px rgba(238,42,123,.65)
 }
 .btn:active{transform:scale(.975)}
+.btn-g{
+  background:#fff;color:#1a1a1a;margin-bottom:14px;
+  box-shadow:0 14px 34px -14px rgba(255,255,255,.4)
+}
+.btn-g.done{background:rgba(255,255,255,.09);color:#8B9BB8;box-shadow:none}
+.or{
+  display:flex;align-items:center;gap:12px;margin:0 0 14px;
+  color:#4C5A79;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase
+}
+.or::before,.or::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.09)}
 .skip{
   display:inline-block;margin-top:18px;color:#55637F;font-size:13.5px;
   text-decoration:none;padding:8px 14px
@@ -100,34 +110,30 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
 <body>
 <div class="box">
 
-  <div id="wait">
-    <div class="spin"></div>
-    <p class="muted" id="waitText">Открываем страницу отзыва…<br>
-      <a href="#" id="manual">Открыть вручную</a></p>
-  </div>
+  <div class="thanks"><span>★</span><span id="thx">Понравилось у нас?</span></div>
 
-  <div id="panel">
-    <div class="thanks"><span>★</span><span id="thx">Спасибо за отзыв</span></div>
-    <div class="ig">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9">
-        <rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/>
-        <circle cx="12" cy="12" r="4.2"/>
-        <circle cx="17.5" cy="6.5" r="1.2" fill="#fff" stroke="none"/>
-      </svg>
-    </div>
-    <h1 id="h">Подпишитесь на нас<br>в Instagram</h1>
-    <div class="name">${name}</div>
-    <p class="sub" id="sub">Новые блюда, акции и события — первыми у подписчиков</p>
-    <a class="btn" id="go" href="#" rel="noopener">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/>
-        <circle cx="12" cy="12" r="4.2"/>
-        <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
-      </svg>
-      <span id="btnText">Подписаться</span>
-    </a>
-    <a class="skip" href="#" id="close">Не сейчас</a>
-  </div>
+  <h1 id="h">Оставьте отзыв<br>и подпишитесь</h1>
+  <div class="name">${name}</div>
+
+  <a class="btn btn-g" id="review" href="#" target="_blank" rel="noopener">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+      <path d="m12 3 2.6 6.1 6.4.5-4.9 4.2 1.5 6.2L12 16.8 6.4 20l1.5-6.2L3 9.6l6.4-.5z"/>
+    </svg>
+    <span id="reviewText">Оставить отзыв в Google</span>
+  </a>
+
+  <div class="or"><span id="orText">и ещё</span></div>
+
+  <a class="btn" id="go" href="#" rel="noopener">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/>
+      <circle cx="12" cy="12" r="4.2"/>
+      <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
+    </svg>
+    <span id="btnText">Подписаться в Instagram</span>
+  </a>
+
+  <p class="sub" id="sub">Новые блюда, акции и события — первыми у подписчиков</p>
 
 </div>
 
@@ -139,54 +145,45 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
   var ru = (navigator.language || '').toLowerCase().indexOf('ru') === 0;
   if (!ru) {
     document.documentElement.lang = 'uz';
-    document.getElementById('waitText').innerHTML =
-      'Sharh sahifasi ochilmoqda…<br><a href="#" id="manual">Qo\\'lda ochish</a>';
-    document.getElementById('thx').textContent = 'Sharh uchun rahmat';
-    document.getElementById('h').innerHTML = 'Instagram\\'da bizga<br>obuna bo\\'ling';
+    document.getElementById('thx').textContent = 'Bizda yoqdimi?';
+    document.getElementById('h').innerHTML = "Sharh qoldiring<br>va obuna bo'ling";
+    document.getElementById('reviewText').textContent = "Google'da sharh qoldirish";
+    document.getElementById('orText').textContent = 'va yana';
+    document.getElementById('btnText').textContent = "Instagram'da obuna";
     document.getElementById('sub').textContent =
       'Yangi taomlar, aksiyalar va tadbirlar — avval obunachilarga';
-    document.getElementById('btnText').textContent = 'Obuna bo\\'lish';
-    document.getElementById('close').textContent = 'Hozir emas';
   }
 
+  var review = document.getElementById('review');
+  var thx = document.getElementById('thx');
+  var h = document.getElementById('h');
+  review.setAttribute('href', G);
   document.getElementById('go').setAttribute('href', IG);
 
-  var panel = document.getElementById('panel'), wait = document.getElementById('wait');
-  var shown = false;
-  function show(){
-    if (shown) return;
-    shown = true;
-    wait.style.display = 'none';
-    panel.classList.add('on');
+  // Гость уже уходил оставлять отзыв — значит вернулся, благодарим
+  function thanked(){
+    review.classList.add('done');
+    thx.textContent = ru ? 'Спасибо за отзыв' : 'Sharh uchun rahmat';
+    h.innerHTML = ru
+      ? 'Осталось подписаться<br>на нас'
+      : "Endi bizga obuna<br>bo'lish qoldi";
   }
 
-  // Возвращались ли мы уже отсюда в Google?
-  var been = location.search.indexOf('r=1') !== -1;
-  try { been = been || sessionStorage.getItem(KEY) === '1' } catch(e){}
+  var been = false;
+  try { been = sessionStorage.getItem(KEY) === '1' } catch(e){}
+  if (been) thanked();
 
-  if (been) {
-    show();
-  } else {
+  review.addEventListener('click', function(){
     try { sessionStorage.setItem(KEY, '1') } catch(e){}
-    var m = document.getElementById('manual');
-    if (m) m.setAttribute('href', G);
-    // помечаем свою запись в истории — по кнопке «назад» вернёмся сюда же
-    try { history.replaceState(null, '', location.pathname + '?r=1') } catch(e){}
-    setTimeout(function(){ location.href = G }, 80);
-  }
-
-  // Google открылся в приложении Карт — наша вкладка осталась живой.
-  // Как только гость вернётся в браузер, показываем панель.
-  document.addEventListener('visibilitychange', function(){
-    if (document.visibilityState === 'visible') setTimeout(show, 600);
+    setTimeout(thanked, 900);
   });
-  // Возврат «назад» из кэша страниц
-  window.addEventListener('pageshow', function(e){ if (e.persisted) show() });
 
-  document.getElementById('close').addEventListener('click', function(e){
-    e.preventDefault();
-    panel.style.opacity = '.35';
-    setTimeout(function(){ panel.classList.remove('on') }, 200);
+  // Вернулся во вкладку после Google — подсвечиваем Instagram
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState !== 'visible') return;
+    var flag = false;
+    try { flag = sessionStorage.getItem(KEY) === '1' } catch(e){}
+    if (flag) thanked();
   });
 })();
 </script>
