@@ -276,6 +276,44 @@ h1 em{font-style:normal;background:linear-gradient(120deg,var(--mint2),var(--min
 }
 .who span{font-size:17px}
 
+
+/* ─── Тарифы ─────────────────────────────────────────── */
+.prices{display:grid;gap:11px;margin-bottom:22px}
+.price{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:19px;position:relative;overflow:hidden}
+.price.hi{border-color:rgba(0,217,174,.4);background:linear-gradient(160deg,rgba(0,217,174,.09),var(--card))}
+.price.hi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--mint2),transparent)}
+.price-top{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.price-top b{font-size:15px;font-weight:750;letter-spacing:-.02em}
+.price-sum{display:flex;align-items:baseline;gap:7px;margin-bottom:9px}
+.price-sum b{font:800 34px/1 'JetBrains Mono',monospace;letter-spacing:-.05em;word-spacing:-.3em;color:var(--mint)}
+.price-sum span{font-size:14px;color:var(--muted);font-weight:600}
+.price-note{font-size:13px;line-height:1.5;color:var(--muted)}
+.price-then{margin-top:13px;padding-top:13px;border-top:1px solid var(--border);font-size:13.5px;color:var(--muted)}
+.price-then b{font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:700;word-spacing:-.3em}
+.price-save{
+  margin-top:13px;padding:10px 12px;border-radius:11px;
+  background:var(--mint-dim);color:var(--mint);font-size:12.5px;font-weight:650;line-height:1.45
+}
+.incl{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:17px;margin-bottom:11px}
+.incl>b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mint);margin-bottom:13px}
+.incl ul{list-style:none;display:grid;gap:11px}
+.incl li{position:relative;padding-left:23px;font-size:13.5px;line-height:1.6;color:var(--muted)}
+.incl li::before{
+  content:'✓';position:absolute;left:0;top:0;
+  color:var(--mint);font-weight:900;font-size:12.5px
+}
+.incl li b{color:var(--text);font-weight:650}
+.callout{
+  display:flex;align-items:flex-start;gap:11px;
+  padding:15px;border-radius:var(--r);font-size:13px;line-height:1.6;color:var(--muted)
+}
+.callout b{color:var(--text);font-weight:700}
+.callout>span{font-size:16px;flex-shrink:0;line-height:1.3}
+.callout--lock{background:var(--mint-dim);border:1px solid rgba(0,217,174,.28)}
+.callout--off{background:var(--orange-dim);border:1px solid rgba(255,107,53,.26)}
+.pz-final{text-align:center;font-size:13.5px;color:var(--muted);margin:20px 0 14px;line-height:1.55}
+@media (min-width:720px){ .prices{grid-template-columns:1fr 1fr;gap:14px} }
+
 /* ─── FAQ ────────────────────────────────────────────── */
 .faq{display:grid;gap:8px}
 details{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
@@ -645,6 +683,70 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
   </div>
 </section>
 
+
+<!-- ═══ ТАРИФЫ ═══ -->
+<section id="price">
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="pz.eye">Тарифы</span></div>
+    <h2 class="rv" data-i="pz.h">Сколько это стоит</h2>
+    <p class="lead rv" data-i="pz.lead">Два варианта. В обоих — устройство, установка на месте и личный кабинет.</p>
+
+    <div class="prices">
+      <div class="price rv">
+        <div class="price-top"><b data-i="pz.m">Помесячно</b></div>
+        <div class="price-sum"><b>200&nbsp;000</b><span data-i="pz.sum">сум</span></div>
+        <div class="price-note" data-i="pz.mnote">Устройство, подключение, установка и первый месяц — всё включено</div>
+        <div class="price-then"><span data-i="pz.then">далее</span> <b>47&nbsp;000</b> <span data-i="pz.permonth">сум в месяц</span></div>
+      </div>
+
+      <div class="price hi rv">
+        <div class="price-top"><b data-i="pz.y">Год сразу</b><span class="vs-b" data-i="pz.ybadge">выгоднее</span></div>
+        <div class="price-sum"><b>620&nbsp;000</b><span data-i="pz.sum">сум</span></div>
+        <div class="price-note" data-i="pz.ynote">За 12 месяцев одной оплатой. Всё то же самое, что помесячно</div>
+        <div class="price-save" data-i="pz.save">Дешевле на 97&nbsp;000 сум — два месяца бесплатно</div>
+      </div>
+    </div>
+
+    <div class="incl rv">
+      <b data-i="pz.now">Что вы получаете сразу</b>
+      <ul>
+        <li data-i="pz.n1">Устройство <b>NFC + QR</b></li>
+        <li data-i="pz.n2">Подключение к вашему заведению и настройка переадресации на Google</li>
+        <li data-i="pz.n3">Установка на месте и проверка работы</li>
+      </ul>
+    </div>
+
+    <div class="incl rv">
+      <b data-i="pz.sub">Что входит в подписку</b>
+      <ul>
+        <li data-i="pz.s1"><b>Личный кабинет</b> со статистикой: сколько гостей отсканировало, сколько отзывов оставлено, в какие дни и часы. Платформа развивается — новые функции входят в подписку бесплатно</li>
+        <li data-i="pz.s2"><b>Окно «Подпишитесь на нас в Instagram»</b> после отзыва — вы получаете не только отзыв, но и подписчика</li>
+        <li data-i="pz.s3"><b>Замена устройства</b> при поломке или пропаже — 2 раза в год бесплатно, далее по стоимости устройства</li>
+        <li data-i="pz.s4"><b>Поддержка напрямую</b> — пишете нам в Telegram, без тикетов и колл-центров</li>
+      </ul>
+    </div>
+
+    <div class="rv" style="margin-bottom:11px">
+      <div class="callout callout--lock">
+        <span>🔒</span>
+        <div><b data-i="pz.lockh">Цена фиксируется за вами.</b>
+          <span data-i="pz.lockp"> Платформа растёт, функций становится больше — но для тех, кто подключается сейчас, стоимость подписки не изменится ни через год, ни через три. Всё, что мы добавим дальше, вы получаете без доплат. Для новых заведений цена позже будет выше — но не для вас.</span></div>
+      </div>
+    </div>
+
+    <div class="rv">
+      <div class="callout callout--off">
+        <span>⏸</span>
+        <div><b data-i="pz.offh">Если подписка не продлена.</b>
+          <span data-i="pz.offp"> Переадресация и кабинет перестают работать, устройство остаётся у вас. Возобновить можно в любой момент — по вашей зафиксированной цене.</span></div>
+      </div>
+    </div>
+
+    <p class="pz-final rv" data-i="pz.term">Подключаем в течение 1–2 дней после подтверждения</p>
+    <a class="btn btn-p rv" href="https://t.me/Jrkhnv777" data-i="cta.price">Подключить заведение</a>
+  </div>
+</section>
+
 <!-- ═══ FAQ ═══ -->
 <section>
   <div class="wrap">
@@ -837,6 +939,29 @@ const UZ = {
 'wh.1':'Restoranlar','wh.2':'Kofexonalar','wh.3':'Kalyanxonalar','wh.4':'Mehmonxonalar',
 'wh.5':'Go\'zallik salonlari','wh.6':'Avtoservislar','wh.7':'Do\'konlar','wh.8':'Tarmoq va franshizalar',
 
+'pz.eye':'Tariflar',
+'pz.h':'Bu qancha turadi',
+'pz.lead':'Ikki variant. Ikkalasida ham — qurilma, joyida o\'rnatish va shaxsiy kabinet.',
+'pz.m':'Oylik','pz.y':'Bir yillik','pz.ybadge':'foydali','pz.sum':'so\'m',
+'pz.mnote':'Qurilma, ulash, o\'rnatish va birinchi oy — hammasi ichida',
+'pz.then':'keyin','pz.permonth':'so\'m har oyda',
+'pz.ynote':'12 oy uchun bitta to\'lovda. Oylikdagi hamma narsa saqlanadi',
+'pz.save':'97 000 so\'m arzon — ikki oy bepul',
+'pz.now':'Darhol nima olasiz',
+'pz.n1':'<b>NFC + QR</b> qurilma',
+'pz.n2':'Muassasangizga ulash va Google\'ga yo\'naltirishni sozlash',
+'pz.n3':'Joyida o\'rnatish va ishlashini tekshirish',
+'pz.sub':'Obunaga nima kiradi',
+'pz.s1':'<b>Shaxsiy kabinet</b> statistika bilan: nechta mehmon skanerladi, nechta sharh qoldirildi, qaysi kun va soatlarda. Platforma rivojlanadi — yangi imkoniyatlar obunaga bepul kiradi',
+'pz.s2':'Sharhdan keyin <b>«Instagram\'da bizga obuna bo\'ling»</b> oynasi — siz nafaqat sharh, balki obunachi ham olasiz',
+'pz.s3':'Qurilma buzilsa yoki yo\'qolsa <b>almashtirish</b> — yiliga 2 marta bepul, keyingilari qurilma narxida',
+'pz.s4':'<b>To\'g\'ridan-to\'g\'ri qo\'llab-quvvatlash</b> — Telegram\'ga yozasiz, tiket va kol-markazlarsiz',
+'pz.lockh':'Narx siz uchun qat\'iy qoladi.',
+'pz.lockp':' Platforma o\'sadi, imkoniyatlar ko\'payadi — lekin hozir ulanganlar uchun obuna narxi na bir yildan keyin, na uch yildan keyin o\'zgaradi. Keyin qo\'shadigan hamma narsani qo\'shimcha to\'lovsiz olasiz. Yangi muassasalar uchun narx keyinroq yuqori bo\'ladi — lekin siz uchun emas.',
+'pz.offh':'Agar obuna uzaytirilmasa.',
+'pz.offp':' Yo\'naltirish va kabinet ishlamay qoladi, qurilma sizda qoladi. Istalgan paytda qayta tiklash mumkin — sizning qat\'iylashtirilgan narxingizda.',
+'pz.term':'Tasdiqlangandan keyin 1–2 kun ichida ulaymiz',
+'cta.price':'Muassasani ulash',
 'fq.eye':'Ko\'p beriladigan savollar','fq.h':'Eng muhimi haqida qisqacha',
 'fq.1q':'Mehmonga ilova yoki internet kerakmi?',
 'fq.1a':'Ilova — yo\'q. Faqat NFC yoki kamerasi bor telefon kerak. Google sahifasi ochilishi uchun internet kerak — u hammada bor.',
