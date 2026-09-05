@@ -69,6 +69,20 @@ export async function GET(
     return NextResponse.redirect(new URL('/scan-error', request.url))
   }
 
-  // ── 4. Редирект на Google Reviews ────────────────────────────────────────
+  // ── 4. Есть ли у филиала Instagram? ──────────────────────────────────────
+  //    Если есть — уводим гостя через промежуточную страницу /r/go: она
+  //    отправит его в Google, а по возвращении предложит подписаться.
+  //    Скан уже записан выше, повторно /r/go его не фиксирует.
+  const { data: branch } = await supabase
+    .from('branches')
+    .select('instagram_url')
+    .or(`nfc_token.eq.${token},qr_token.eq.${token}`)
+    .maybeSingle()
+
+  if (branch?.instagram_url) {
+    return NextResponse.redirect(new URL(`/r/go/${token}`, request.url))
+  }
+
+  // ── 5. Обычный путь: сразу на Google Reviews ─────────────────────────────
   return NextResponse.redirect(data.redirect_url)
 }
