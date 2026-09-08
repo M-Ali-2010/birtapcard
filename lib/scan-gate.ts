@@ -26,13 +26,57 @@ export function renderScanGate(opts: {
   token: string
   branchName: string
   googleUrl: string
-  instagramUrl: string
+  instagramUrl?: string | null
+  yandexUrl?: string | null
+  gisUrl?: string | null
 }): string {
   const name = escapeHtml(opts.branchName)
-  // Ссылки уходят в JS строками — JSON.stringify экранирует кавычки и юникод
-  const g = JSON.stringify(opts.googleUrl)
-  const ig = JSON.stringify(opts.instagramUrl)
   const key = JSON.stringify('btc_gate_' + opts.token)
+
+  // Ссылки подставляются и в href, и в JS — экранируем для обоих контекстов
+  const g = escapeHtml(opts.googleUrl)
+  const hasIg = !!opts.instagramUrl
+  const hasYa = !!opts.yandexUrl
+  const hasGis = !!opts.gisUrl
+
+  // Заголовок зависит от того, есть ли Instagram: подписка или только отзывы
+  const hasIgJs = hasIg ? 'true' : 'false'
+  const headingRu = hasIg
+    ? 'Оставьте отзыв<br>и подпишитесь'
+    : 'Оставьте, пожалуйста,<br>отзыв о нас'
+
+  const yandexBtn = hasYa ? `
+  <a class="btn btn-ya rev" data-k="ya" href="${escapeHtml(opts.yandexUrl!)}" target="_blank" rel="noopener">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>
+    </svg>
+    <span id="yaText">Отзыв на Яндекс Картах</span><span class="ok">✓</span>
+  </a>
+` : ''
+
+  const gisBtn = hasGis ? `
+  <a class="btn btn-gis rev" data-k="gis" href="${escapeHtml(opts.gisUrl!)}" target="_blank" rel="noopener">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>
+    </svg>
+    <span id="gisText">Отзыв в 2ГИС</span><span class="ok">✓</span>
+  </a>
+` : ''
+
+  const instagramBlock = hasIg ? `
+  <div class="or"><span id="orText">и ещё</span></div>
+
+  <a class="btn" id="go" href="${escapeHtml(opts.instagramUrl!)}" rel="noopener">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/>
+      <circle cx="12" cy="12" r="4.2"/>
+      <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
+    </svg>
+    <span id="btnText">Подписаться в Instagram</span>
+  </a>
+
+  <p class="sub" id="sub">Новые блюда, акции и события — первыми у подписчиков</p>
+` : ''
 
   return `<!DOCTYPE html>
 <html lang="ru">
@@ -92,6 +136,20 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
   box-shadow:0 14px 34px -14px rgba(255,255,255,.4)
 }
 .btn-g.done{background:rgba(255,255,255,.09);color:#8B9BB8;box-shadow:none}
+.btn-ya{
+  background:#FC3F1D;color:#fff;margin-bottom:12px;
+  box-shadow:0 14px 34px -14px rgba(252,63,29,.6)
+}
+.btn-gis{
+  background:#00B956;color:#fff;margin-bottom:12px;
+  box-shadow:0 14px 34px -14px rgba(0,185,86,.55)
+}
+.rev.done{
+  background:rgba(255,255,255,.07)!important;color:#8B9BB8!important;
+  box-shadow:none!important
+}
+.rev.done .ok{display:inline}
+.ok{display:none;margin-left:2px}
 .or{
   display:flex;align-items:center;gap:12px;margin:0 0 14px;
   color:#4C5A79;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase
@@ -112,78 +170,81 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
 
   <div class="thanks"><span>★</span><span id="thx">Понравилось у нас?</span></div>
 
-  <h1 id="h">Оставьте отзыв<br>и подпишитесь</h1>
+  <h1 id="h">${headingRu}</h1>
   <div class="name">${name}</div>
 
-  <a class="btn btn-g" id="review" href="#" target="_blank" rel="noopener">
+  <a class="btn btn-g rev" data-k="g" href="${g}" target="_blank" rel="noopener">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
       <path d="m12 3 2.6 6.1 6.4.5-4.9 4.2 1.5 6.2L12 16.8 6.4 20l1.5-6.2L3 9.6l6.4-.5z"/>
     </svg>
-    <span id="reviewText">Оставить отзыв в Google</span>
+    <span id="reviewText">Оставить отзыв в Google</span><span class="ok">✓</span>
   </a>
-
-  <div class="or"><span id="orText">и ещё</span></div>
-
-  <a class="btn" id="go" href="#" rel="noopener">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/>
-      <circle cx="12" cy="12" r="4.2"/>
-      <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
-    </svg>
-    <span id="btnText">Подписаться в Instagram</span>
-  </a>
-
-  <p class="sub" id="sub">Новые блюда, акции и события — первыми у подписчиков</p>
-
+${yandexBtn}${gisBtn}${instagramBlock}
 </div>
 
 <script>
 (function(){
-  var G = ${g}, IG = ${ig}, KEY = ${key};
+  var KEY = ${key};
+  var $ = function(id){ return document.getElementById(id) };
+  var setText = function(id, t){ var e = $(id); if (e) e.textContent = t };
 
   // Узбекский по умолчанию, русский — если язык телефона русский
-  var ru = (navigator.language || '').toLowerCase().indexOf('ru') === 0;
+  var ru = (navigator.language || "").toLowerCase().indexOf("ru") === 0;
   if (!ru) {
-    document.documentElement.lang = 'uz';
-    document.getElementById('thx').textContent = 'Bizda yoqdimi?';
-    document.getElementById('h').innerHTML = "Sharh qoldiring<br>va obuna bo'ling";
-    document.getElementById('reviewText').textContent = "Google'da sharh qoldirish";
-    document.getElementById('orText').textContent = 'va yana';
-    document.getElementById('btnText').textContent = "Instagram'da obuna";
-    document.getElementById('sub').textContent =
-      'Yangi taomlar, aksiyalar va tadbirlar — avval obunachilarga';
+    document.documentElement.lang = "uz";
+    setText("thx", "Bizda yoqdimi?");
+    $("h").innerHTML = ${hasIgJs}
+      ? "Sharh qoldiring<br>va obuna bo'ling"
+      : "Iltimos, biz haqimizda<br>sharh qoldiring";
+    setText("reviewText", "Google'da sharh qoldirish");
+    setText("yaText", "Yandex Xaritalarda sharh");
+    setText("gisText", "2GIS'da sharh");
+    setText("orText", "va yana");
+    setText("btnText", "Instagram'da obuna");
+    setText("sub", "Yangi taomlar, aksiyalar va tadbirlar — avval obunachilarga");
   }
 
-  var review = document.getElementById('review');
-  var thx = document.getElementById('thx');
-  var h = document.getElementById('h');
-  review.setAttribute('href', G);
-  document.getElementById('go').setAttribute('href', IG);
+  var revs = [].slice.call(document.querySelectorAll(".rev"));
+  var thx = $("thx"), h = $("h");
 
-  // Гость уже уходил оставлять отзыв — значит вернулся, благодарим
-  function thanked(){
-    review.classList.add('done');
-    thx.textContent = ru ? 'Спасибо за отзыв' : 'Sharh uchun rahmat';
-    h.innerHTML = ru
-      ? 'Осталось подписаться<br>на нас'
-      : "Endi bizga obuna<br>bo'lish qoldi";
+  // Гость уже уходил оставлять отзыв — меняем шапку на благодарность
+  function afterReview(){
+    thx.textContent = ru ? "Спасибо за отзыв" : "Sharh uchun rahmat";
+    if (${hasIgJs}) {
+      h.innerHTML = ru
+        ? "Осталось подписаться<br>на нас"
+        : "Endi bizga obuna<br>bo'lish qoldi";
+    } else {
+      h.innerHTML = ru ? "Спасибо,<br>это очень помогает" : "Rahmat,<br>bu juda yordam beradi";
+    }
   }
 
-  var been = false;
-  try { been = sessionStorage.getItem(KEY) === '1' } catch(e){}
-  if (been) thanked();
+  function mark(a, k){
+    a.classList.add("done");
+    try { sessionStorage.setItem(KEY + ":" + k, "1") } catch(e){}
+  }
 
-  review.addEventListener('click', function(){
-    try { sessionStorage.setItem(KEY, '1') } catch(e){}
-    setTimeout(thanked, 900);
+  var any = false;
+  revs.forEach(function(a){
+    var k = a.getAttribute("data-k");
+    var was = false;
+    try { was = sessionStorage.getItem(KEY + ":" + k) === "1" } catch(e){}
+    if (was) { a.classList.add("done"); any = true }
+    a.addEventListener("click", function(){
+      setTimeout(function(){ mark(a, k); afterReview() }, 900);
+    });
   });
+  if (any) afterReview();
 
-  // Вернулся во вкладку после Google — подсвечиваем Instagram
-  document.addEventListener('visibilitychange', function(){
-    if (document.visibilityState !== 'visible') return;
-    var flag = false;
-    try { flag = sessionStorage.getItem(KEY) === '1' } catch(e){}
-    if (flag) thanked();
+  // Вернулся во вкладку после отзыва — обновляем вид
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState !== "visible") return;
+    var some = false;
+    revs.forEach(function(a){
+      var k = a.getAttribute("data-k");
+      try { if (sessionStorage.getItem(KEY + ":" + k) === "1") { a.classList.add("done"); some = true } } catch(e){}
+    });
+    if (some) afterReview();
   });
 })();
 </script>

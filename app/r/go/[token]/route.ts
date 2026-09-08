@@ -30,7 +30,7 @@ export async function GET(
   const supabase = createServiceRoleClient()
   const { data: branch } = await supabase
     .from('branches')
-    .select('name, google_url, instagram_url, active')
+    .select('name, google_url, instagram_url, yandex_url, gis_url, active')
     .or(`nfc_token.eq.${token},qr_token.eq.${token}`)
     .maybeSingle()
 
@@ -38,8 +38,8 @@ export async function GET(
     return NextResponse.redirect(new URL('/scan-error', _request.url))
   }
 
-  // Instagram не заполнен — показывать нечего, отправляем прямо в Google
-  if (!branch.instagram_url) {
+  // Ни одной дополнительной ссылки — показывать нечего, сразу в Google
+  if (!branch.instagram_url && !branch.yandex_url && !branch.gis_url) {
     return NextResponse.redirect(branch.google_url)
   }
 
@@ -48,6 +48,8 @@ export async function GET(
     branchName: branch.name ?? '',
     googleUrl: branch.google_url,
     instagramUrl: branch.instagram_url,
+    yandexUrl: branch.yandex_url,
+    gisUrl: branch.gis_url,
   })
 
   return new NextResponse(html, {

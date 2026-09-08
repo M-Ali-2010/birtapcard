@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
   if (auth.role !== 'super_admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await request.json()
-  const { company_id, name, slug, google_url, instagram_url, nfc_token, qr_token, active } = body
+  const { company_id, name, slug, google_url, instagram_url, yandex_url, gis_url, nfc_token, qr_token, active } = body
 
   if (!company_id || !name || !slug || !google_url || !nfc_token || !qr_token) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -44,6 +44,8 @@ export async function POST(request: NextRequest) {
       slug,
       google_url,
       instagram_url: instagram_url || null,
+      yandex_url: yandex_url || null,
+      gis_url: gis_url || null,
       nfc_token,
       qr_token,
       qr_image_url: null,
@@ -70,7 +72,7 @@ export async function PUT(request: NextRequest) {
   if (auth.role !== 'super_admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await request.json()
-  const { id, company_id, name, slug, google_url, instagram_url, active } = body
+  const { id, company_id, name, slug, google_url, instagram_url, yandex_url, gis_url, active } = body
 
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
 
@@ -78,7 +80,13 @@ export async function PUT(request: NextRequest) {
 
   const { error } = await supabase
     .from('branches')
-    .update({ company_id, name, slug, google_url, instagram_url: instagram_url || null, active })
+    .update({
+      company_id, name, slug, google_url,
+      instagram_url: instagram_url || null,
+      yandex_url: yandex_url || null,
+      gis_url: gis_url || null,
+      active,
+    })
     .eq('id', id)
 
   if (error) {

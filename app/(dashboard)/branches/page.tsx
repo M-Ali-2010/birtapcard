@@ -40,6 +40,8 @@ type Branch = {
   slug: string
   google_url: string
   instagram_url: string | null
+  yandex_url: string | null
+  gis_url: string | null
   nfc_token: string
   qr_token: string
   nfc_url: string
@@ -92,6 +94,8 @@ function BranchModal({
   const [slug, setSlug] = useState(branch?.slug ?? '')
   const [googleUrl, setGoogleUrl] = useState(branch?.google_url ?? '')
   const [instagram, setInstagram] = useState(branch?.instagram_url ?? '')
+  const [yandex, setYandex] = useState(branch?.yandex_url ?? '')
+  const [gis, setGis] = useState(branch?.gis_url ?? '')
   const [active, setActive] = useState(branch?.active ?? true)
   const [slugTouched, setSlugTouched] = useState(isEdit)
   const [saving, setSaving] = useState(false)
@@ -125,6 +129,8 @@ function BranchModal({
             slug: slug.trim(),
             google_url: googleUrl.trim(),
             instagram_url: normalizeInstagram(instagram),
+            yandex_url: yandex.trim() || null,
+            gis_url: gis.trim() || null,
             active,
           }),
         })
@@ -147,6 +153,8 @@ function BranchModal({
             slug: slug.trim(),
             google_url: googleUrl.trim(),
             instagram_url: normalizeInstagram(instagram),
+            yandex_url: yandex.trim() || null,
+            gis_url: gis.trim() || null,
             nfc_token: nfcToken,
             qr_token: qrToken,
             active,
@@ -243,6 +251,24 @@ function BranchModal({
           placeholder="@grand_registan" />
       </Field>
 
+      <Field
+        label="Отзывы на Яндекс Картах"
+        hint="Необязательно. Кнопка появится на странице после скана — рядом с Google."
+      >
+        <input className="input" value={yandex} inputMode="url"
+          onChange={e => setYandex(e.target.value)}
+          placeholder="https://yandex.uz/maps/-/…" />
+      </Field>
+
+      <Field
+        label="Отзывы в 2ГИС"
+        hint="Необязательно. Тоже отдельной кнопкой на странице после скана."
+      >
+        <input className="input" value={gis} inputMode="url"
+          onChange={e => setGis(e.target.value)}
+          placeholder="https://go.2gis.com/…" />
+      </Field>
+
       <div style={{ marginBottom: 15 }}>
         <Switch checked={active} onChange={setActive} label="Филиал активен" />
       </div>
@@ -300,7 +326,7 @@ function BranchesView() {
       supabase.from('companies').select('id, name, active').order('name'),
       supabase
         .from('branches')
-        .select('id, company_id, name, slug, google_url, instagram_url, nfc_token, qr_token, nfc_url, qr_url, qr_image_url, active, created_at, companies(name, slug)')
+        .select('id, company_id, name, slug, google_url, instagram_url, yandex_url, gis_url, nfc_token, qr_token, nfc_url, qr_url, qr_image_url, active, created_at, companies(name, slug)')
         .order('created_at', { ascending: false }),
     ])
 
@@ -493,12 +519,16 @@ function BranchesView() {
                     <div className="truncate" style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 3 }}>
                       {b.companies?.name ?? '—'} · /{b.slug}
                     </div>
-                    {b.instagram_url && (
-                      <div className="row" style={{ gap: 5, marginTop: 5 }}>
-                        <Badge tone="purple">
-                          <Icon name="share" size={10} />
-                          {b.instagram_url.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '@')}
-                        </Badge>
+                    {(b.instagram_url || b.yandex_url || b.gis_url) && (
+                      <div className="row row--wrap" style={{ gap: 5, marginTop: 5 }}>
+                        {b.instagram_url && (
+                          <Badge tone="purple">
+                            <Icon name="share" size={10} />
+                            {b.instagram_url.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '@')}
+                          </Badge>
+                        )}
+                        {b.yandex_url && <Badge tone="danger">Яндекс</Badge>}
+                        {b.gis_url && <Badge tone="success">2ГИС</Badge>}
                       </div>
                     )}
                   </div>
