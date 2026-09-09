@@ -29,6 +29,7 @@ export function renderScanGate(opts: {
   instagramUrl?: string | null
   yandexUrl?: string | null
   gisUrl?: string | null
+  telegramUrl?: string | null
 }): string {
   const name = escapeHtml(opts.branchName)
   const key = JSON.stringify('btc_gate_' + opts.token)
@@ -38,10 +39,12 @@ export function renderScanGate(opts: {
   const hasIg = !!opts.instagramUrl
   const hasYa = !!opts.yandexUrl
   const hasGis = !!opts.gisUrl
+  const hasTg = !!opts.telegramUrl
+  const hasFollow = hasIg || hasTg
 
   // Заголовок зависит от того, есть ли Instagram: подписка или только отзывы
-  const hasIgJs = hasIg ? 'true' : 'false'
-  const headingRu = hasIg
+  const hasFollowJs = hasFollow ? 'true' : 'false'
+  const headingRu = hasFollow
     ? 'Оставьте отзыв<br>и подпишитесь'
     : 'Оставьте, пожалуйста,<br>отзыв о нас'
 
@@ -63,9 +66,7 @@ export function renderScanGate(opts: {
   </a>
 ` : ''
 
-  const instagramBlock = hasIg ? `
-  <div class="or"><span id="orText">и ещё</span></div>
-
+  const igBtn = hasIg ? `
   <a class="btn" id="go" href="${escapeHtml(opts.instagramUrl!)}" rel="noopener">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/>
@@ -74,8 +75,22 @@ export function renderScanGate(opts: {
     </svg>
     <span id="btnText">Подписаться в Instagram</span>
   </a>
+` : ''
 
-  <p class="sub" id="sub">Новые блюда, акции и события — первыми у подписчиков</p>
+  const tgBtn = hasTg ? `
+  <a class="btn btn-tg" id="tg" href="${escapeHtml(opts.telegramUrl!)}" rel="noopener">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+      <path d="M21.6 3.3 2.9 10.4c-.9.35-.88 1.63.03 1.95l4.6 1.6 1.75 5.2c.27.8 1.32.98 1.84.32l2.36-2.98 4.66 3.42c.66.48 1.6.12 1.77-.68l3.06-14.5c.19-.9-.7-1.65-1.37-1.4z"/>
+      <path d="m8 13.5 9.5-6.6-6.9 7.6"/>
+    </svg>
+    <span id="tgText">Наш Telegram-канал</span>
+  </a>
+` : ''
+
+  const followBlock = hasFollow ? `
+  <div class="or"><span id="orText">и ещё</span></div>
+${igBtn}${tgBtn}
+  <p class="sub" id="sub">Новости, акции и события — первыми у подписчиков</p>
 ` : ''
 
   return `<!DOCTYPE html>
@@ -140,6 +155,10 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
   background:#FC3F1D;color:#fff;margin-bottom:12px;
   box-shadow:0 14px 34px -14px rgba(252,63,29,.6)
 }
+.btn-tg{
+  background:linear-gradient(135deg,#2AABEE,#229ED9);color:#fff;margin-top:12px;
+  box-shadow:0 14px 34px -14px rgba(34,158,217,.6)
+}
 .btn-gis{
   background:#00B956;color:#fff;margin-bottom:12px;
   box-shadow:0 14px 34px -14px rgba(0,185,86,.55)
@@ -179,7 +198,7 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
     </svg>
     <span id="reviewText">Оставить отзыв в Google</span><span class="ok">✓</span>
   </a>
-${yandexBtn}${gisBtn}${instagramBlock}
+${yandexBtn}${gisBtn}${followBlock}
 </div>
 
 <script>
@@ -193,7 +212,7 @@ ${yandexBtn}${gisBtn}${instagramBlock}
   if (!ru) {
     document.documentElement.lang = "uz";
     setText("thx", "Bizda yoqdimi?");
-    $("h").innerHTML = ${hasIgJs}
+    $("h").innerHTML = ${hasFollowJs}
       ? "Sharh qoldiring<br>va obuna bo'ling"
       : "Iltimos, biz haqimizda<br>sharh qoldiring";
     setText("reviewText", "Google'da sharh qoldirish");
@@ -201,7 +220,8 @@ ${yandexBtn}${gisBtn}${instagramBlock}
     setText("gisText", "2GIS'da sharh");
     setText("orText", "va yana");
     setText("btnText", "Instagram'da obuna");
-    setText("sub", "Yangi taomlar, aksiyalar va tadbirlar — avval obunachilarga");
+    setText("tgText", "Telegram kanalimiz");
+    setText("sub", "Yangiliklar, aksiyalar va tadbirlar — avval obunachilarga");
   }
 
   var revs = [].slice.call(document.querySelectorAll(".rev"));
@@ -210,7 +230,7 @@ ${yandexBtn}${gisBtn}${instagramBlock}
   // Гость уже уходил оставлять отзыв — меняем шапку на благодарность
   function afterReview(){
     thx.textContent = ru ? "Спасибо за отзыв" : "Sharh uchun rahmat";
-    if (${hasIgJs}) {
+    if (${hasFollowJs}) {
       h.innerHTML = ru
         ? "Осталось подписаться<br>на нас"
         : "Endi bizga obuna<br>bo'lish qoldi";
