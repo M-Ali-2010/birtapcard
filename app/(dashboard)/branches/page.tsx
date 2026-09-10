@@ -55,6 +55,7 @@ type Branch = {
   yandex_url: string | null
   gis_url: string | null
   telegram_url: string | null
+  bot_url: string | null
   nfc_token: string
   qr_token: string
   nfc_url: string
@@ -110,6 +111,7 @@ function BranchModal({
   const [yandex, setYandex] = useState(branch?.yandex_url ?? '')
   const [gis, setGis] = useState(branch?.gis_url ?? '')
   const [telegram, setTelegram] = useState(branch?.telegram_url ?? '')
+  const [bot, setBot] = useState(branch?.bot_url ?? '')
   const [active, setActive] = useState(branch?.active ?? true)
   const [slugTouched, setSlugTouched] = useState(isEdit)
   const [saving, setSaving] = useState(false)
@@ -146,6 +148,7 @@ function BranchModal({
             yandex_url: yandex.trim() || null,
             gis_url: gis.trim() || null,
             telegram_url: normalizeTelegram(telegram),
+            bot_url: normalizeTelegram(bot),
             active,
           }),
         })
@@ -171,6 +174,7 @@ function BranchModal({
             yandex_url: yandex.trim() || null,
             gis_url: gis.trim() || null,
             telegram_url: normalizeTelegram(telegram),
+            bot_url: normalizeTelegram(bot),
             nfc_token: nfcToken,
             qr_token: qrToken,
             active,
@@ -294,6 +298,15 @@ function BranchModal({
           placeholder="@quest_house_uz" />
       </Field>
 
+      <Field
+        label="Telegram-бот заведения"
+        hint="Необязательно. Например, бот доставки или брони. Можно вставить @бот или ссылку."
+      >
+        <input className="input" value={bot} inputMode="url"
+          onChange={e => setBot(e.target.value)}
+          placeholder="@quest_house_bot" />
+      </Field>
+
       <div style={{ marginBottom: 15 }}>
         <Switch checked={active} onChange={setActive} label="Филиал активен" />
       </div>
@@ -351,7 +364,7 @@ function BranchesView() {
       supabase.from('companies').select('id, name, active').order('name'),
       supabase
         .from('branches')
-        .select('id, company_id, name, slug, google_url, instagram_url, yandex_url, gis_url, telegram_url, nfc_token, qr_token, nfc_url, qr_url, qr_image_url, active, created_at, companies(name, slug)')
+        .select('id, company_id, name, slug, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, nfc_token, qr_token, nfc_url, qr_url, qr_image_url, active, created_at, companies(name, slug)')
         .order('created_at', { ascending: false }),
     ])
 
@@ -544,7 +557,7 @@ function BranchesView() {
                     <div className="truncate" style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 3 }}>
                       {b.companies?.name ?? '—'} · /{b.slug}
                     </div>
-                    {(b.instagram_url || b.yandex_url || b.gis_url || b.telegram_url) && (
+                    {(b.instagram_url || b.yandex_url || b.gis_url || b.telegram_url || b.bot_url) && (
                       <div className="row row--wrap" style={{ gap: 5, marginTop: 5 }}>
                         {b.instagram_url && (
                           <Badge tone="purple">
@@ -554,6 +567,12 @@ function BranchesView() {
                         )}
                         {b.yandex_url && <Badge tone="danger">Яндекс</Badge>}
                         {b.gis_url && <Badge tone="success">2ГИС</Badge>}
+                        {b.bot_url && (
+                          <Badge tone="purple">
+                            <Icon name="zap" size={10} />
+                            {b.bot_url.replace(/^https?:\/\/(www\.)?t\.me\//i, '@')}
+                          </Badge>
+                        )}
                         {b.telegram_url && (
                           <Badge tone="blue">
                             <Icon name="telegram" size={10} />

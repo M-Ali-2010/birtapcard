@@ -30,6 +30,7 @@ export function renderScanGate(opts: {
   yandexUrl?: string | null
   gisUrl?: string | null
   telegramUrl?: string | null
+  botUrl?: string | null
 }): string {
   const name = escapeHtml(opts.branchName)
   const key = JSON.stringify('btc_gate_' + opts.token)
@@ -40,7 +41,8 @@ export function renderScanGate(opts: {
   const hasYa = !!opts.yandexUrl
   const hasGis = !!opts.gisUrl
   const hasTg = !!opts.telegramUrl
-  const hasFollow = hasIg || hasTg
+  const hasBot = !!opts.botUrl
+  const hasFollow = hasIg || hasTg || hasBot
 
   // Заголовок зависит от того, есть ли Instagram: подписка или только отзывы
   const hasFollowJs = hasFollow ? 'true' : 'false'
@@ -87,9 +89,22 @@ export function renderScanGate(opts: {
   </a>
 ` : ''
 
+  const botBtn = hasBot ? `
+  <a class="btn btn-bot" id="bot" href="${escapeHtml(opts.botUrl!)}" rel="noopener">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round">
+      <rect x="3.5" y="7.5" width="17" height="12.5" rx="4"/>
+      <path d="M12 3.5v4"/><circle cx="12" cy="2.6" r="1.1" fill="currentColor" stroke="none"/>
+      <circle cx="9" cy="13" r="1.3" fill="currentColor" stroke="none"/>
+      <circle cx="15" cy="13" r="1.3" fill="currentColor" stroke="none"/>
+      <path d="M9.5 16.6h5"/>
+    </svg>
+    <span id="botText">Наш Telegram-бот</span>
+  </a>
+` : ''
+
   const followBlock = hasFollow ? `
   <div class="or"><span id="orText">и ещё</span></div>
-${igBtn}${tgBtn}
+${igBtn}${tgBtn}${botBtn}
   <p class="sub" id="sub">Новости, акции и события — первыми у подписчиков</p>
 ` : ''
 
@@ -154,6 +169,10 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
 .btn-ya{
   background:#FC3F1D;color:#fff;margin-bottom:12px;
   box-shadow:0 14px 34px -14px rgba(252,63,29,.6)
+}
+.btn-bot{
+  background:linear-gradient(135deg,#4F6BED,#3B4FCB);color:#fff;margin-top:12px;
+  box-shadow:0 14px 34px -14px rgba(79,107,237,.6)
 }
 .btn-tg{
   background:linear-gradient(135deg,#2AABEE,#229ED9);color:#fff;margin-top:12px;
@@ -221,6 +240,7 @@ ${yandexBtn}${gisBtn}${followBlock}
     setText("orText", "va yana");
     setText("btnText", "Instagram'da obuna");
     setText("tgText", "Telegram kanalimiz");
+    setText("botText", "Telegram botimiz");
     setText("sub", "Yangiliklar, aksiyalar va tadbirlar — avval obunachilarga");
   }
 

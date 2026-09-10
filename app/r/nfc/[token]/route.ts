@@ -75,11 +75,11 @@ export async function GET(
   //    Скан уже записан выше, повторно /r/go его не фиксирует.
   const { data: branch } = await supabase
     .from('branches')
-    .select('instagram_url, yandex_url, gis_url, telegram_url')
+    .select('instagram_url, yandex_url, gis_url, telegram_url, bot_url')
     .or(`nfc_token.eq.${token},qr_token.eq.${token}`)
     .maybeSingle()
 
-  if (branch?.instagram_url || branch?.yandex_url || branch?.gis_url || branch?.telegram_url) {
+  if (branch?.instagram_url || branch?.yandex_url || branch?.gis_url || branch?.telegram_url || branch?.bot_url) {
     return NextResponse.redirect(new URL(`/r/go/${token}`, request.url))
   }
 
