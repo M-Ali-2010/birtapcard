@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import QRCode from 'qrcode'
 import { useProfile } from '@/lib/hooks'
 import { REFRESH_EVENT } from '@/components/nav-config'
-import { slugify } from '@/lib/format'
+import { plural, shortDate, slugify } from '@/lib/format'
 import { Icon } from '@/components/ui/icons'
 import {
   AccessDenied, Badge, Button, CopyField, EmptyState, Field, IconButton, KpiCard,
@@ -19,6 +19,23 @@ import { QrPreviewModal } from '@/components/qr-preview-modal'
 /* ─── Конфигурация ───────────────────────────────────────────────────────── */
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/+$/, '')
+
+/** Прибавить месяцы к дате; отсчёт от конца текущей подписки, если она ещё идёт */
+function extendFrom(current: string | null, months: number): string {
+  const now = new Date()
+  const base = current && new Date(current) > now ? new Date(current) : now
+  base.setMonth(base.getMonth() + months)
+  return base.toISOString()
+}
+
+/** Состояние подписки филиала — для бейджа в списке и блока в форме */
+function subState(paidUntil: string | null): { tone: 'mint' | 'orange' | 'danger' | 'muted'; label: string; days: number } {
+  if (!paidUntil) return { tone: 'muted', label: 'без срока', days: Infinity }
+  const days = Math.ceil((new Date(paidUntil).getTime() - Date.now()) / 86400000)
+  if (days < 0) return { tone: 'danger', label: 'подписка истекла', days }
+  if (days <= 7) return { tone: 'orange', label: `осталось ${days} ${plural(days, ['день', 'дня', 'дней'])}`, days }
+  return { tone: 'mint', label: `до ${shortDate(paidUntil)}`, days }
+}
 
 /** «@name», «t.me/name» и полная ссылка приводятся к одному виду */
 function normalizeTelegram(value: string): string | null {
@@ -56,6 +73,7 @@ type Branch = {
   gis_url: string | null
   telegram_url: string | null
   bot_url: string | null
+  paid_until: string | null
   nfc_token: string
   qr_token: string
   nfc_url: string
@@ -112,6 +130,9 @@ function BranchModal({
   const [gis, setGis] = useState(branch?.gis_url ?? '')
   const [telegram, setTelegram] = useState(branch?.telegram_url ?? '')
   const [bot, setBot] = useState(branch?.bot_url ?? '')
+  const [paidUntil, setPaidUntil] = useState<string | null>(
+    branch ? branch.paid_until : extendFrom(null, 1),
+  )
   const [active, setActive] = useState(branch?.active ?? true)
   const [slugTouched, setSlugTouched] = useState(isEdit)
   const [saving, setSaving] = useState(false)
@@ -149,6 +170,7 @@ function BranchModal({
             gis_url: gis.trim() || null,
             telegram_url: normalizeTelegram(telegram),
             bot_url: normalizeTelegram(bot),
+            paid_until: paidUntil,
             active,
           }),
         })
@@ -175,6 +197,7 @@ function BranchModal({
             gis_url: gis.trim() || null,
             telegram_url: normalizeTelegram(telegram),
             bot_url: normalizeTelegram(bot),
+            paid_until: paidUntil,
             nfc_token: nfcToken,
             qr_token: qrToken,
             active,
@@ -307,6 +330,34 @@ function BranchModal({
           placeholder="@quest_house_bot" />
       </Field>
 
+      <Field
+        label="Подписка устройства"
+        hint="Когда срок пройдёт, при скане вместо отзывов гость увидит «подписка истекла — обратитесь в поддержку». Продление отсчитывается от даты окончания, а не от сегодня."
+      >
+        {(() => {
+          const st = subState(paidUntil)
+          return (
+            <div className="switch-row" style={{ cursor: 'default', flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ flex: 1, minWidth: 140 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 650 }}>
+                  {paidUntil ? `Действует до ${shortDate(paidUntil)}` : 'Без ограничения срока'}
+                </div>
+                <div style={{ marginTop: 4 }}>
+                  <Badge tone={st.tone}>{st.label}</Badge>
+                </div>
+              </div>
+              <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
+                <Button size="sm" variant="outline" onClick={() => setPaidUntil(extendFrom(paidUntil, 1))}>+1 месяц</Button>
+                <Button size="sm" variant="outline" onClick={() => setPaidUntil(extendFrom(paidUntil, 12))}>+1 год</Button>
+                {paidUntil && (
+                  <Button size="sm" variant="ghost" onClick={() => setPaidUntil(null)}>Без срока</Button>
+                )}
+              </div>
+            </div>
+          )
+        })()}
+      </Field>
+
       <div style={{ marginBottom: 15 }}>
         <Switch checked={active} onChange={setActive} label="Филиал активен" />
       </div>
@@ -364,7 +415,7 @@ function BranchesView() {
       supabase.from('companies').select('id, name, active').order('name'),
       supabase
         .from('branches')
-        .select('id, company_id, name, slug, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, nfc_token, qr_token, nfc_url, qr_url, qr_image_url, active, created_at, companies(name, slug)')
+        .select('id, company_id, name, slug, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, paid_until, nfc_token, qr_token, nfc_url, qr_url, qr_image_url, active, created_at, companies(name, slug)')
         .order('created_at', { ascending: false }),
     ])
 
@@ -395,6 +446,8 @@ function BranchesView() {
 
   const activeCount = branches.filter(b => b.active).length
   const withoutQrCount = branches.filter(b => !b.qr_image_url).length
+  const expiredCount = branches.filter(b => subState(b.paid_until).days < 0).length
+  const expiringCount = branches.filter(b => { const d = subState(b.paid_until).days; return d >= 0 && d <= 7 }).length
 
   async function handleToggleActive(b: Branch) {
     setBusyId(b.id)
@@ -463,7 +516,7 @@ function BranchesView() {
   }
 
   if (!profileLoaded) {
-    return <div className="grid grid--kpi-3"><KpiSkeleton count={3} /></div>
+    return <div className="grid grid--kpi"><KpiSkeleton /></div>
   }
 
   if (!isSuperAdmin) return <AccessDenied what="Филиалы" />
@@ -471,14 +524,16 @@ function BranchesView() {
   return (
     <div className="stack">
 
-      <div className="grid grid--kpi-3">
-        {loading ? <KpiSkeleton count={3} /> : (
+      <div className="grid grid--kpi">
+        {loading ? <KpiSkeleton /> : (
           <>
             <KpiCard label="Филиалов" icon="branches" accent="mint"
               value={branches.length} sub="По всем ресторанам" />
             <KpiCard label="Активных" icon="check" accent="blue"
               value={activeCount} sub={`Отключено: ${branches.length - activeCount}`} />
-            <KpiCard label="Без QR-кода" icon="qrcodes" accent="orange"
+            <KpiCard label="Подписка истекла" icon="lock" accent="orange"
+              value={expiredCount} sub={expiringCount > 0 ? `Истекает в течение недели: ${expiringCount}` : 'Карточки заблокированы'} />
+            <KpiCard label="Без QR-кода" icon="qrcodes" accent="purple"
               value={withoutQrCount} sub="Требуют генерации" />
           </>
         )}
@@ -553,6 +608,7 @@ function BranchesView() {
                     <div className="row" style={{ gap: 8 }}>
                       <span className="truncate" style={{ fontSize: 14, fontWeight: 650 }}>{b.name}</span>
                       <StatusBadge active={b.active} />
+                      {(() => { const st = subState(b.paid_until); return st.tone !== 'muted' ? <Badge tone={st.tone}>{st.label}</Badge> : null })()}
                     </div>
                     <div className="truncate" style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 3 }}>
                       {b.companies?.name ?? '—'} · /{b.slug}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { getVisitorDevice, getClientIp, getBrowserLang, isBot } from '@/lib/visitor-hash'
+import { isSubscriptionExpired, renderExpiredPage } from '@/lib/scan-lock'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,9 +63,18 @@ export async function GET(
   //    Скан уже записан выше, повторно /r/go его не фиксирует.
   const { data: branch } = await supabase
     .from('branches')
-    .select('instagram_url, yandex_url, gis_url, telegram_url, bot_url')
+    .select('name, paid_until, instagram_url, yandex_url, gis_url, telegram_url, bot_url')
     .or(`nfc_token.eq.${token},qr_token.eq.${token}`)
     .maybeSingle()
+
+  // Срок подписки устройства прошёл — вместо отзывов показываем замок.
+  // Скан уже записан выше: владелец видит, что карточкой продолжают пользоваться.
+  if (isSubscriptionExpired(branch?.paid_until)) {
+    return new NextResponse(renderExpiredPage(branch?.name ?? ''), {
+      status: 200,
+      headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' },
+    })
+  }
 
   if (branch?.instagram_url || branch?.yandex_url || branch?.gis_url || branch?.telegram_url || branch?.bot_url) {
     return NextResponse.redirect(new URL(`/r/go/${token}`, request.url))
