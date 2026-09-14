@@ -42,27 +42,33 @@ export default function LoginPage() {
       padding: 'max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom))',
       position: 'relative',
     }}>
-      <div style={{ position: 'absolute', top: 16, right: 16 }}>
+      <div className="brand-orbs" aria-hidden="true">
+        <div className="brand-orb brand-orb--a" />
+        <div className="brand-orb brand-orb--b" />
+        <div className="brand-orb brand-orb--c" />
+      </div>
+
+      <div style={{ position: 'absolute', top: 'max(16px, env(safe-area-inset-top))', right: 16 }}>
         <ThemeToggle />
       </div>
 
       <div style={{ width: '100%', maxWidth: 400 }}>
 
-        {/* Логотип */}
-        <div className="row" style={{ gap: 12, justifyContent: 'center', marginBottom: 24 }}>
-          <Logo size={46} />
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 750, letterSpacing: '-0.02em' }}>BirTapCard</div>
+        {/* Бренд */}
+        <div className="brand-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginBottom: 26 }}>
+          <Logo size={72} />
+          <div style={{ textAlign: 'center' }}>
+            <div className="wordmark" style={{ fontSize: 30 }}>Bir<em>Tap</em>Card</div>
             <div style={{
-              fontSize: 10, color: 'var(--mint)', fontWeight: 700,
-              letterSpacing: 1.6, textTransform: 'uppercase',
+              fontSize: 10.5, color: 'var(--mint)', fontWeight: 700,
+              letterSpacing: 2.2, textTransform: 'uppercase', marginTop: 8,
             }}>
-              Аналитика
+              одно касание — один отзыв
             </div>
           </div>
         </div>
 
-        <div className="card" style={{ padding: 26, boxShadow: 'var(--sh-3)' }}>
+        <div className="card brand-in brand-in--2" style={{ padding: 26, boxShadow: 'var(--sh-3)' }}>
           <h1 style={{ fontSize: 19, fontWeight: 700, margin: '0 0 5px', letterSpacing: '-0.01em' }}>
             Вход в систему
           </h1>
@@ -126,7 +132,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p style={{
+        <p className="brand-in brand-in--3" style={{
           textAlign: 'center', fontSize: 11.5, color: 'var(--text-muted)',
           marginTop: 18, lineHeight: 1.6,
         }}>

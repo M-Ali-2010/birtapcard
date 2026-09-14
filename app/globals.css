@@ -1136,3 +1136,40 @@ button { font-family: inherit; }
 
 .print-only { display: none; }
 @media print { .print-only { display: block; } }
+
+/* ─── 9. ВНУТРИ МОБИЛЬНОГО ПРИЛОЖЕНИЯ ─────────────────────────────────────── */
+
+.is-native body { overscroll-behavior: none; -webkit-user-select: none; user-select: none; }
+.is-native input, .is-native textarea, .is-native [contenteditable] { -webkit-user-select: text; user-select: text; }
+.is-native * { -webkit-touch-callout: none; }
+.is-native .topbar { padding-top: env(safe-area-inset-top); height: calc(var(--topbar-h) + env(safe-area-inset-top)); }
+.is-native ::-webkit-scrollbar { display: none; }
+.is-native .btn:active:not(:disabled) { transform: scale(0.96); }
+
+/* ─── 10. ЭКРАН ВХОДА — БРЕНД ─────────────────────────────────────────────── */
+
+.brand-orbs { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.brand-orb {
+  position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.55;
+  animation: orb-drift 14s var(--ease) infinite alternate;
+}
+.brand-orb--a { width: 46vmax; height: 46vmax; left: -12vmax; top: -14vmax; background: radial-gradient(circle, rgba(0,226,181,.55), transparent 62%); }
+.brand-orb--b { width: 40vmax; height: 40vmax; right: -10vmax; top: 22vh; background: radial-gradient(circle, rgba(59,130,246,.45), transparent 62%); animation-delay: -6s; }
+.brand-orb--c { width: 36vmax; height: 36vmax; left: 18vw; bottom: -16vmax; background: radial-gradient(circle, rgba(139,92,246,.4), transparent 62%); animation-delay: -10s; }
+[data-theme="light"] .brand-orb { opacity: 0.35; }
+
+@keyframes orb-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(6vw, 4vh, 0) scale(1.12); }
+}
+
+.brand-in { animation: brand-in 0.9s var(--ease-out) both; }
+.brand-in--2 { animation-delay: 0.12s; }
+.brand-in--3 { animation-delay: 0.24s; }
+@keyframes brand-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+.wordmark { font-weight: 800; letter-spacing: -0.035em; line-height: 1; }
+.wordmark em { font-style: normal; color: var(--mint); }

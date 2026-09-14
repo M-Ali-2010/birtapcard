@@ -124,7 +124,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="sidebar__brand">
           <Logo size={38} />
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: 15.5, fontWeight: 700, letterSpacing: '-0.02em' }}>BirTapCard</div>
+            <div className="wordmark" style={{ fontSize: 16 }}>Bir<em>Tap</em>Card</div>
             <div style={{ fontSize: 9.5, color: 'var(--mint)', fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase' }}>
               Аналитика
             </div>

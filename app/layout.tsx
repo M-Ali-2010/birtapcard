@@ -4,6 +4,7 @@ import './globals.css'
 import { ThemeProvider, themeInitScript } from '@/components/ui/theme'
 import { ToastProvider } from '@/components/ui/toast'
 import { ConfirmProvider } from '@/components/ui/kit'
+import { NativeBridge } from '@/components/native-bridge'
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -54,7 +55,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="h-full">
         <ThemeProvider>
           <ToastProvider>
-            <ConfirmProvider>{children}</ConfirmProvider>
+            <ConfirmProvider>
+              <NativeBridge />
+              {children}
+            </ConfirmProvider>
           </ToastProvider>
         </ThemeProvider>
       </body>

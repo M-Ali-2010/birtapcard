@@ -84,24 +84,22 @@ export function Icon({
   )
 }
 
-/** Логотип BirTapCard — волна NFC */
+/** Логотип BirTapCard — «1» и волна касания: Bir (один) + tap */
 export function Logo({ size = 38 }: { size?: number }) {
   return (
     <div
       style={{
-        width: size, height: size, borderRadius: size * 0.29,
-        background: 'linear-gradient(135deg, var(--mint), var(--mint-2))',
-        display: 'grid', placeItems: 'center', position: 'relative',
-        flexShrink: 0,
+        width: size, height: size, borderRadius: size * 0.23,
+        background: 'linear-gradient(135deg, #00E2B5, #00A882)',
+        display: 'grid', placeItems: 'center', flexShrink: 0,
         boxShadow: '0 6px 18px -6px var(--mint-glow)',
       }}
     >
-      <svg width={size * 0.5} height={size * 0.5} viewBox="0 0 24 24" fill="none"
-        stroke="#04121C" strokeWidth="2.3" strokeLinecap="round">
-        <path d="M6.5 8.2a6 6 0 0 1 11 0" />
-        <path d="M3.5 5.6a9.6 9.6 0 0 1 17 0" />
-        <path d="M12 12.5v5" />
-        <circle cx="12" cy="20" r="1.1" fill="#04121C" stroke="none" />
+      <svg width={size * 0.72} height={size * 0.72} viewBox="0 0 512 512" fill="none"
+        stroke="#04121C" strokeWidth="46" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M166 214 L222 158 V378" />
+        <path d="M280 172 a74 74 0 0 1 74 74" />
+        <path d="M280 100 a146 146 0 0 1 146 146" />
       </svg>
     </div>
   )
