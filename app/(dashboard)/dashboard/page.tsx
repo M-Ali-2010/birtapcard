@@ -44,6 +44,17 @@ const LANG_NAMES: Record<string, string> = {
 }
 const LANG_COLORS = ['var(--purple)', 'var(--blue)', 'var(--orange)', 'var(--mint)', 'var(--text-muted)']
 
+/** Кнопки на странице после скана — куда гость переходит */
+const TARGETS: { key: string; label: string; color: string }[] = [
+  { key: 'google',    label: 'Google',    color: 'var(--text)' },
+  { key: 'yandex',    label: 'Яндекс',    color: '#FC3F1D' },
+  { key: 'gis',       label: '2ГИС',      color: '#00B956' },
+  { key: 'instagram', label: 'Instagram', color: '#E1306C' },
+  { key: 'telegram',  label: 'Telegram',  color: '#229ED9' },
+  { key: 'bot',       label: 'Бот',       color: '#4F6BED' },
+]
+type ClickRow = { target: string; branch_id: string }
+
 /* ─── Страница ───────────────────────────────────────────────────────────── */
 
 export default function DashboardPage() {
@@ -56,6 +67,7 @@ export default function DashboardPage() {
   const [deviceData, setDeviceData] = useState<Slice[]>([])
   const [langData, setLangData] = useState<Slice[]>([])
   const [topBranches, setTopBranches] = useState<BranchStat[]>([])
+  const [clicks, setClicks] = useState<ClickRow[]>([])
   const [loading, setLoading] = useState(true)
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null)
 
@@ -88,6 +100,12 @@ export default function DashboardPage() {
     const days = parseInt(tab)
     const since = new Date(Date.now() - days * 86400000).toISOString()
 
+    let clickQuery = supabase
+      .from('link_clicks')
+      .select('target, branch_id')
+      .gte('clicked_at', since)
+      .limit(5000)
+
     let query = supabase
       .from('scan_events')
       .select('id, branch_id, scan_type, device, browser_lang, is_unique, scanned_at, branches(name, companies(name))')
@@ -98,6 +116,7 @@ export default function DashboardPage() {
     if (profile.role === 'branch_manager' && profile.branch_id) {
       // Менеджер видит только свой филиал
       query = query.eq('branch_id', profile.branch_id)
+      clickQuery = clickQuery.eq('branch_id', profile.branch_id)
     } else if (profile.role === 'owner' && profile.company_id) {
       // Владелец — все филиалы своей компании (RLS дублирует ограничение)
       const { data: branchIds } = await supabase
@@ -107,17 +126,19 @@ export default function DashboardPage() {
       const ids = (branchIds ?? []).map((b: { id: string }) => b.id)
       if (ids.length > 0) {
         query = query.in('branch_id', ids)
+        clickQuery = clickQuery.in('branch_id', ids)
       } else {
-        setEvents([]); setDayData([]); setDeviceData([]); setLangData([]); setTopBranches([])
+        setEvents([]); setDayData([]); setDeviceData([]); setLangData([]); setTopBranches([]); setClicks([])
         setLoading(false)
         return
       }
     }
     // super_admin — без фильтра
 
-    const { data: rawEvents } = await query
+    const [{ data: rawEvents }, { data: rawClicks }] = await Promise.all([query, clickQuery])
     const ev: ScanEvent[] = (rawEvents as ScanEvent[] | null) ?? []
     setEvents(ev)
+    setClicks((rawClicks as ClickRow[] | null) ?? [])
 
     // По дням
     const byDay: Record<string, { nfc: number; qr: number }> = {}
@@ -230,6 +251,14 @@ export default function DashboardPage() {
   const sparkQr = useMemo(() => dayData.map(d => d.qr), [dayData])
   const sparkTotal = useMemo(() => dayData.map(d => d.total), [dayData])
   const maxBranch = Math.max(...topBranches.map(b => b.scans), 1)
+
+  const clickStats = useMemo(() => {
+    const count: Record<string, number> = {}
+    clicks.forEach(c => { count[c.target] = (count[c.target] ?? 0) + 1 })
+    const rows = TARGETS.map(t => ({ ...t, value: count[t.key] ?? 0 })).filter(r => r.value > 0)
+    const total = rows.reduce((s, r) => s + r.value, 0)
+    return { rows, total, max: Math.max(...rows.map(r => r.value), 1) }
+  }, [clicks])
   const periodTotal = dayData.reduce((s, d) => s + d.total, 0)
 
   if (!profileLoaded) {
@@ -456,6 +485,39 @@ export default function DashboardPage() {
           )}
         </Panel>
       </div>
+
+      {/* ── Переходы по кнопкам ───────────────────────────────────────── */}
+      <Panel
+        title="Куда переходят гости"
+        sub={`Нажатия на кнопки после скана · ${nf(clickStats.total)} за ${tab} дней`}
+        action={periodTotal > 0 && clickStats.total > 0
+          ? <Badge tone="mint">{pct(clickStats.total, periodTotal)}% сканов → переход</Badge>
+          : undefined}
+      >
+        {loading ? (
+          <SkeletonRows rows={3} height={34} />
+        ) : clickStats.rows.length === 0 ? (
+          <EmptyState
+            icon="target"
+            title="Переходов пока нет"
+            text="Появятся, когда гости начнут нажимать кнопки на странице после скана — Google, Яндекс, 2ГИС, Instagram, Telegram."
+          />
+        ) : (
+          <div className="grid grid--2" style={{ gap: '8px 22px' }}>
+            {clickStats.rows.map(r => (
+              <div key={r.key} className="row" style={{ gap: 12, padding: '7px 0' }}>
+                <span className="dot" style={{ background: r.color, width: 9, height: 9 }} />
+                <span style={{ fontSize: 13, fontWeight: 600, width: 84 }}>{r.label}</span>
+                <div className="bar" style={{ flex: 1 }}>
+                  <div className="bar__fill" style={{ width: `${Math.round((r.value / clickStats.max) * 100)}%`, background: r.color }} />
+                </div>
+                <span className="mono" style={{ fontSize: 12.5, fontWeight: 700, width: 44, textAlign: 'right' }}>{nf(r.value)}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 36, textAlign: 'right' }}>{pct(r.value, clickStats.total)}%</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Panel>
 
       {/* ── Устройства · языки · лента ────────────────────────────────── */}
       <div className="grid grid--3">

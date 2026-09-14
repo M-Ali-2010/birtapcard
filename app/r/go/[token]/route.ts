@@ -31,7 +31,7 @@ export async function GET(
   const supabase = createServiceRoleClient()
   const { data: branch } = await supabase
     .from('branches')
-    .select('name, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, active, paid_until')
+    .select('name, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, active, paid_until, companies(logo_url)')
     .or(`nfc_token.eq.${token},qr_token.eq.${token}`)
     .maybeSingle()
 
@@ -60,6 +60,7 @@ export async function GET(
     gisUrl: branch.gis_url,
     telegramUrl: branch.telegram_url,
     botUrl: branch.bot_url,
+    logoUrl: (Array.isArray(branch.companies) ? branch.companies[0] : branch.companies)?.logo_url ?? null,
   })
 
   return new NextResponse(html, {

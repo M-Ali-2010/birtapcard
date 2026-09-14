@@ -31,6 +31,7 @@ export function renderScanGate(opts: {
   gisUrl?: string | null
   telegramUrl?: string | null
   botUrl?: string | null
+  logoUrl?: string | null
 }): string {
   const name = escapeHtml(opts.branchName)
   const key = JSON.stringify('btc_gate_' + opts.token)
@@ -42,6 +43,8 @@ export function renderScanGate(opts: {
   const hasGis = !!opts.gisUrl
   const hasTg = !!opts.telegramUrl
   const hasBot = !!opts.botUrl
+  const tokenJs = JSON.stringify(opts.token)
+  const logo = opts.logoUrl ? `<img class="logo" src="${escapeHtml(opts.logoUrl)}" alt="" onerror="this.remove()">` : ''
   const hasFollow = hasIg || hasTg || hasBot
 
   // Заголовок зависит от того, есть ли Instagram: подписка или только отзывы
@@ -51,7 +54,7 @@ export function renderScanGate(opts: {
     : 'Оставьте, пожалуйста,<br>отзыв о нас'
 
   const yandexBtn = hasYa ? `
-  <a class="btn btn-ya rev" data-k="ya" href="${escapeHtml(opts.yandexUrl!)}" target="_blank" rel="noopener">
+  <a class="btn btn-ya rev" data-k="ya" data-t="yandex" href="${escapeHtml(opts.yandexUrl!)}" target="_blank" rel="noopener">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>
     </svg>
@@ -60,7 +63,7 @@ export function renderScanGate(opts: {
 ` : ''
 
   const gisBtn = hasGis ? `
-  <a class="btn btn-gis rev" data-k="gis" href="${escapeHtml(opts.gisUrl!)}" target="_blank" rel="noopener">
+  <a class="btn btn-gis rev" data-k="gis" data-t="gis" href="${escapeHtml(opts.gisUrl!)}" target="_blank" rel="noopener">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>
     </svg>
@@ -69,7 +72,7 @@ export function renderScanGate(opts: {
 ` : ''
 
   const igBtn = hasIg ? `
-  <a class="btn" id="go" href="${escapeHtml(opts.instagramUrl!)}" rel="noopener">
+  <a class="btn" id="go" data-t="instagram" href="${escapeHtml(opts.instagramUrl!)}" rel="noopener">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/>
       <circle cx="12" cy="12" r="4.2"/>
@@ -80,7 +83,7 @@ export function renderScanGate(opts: {
 ` : ''
 
   const tgBtn = hasTg ? `
-  <a class="btn btn-tg" id="tg" href="${escapeHtml(opts.telegramUrl!)}" rel="noopener">
+  <a class="btn btn-tg" id="tg" data-t="telegram" href="${escapeHtml(opts.telegramUrl!)}" rel="noopener">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
       <path d="M21.6 3.3 2.9 10.4c-.9.35-.88 1.63.03 1.95l4.6 1.6 1.75 5.2c.27.8 1.32.98 1.84.32l2.36-2.98 4.66 3.42c.66.48 1.6.12 1.77-.68l3.06-14.5c.19-.9-.7-1.65-1.37-1.4z"/>
       <path d="m8 13.5 9.5-6.6-6.9 7.6"/>
@@ -90,7 +93,7 @@ export function renderScanGate(opts: {
 ` : ''
 
   const botBtn = hasBot ? `
-  <a class="btn btn-bot" id="bot" href="${escapeHtml(opts.botUrl!)}" rel="noopener">
+  <a class="btn btn-bot" id="bot" data-t="bot" href="${escapeHtml(opts.botUrl!)}" rel="noopener">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round">
       <rect x="3.5" y="7.5" width="17" height="12.5" rx="4"/>
       <path d="M12 3.5v4"/><circle cx="12" cy="2.6" r="1.1" fill="currentColor" stroke="none"/>
@@ -197,6 +200,10 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
   display:inline-block;margin-top:18px;color:#55637F;font-size:13.5px;
   text-decoration:none;padding:8px 14px
 }
+.logo{
+  width:84px;height:84px;border-radius:24px;object-fit:cover;margin:0 auto 18px;display:block;
+  background:#fff;border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 40px -18px rgba(0,0,0,.8)
+}
 .thanks{
   display:inline-flex;align-items:center;gap:7px;margin-bottom:16px;
   color:#00D9AE;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase
@@ -206,12 +213,13 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
 <body>
 <div class="box">
 
+${logo}
   <div class="thanks"><span>★</span><span id="thx">Понравилось у нас?</span></div>
 
   <h1 id="h">${headingRu}</h1>
   <div class="name">${name}</div>
 
-  <a class="btn btn-g rev" data-k="g" href="${g}" target="_blank" rel="noopener">
+  <a class="btn btn-g rev" data-k="g" data-t="google" href="${g}" target="_blank" rel="noopener">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
       <path d="m12 3 2.6 6.1 6.4.5-4.9 4.2 1.5 6.2L12 16.8 6.4 20l1.5-6.2L3 9.6l6.4-.5z"/>
     </svg>
@@ -243,6 +251,18 @@ ${yandexBtn}${gisBtn}${followBlock}
     setText("botText", "Telegram botimiz");
     setText("sub", "Yangiliklar, aksiyalar va tadbirlar — avval obunachilarga");
   }
+
+  // Считаем нажатия: sendBeacon доживает даже если вкладка тут же уходит на другой сайт
+  var TOKEN = ${tokenJs};
+  document.addEventListener("click", function(e){
+    var a = e.target && e.target.closest ? e.target.closest("[data-t]") : null;
+    if (!a) return;
+    var body = JSON.stringify({ token: TOKEN, target: a.getAttribute("data-t") });
+    try {
+      if (navigator.sendBeacon) navigator.sendBeacon("/api/track", body);
+      else fetch("/api/track", { method: "POST", body: body, keepalive: true });
+    } catch(err){}
+  }, true);
 
   var revs = [].slice.call(document.querySelectorAll(".rev"));
   var thx = $("thx"), h = $("h");

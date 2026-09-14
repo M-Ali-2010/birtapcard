@@ -20,12 +20,25 @@ import { QrPreviewModal } from '@/components/qr-preview-modal'
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/+$/, '')
 
-/** Прибавить месяцы к дате; отсчёт от конца текущей подписки, если она ещё идёт */
-function extendFrom(current: string | null, months: number): string {
+/**
+ * Прибавить месяцы к сроку подписки.
+ * Если подписка ещё идёт — считаем от её конца (ранняя оплата не сгорает).
+ * Если срока нет или он прошёл — от fallback: для нового филиала это сегодня,
+ * для существующего — дата, когда его добавили (момент покупки устройства).
+ */
+function extendFrom(current: string | null, months: number, fallback: Date = new Date()): string {
   const now = new Date()
-  const base = current && new Date(current) > now ? new Date(current) : now
+  const base = current && new Date(current) > now ? new Date(current) : new Date(fallback)
   base.setMonth(base.getMonth() + months)
   return base.toISOString()
+}
+
+/** ISO → значение для <input type="date"> в локальном времени */
+function toDateInput(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
 /** Состояние подписки филиала — для бейджа в списке и блока в форме */
@@ -130,6 +143,8 @@ function BranchModal({
   const [gis, setGis] = useState(branch?.gis_url ?? '')
   const [telegram, setTelegram] = useState(branch?.telegram_url ?? '')
   const [bot, setBot] = useState(branch?.bot_url ?? '')
+  // Для существующего филиала месяц/год считаются от дня его добавления
+  const startBase = branch ? new Date(branch.created_at) : new Date()
   const [paidUntil, setPaidUntil] = useState<string | null>(
     branch ? branch.paid_until : extendFrom(null, 1),
   )
@@ -332,7 +347,11 @@ function BranchModal({
 
       <Field
         label="Подписка устройства"
-        hint="Когда срок пройдёт, при скане вместо отзывов гость увидит «подписка истекла — обратитесь в поддержку». Продление отсчитывается от даты окончания, а не от сегодня."
+        hint={
+          branch
+            ? `Филиал добавлен ${shortDate(branch.created_at)} — «+1 месяц» и «+1 год» считают от этой даты, если срок ещё не задан. Дату можно поправить вручную.`
+            : 'Новый филиал получает месяц с сегодняшнего дня. Когда срок пройдёт, гость при скане увидит «подписка истекла — обратитесь в поддержку».'
+        }
       >
         {(() => {
           const st = subState(paidUntil)
@@ -347,8 +366,14 @@ function BranchModal({
                 </div>
               </div>
               <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
-                <Button size="sm" variant="outline" onClick={() => setPaidUntil(extendFrom(paidUntil, 1))}>+1 месяц</Button>
-                <Button size="sm" variant="outline" onClick={() => setPaidUntil(extendFrom(paidUntil, 12))}>+1 год</Button>
+                <input
+                  className="input" type="date" value={toDateInput(paidUntil)}
+                  onChange={e => setPaidUntil(e.target.value ? new Date(e.target.value + 'T23:59:59').toISOString() : null)}
+                  style={{ width: 'auto', minHeight: 32, padding: '4px 9px', fontSize: 12.5 }}
+                  title="Задать дату окончания вручную"
+                />
+                <Button size="sm" variant="outline" onClick={() => setPaidUntil(extendFrom(paidUntil, 1, startBase))}>+1 месяц</Button>
+                <Button size="sm" variant="outline" onClick={() => setPaidUntil(extendFrom(paidUntil, 12, startBase))}>+1 год</Button>
                 {paidUntil && (
                   <Button size="sm" variant="ghost" onClick={() => setPaidUntil(null)}>Без срока</Button>
                 )}

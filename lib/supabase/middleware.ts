@@ -87,9 +87,16 @@ export async function updateSession(request: NextRequest) {
   const isScanErrorRoute = pathname.startsWith('/scan-error')
   // Презентация для клиентов — открыта всем, без авторизации
   const isPublicInfoRoute = pathname.startsWith('/info')
+  // Серверные API без сессии пользователя: их вызывают Telegram, Vercel Cron и
+  // страница после скана. Каждый защищён своим секретом или валидацией внутри —
+  // редирект на /login здесь просто ломает их.
+  const isPublicApi =
+    pathname.startsWith('/api/telegram/webhook') ||
+    pathname.startsWith('/api/cron/') ||
+    pathname.startsWith('/api/track')
 
   // Not authenticated → /login
-  if (!user && !isAuthRoute && !isPublicScanRoute && !isScanErrorRoute && !isPublicInfoRoute) {
+  if (!user && !isAuthRoute && !isPublicScanRoute && !isScanErrorRoute && !isPublicInfoRoute && !isPublicApi) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)

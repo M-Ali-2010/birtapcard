@@ -28,16 +28,29 @@ type ScanEvent = {
 }
 
 type BranchOption = { id: string; name: string; company: string }
+type ClickRow = { branch_id: string; target: string }
+type Clicks = Record<string, number>
 type BranchRow = {
   id: string; name: string; company: string
   nfc: number; qr: number; total: number; unique: number; conversion: number
+  clicks: number; byTarget: Clicks
 }
-type SortKey = 'total' | 'nfc' | 'qr' | 'unique' | 'conversion'
+type SortKey = 'total' | 'nfc' | 'qr' | 'unique' | 'conversion' | 'clicks'
+
+const TARGET_LABEL: Record<string, string> = {
+  google: 'Google', yandex: 'Яндекс', gis: '2ГИС', instagram: 'Instagram', telegram: 'Telegram', bot: 'Бот',
+}
+const TARGET_ORDER = ['google', 'yandex', 'gis', 'instagram', 'telegram', 'bot']
+
+/** «Google 12 · Яндекс 3 · Instagram 5» */
+function clicksSummary(byTarget: Clicks): string {
+  return TARGET_ORDER.filter(k => byTarget[k]).map(k => `${TARGET_LABEL[k]} ${byTarget[k]}`).join(' · ')
+}
 
 const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
 const SORT_LABELS: Record<SortKey, string> = {
-  total: 'Всего', nfc: 'NFC', qr: 'QR', unique: 'Уникальных', conversion: 'Конверсия',
+  total: 'Всего', nfc: 'NFC', qr: 'QR', unique: 'Уникальных', conversion: 'Конверсия', clicks: 'Переходы',
 }
 
 /* ─── Страница ───────────────────────────────────────────────────────────── */
@@ -72,6 +85,7 @@ function AnalyticsView() {
   const [branches, setBranches] = useState<BranchOption[]>([])
   const [branchFilter, setBranchFilter] = useState<string>(params.get('branch') ?? 'all')
   const [events, setEvents] = useState<ScanEvent[]>([])
+  const [clicks, setClicks] = useState<ClickRow[]>([])
   const [loading, setLoading] = useState(true)
   const [sortKey, setSortKey] = useState<SortKey>('total')
   const [sortAsc, setSortAsc] = useState(false)
@@ -118,6 +132,13 @@ function AnalyticsView() {
     if (!silent) setLoading(true)
     const supabase = createClient()
 
+    let clickQuery = supabase
+      .from('link_clicks')
+      .select('branch_id, target')
+      .gte('clicked_at', since)
+      .lte('clicked_at', until)
+      .limit(10000)
+
     let query = supabase
       .from('scan_events')
       .select('id, branch_id, scan_type, device, is_unique, scanned_at, branches(name, companies(name))')
@@ -129,12 +150,15 @@ function AnalyticsView() {
     // Менеджер филиала жёстко привязан к своей точке
     if (profile.role === 'branch_manager' && profile.branch_id) {
       query = query.eq('branch_id', profile.branch_id)
+      clickQuery = clickQuery.eq('branch_id', profile.branch_id)
     } else if (branchFilter !== 'all') {
       query = query.eq('branch_id', branchFilter)
+      clickQuery = clickQuery.eq('branch_id', branchFilter)
     }
 
-    const { data } = await query
+    const [{ data }, { data: clickData }] = await Promise.all([query, clickQuery])
     setEvents((data as ScanEvent[] | null) ?? [])
+    setClicks((clickData as ClickRow[] | null) ?? [])
     setLoading(false)
   }, [since, until, branchFilter, profile, profileLoaded])
 
@@ -204,7 +228,7 @@ function AnalyticsView() {
           id,
           name: e.branches?.name ?? '—',
           company: e.branches?.companies?.name ?? '—',
-          nfc: 0, qr: 0, total: 0, unique: 0, conversion: 0,
+          nfc: 0, qr: 0, total: 0, unique: 0, conversion: 0, clicks: 0, byTarget: {},
         }
       }
       const row = map[id]
@@ -214,12 +238,20 @@ function AnalyticsView() {
       if (e.is_unique) row.unique++
     })
 
+    // Переходы по кнопкам — только для филиалов, у которых были сканы в периоде
+    clicks.forEach(c => {
+      const row = map[c.branch_id]
+      if (!row) return
+      row.clicks++
+      row.byTarget[c.target] = (row.byTarget[c.target] ?? 0) + 1
+    })
+
     const q = search.trim().toLowerCase()
     return Object.values(map)
       .map(r => ({ ...r, conversion: pct(r.unique, r.total) }))
       .filter(r => !q || r.name.toLowerCase().includes(q) || r.company.toLowerCase().includes(q))
       .sort((a, b) => (sortAsc ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey]))
-  }, [events, sortKey, sortAsc, search])
+  }, [events, clicks, sortKey, sortAsc, search])
 
   function toggleSort(key: SortKey) {
     if (key === sortKey) setSortAsc(v => !v)
@@ -229,8 +261,11 @@ function AnalyticsView() {
   function exportCsv() {
     downloadCsv(
       `birtapcard-analytics-${new Date().toISOString().slice(0, 10)}.csv`,
-      ['Филиал', 'Ресторан', 'NFC', 'QR', 'Всего', 'Уникальных', 'Конверсия %'],
-      branchRows.map(r => [r.name, r.company, r.nfc, r.qr, r.total, r.unique, r.conversion]),
+      ['Филиал', 'Ресторан', 'NFC', 'QR', 'Всего', 'Уникальных', 'Конверсия %', 'Переходы', 'Google', 'Яндекс', '2ГИС', 'Instagram', 'Telegram', 'Бот'],
+      branchRows.map(r => [
+        r.name, r.company, r.nfc, r.qr, r.total, r.unique, r.conversion, r.clicks,
+        ...TARGET_ORDER.map(k => r.byTarget[k] ?? 0),
+      ]),
     )
     toast('Файл выгружен', { kind: 'success', desc: `${branchRows.length} строк в CSV` })
   }
@@ -427,6 +462,11 @@ function AnalyticsView() {
                   <Badge tone="blue">уник. {r.unique}</Badge>
                   <Badge tone="purple">{r.conversion}%</Badge>
                 </div>
+                {r.clicks > 0 && (
+                  <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 8 }}>
+                    <b style={{ color: 'var(--text)' }}>{r.clicks}</b> перех. · {clicksSummary(r.byTarget)}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -459,6 +499,12 @@ function AnalyticsView() {
                     <td className="ta-r mono" style={{ fontWeight: 700 }}>{r.total}</td>
                     <td className="ta-r mono">{r.unique}</td>
                     <td className="ta-r mono" style={{ color: 'var(--mint)', fontWeight: 650 }}>{r.conversion}%</td>
+                    <td className="ta-r">
+                      <div className="mono" style={{ fontWeight: 700 }}>{r.clicks}</div>
+                      {r.clicks > 0 && (
+                        <div style={{ fontSize: 10.5, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{clicksSummary(r.byTarget)}</div>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
