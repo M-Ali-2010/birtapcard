@@ -176,15 +176,40 @@ export async function getFile(fileId: string): Promise<string | null> {
   }
 }
 
-/** Set webhook URL */
-export async function setWebhook(url: string): Promise<boolean> {
+/**
+ * Set webhook URL. Если задан TELEGRAM_WEBHOOK_SECRET, Telegram будет слать его
+ * в заголовке x-telegram-bot-api-secret-token — и /api/telegram/webhook отбросит
+ * всё, что пришло без него.
+ */
+export async function setWebhook(url: string): Promise<{ ok: boolean; description?: string }> {
+  const secret = process.env.TELEGRAM_WEBHOOK_SECRET
   const res = await fetch(botUrl('setWebhook'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url, drop_pending_updates: true }),
+    body: JSON.stringify({
+      url,
+      drop_pending_updates: true,
+      allowed_updates: ['message', 'callback_query'],
+      ...(secret ? { secret_token: secret } : {}),
+    }),
   })
   const json = await res.json()
-  return json.ok === true
+  return { ok: json.ok === true, description: json.description }
+}
+
+export type WebhookInfo = {
+  url: string
+  has_custom_certificate: boolean
+  pending_update_count: number
+  last_error_date?: number
+  last_error_message?: string
+}
+
+/** Текущее состояние вебхука — чтобы показать в кабинете */
+export async function getWebhookInfo(): Promise<WebhookInfo | null> {
+  const res = await fetch(botUrl('getWebhookInfo'))
+  const json = await res.json()
+  return json.ok ? (json.result as WebhookInfo) : null
 }
 
 /** Build inline keyboard from 2D array shorthand */

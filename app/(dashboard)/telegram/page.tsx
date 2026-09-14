@@ -130,6 +130,121 @@ function CompanyTelegramCard({
   )
 }
 
+/* ─── Подключение бота (вебхук) ──────────────────────────────────────────── */
+
+type BotStatus = {
+  tokenSet: boolean
+  secretSet: boolean
+  expected: string
+  connected?: boolean
+  error?: string
+  info: { url: string; pending_update_count: number; last_error_message?: string; last_error_date?: number } | null
+}
+
+function BotSetupCard() {
+  const { success, error: errorToast } = useToast()
+  const [status, setStatus] = useState<BotStatus | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [connecting, setConnecting] = useState(false)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/telegram/setup')
+      setStatus(await res.json())
+    } catch {
+      setStatus(null)
+    }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  async function connect() {
+    setConnecting(true)
+    try {
+      const res = await fetch('/api/telegram/setup', { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Не удалось подключить')
+      success('Бот подключён', json.url)
+      await load()
+    } catch (e) {
+      errorToast(e instanceof Error ? e.message : 'Не удалось подключить')
+    }
+    setConnecting(false)
+  }
+
+  const tone: 'mint' | 'orange' | 'danger' | 'muted' =
+    loading ? 'muted'
+    : !status?.tokenSet ? 'danger'
+    : status.connected ? 'mint'
+    : 'orange'
+
+  const label =
+    loading ? 'проверяем…'
+    : !status?.tokenSet ? 'нет токена'
+    : status.connected ? 'подключён'
+    : status.info?.url ? 'смотрит на другой адрес'
+    : 'не подключён'
+
+  return (
+    <Panel
+      title="Бот"
+      sub="Куда Telegram отправляет сообщения от пользователей"
+      action={<Badge tone={tone} dot>{label}</Badge>}
+    >
+      {loading ? (
+        <Skeleton h={64} r={12} />
+      ) : !status?.tokenSet ? (
+        <Note tone="danger">
+          В Vercel не задан <strong>TELEGRAM_BOT_TOKEN</strong> — без него бот не работает.
+          Settings → Environment Variables → добавить → Redeploy.
+        </Note>
+      ) : (
+        <div className="stack" style={{ gap: 12 }}>
+          <div className="stack" style={{ gap: 6, fontSize: 13 }}>
+            <div className="row" style={{ gap: 10 }}>
+              <span style={{ color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>Сейчас вебхук</span>
+              <span className="mono truncate" style={{ fontSize: 12 }}>{status.info?.url || '— не установлен —'}</span>
+            </div>
+            <div className="row" style={{ gap: 10 }}>
+              <span style={{ color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>Должен быть</span>
+              <span className="mono truncate" style={{ fontSize: 12 }}>{status.expected}</span>
+            </div>
+            {status.info && status.info.pending_update_count > 0 && (
+              <div className="row" style={{ gap: 10 }}>
+                <span style={{ color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>В очереди</span>
+                <span>{status.info.pending_update_count} сообщений</span>
+              </div>
+            )}
+            {status.info?.last_error_message && (
+              <div className="row" style={{ gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>Последняя ошибка</span>
+                <span style={{ color: 'var(--danger)' }}>{status.info.last_error_message}</span>
+              </div>
+            )}
+          </div>
+
+          {!status.secretSet && (
+            <Note tone="warning">
+              Не задан <strong>TELEGRAM_WEBHOOK_SECRET</strong> — бот принимает запросы от кого угодно.
+              Добавьте в Vercel любую длинную случайную строку, сделайте Redeploy и нажмите «Подключить» ещё раз —
+              секрет передастся в Telegram автоматически.
+            </Note>
+          )}
+
+          <div className="row row--wrap" style={{ gap: 9 }}>
+            <Button variant={status.connected ? 'ghost' : 'primary'} icon="telegram" loading={connecting} onClick={connect}>
+              {status.connected ? 'Переподключить' : 'Подключить бота'}
+            </Button>
+            <Button icon="refresh" onClick={load}>Обновить статус</Button>
+          </div>
+        </div>
+      )}
+    </Panel>
+  )
+}
+
 /* ─── Страница ───────────────────────────────────────────────────────────── */
 
 export default function TelegramPage() {
@@ -219,6 +334,8 @@ export default function TelegramPage() {
           и нажмите «Проверить подключение».
         </div>
       </div>
+
+      <BotSetupCard />
 
       {/* Пример отчёта */}
       <Panel title="Пример отчёта" sub="Так это выглядит в Telegram">
