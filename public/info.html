@@ -81,6 +81,7 @@ h2 em{font-style:normal;color:var(--mint)}
   box-shadow:0 6px 18px -6px rgba(0,217,174,.55)
 }
 .logo-name{font-size:15px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.logo-name .tap,.wm .tap{font-style:normal;color:var(--mint)}
 .logo-sub{font-size:8.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--mint)}
 .lang{display:flex;gap:2px;padding:3px;background:var(--card);border:1px solid var(--border);border-radius:11px}
 .lang button{
@@ -208,6 +209,23 @@ h1 em{font-style:normal;background:linear-gradient(120deg,var(--mint2),var(--min
 .vs-col li{display:flex;gap:9px;font-size:13.5px;line-height:1.5;color:var(--muted)}
 .vs-col li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--mint);flex-shrink:0;margin-top:7px}
 .vs-col:not(.hi) li::before{background:var(--dim)}
+
+/* ─── Макет экрана после скана ───────────────────────── */
+.phone{
+  max-width:340px;margin:0 auto;padding:22px 16px 18px;border-radius:30px;
+  background:linear-gradient(170deg,#0B1222,#05070E);border:1px solid var(--border2);
+  box-shadow:0 30px 70px -26px rgba(0,0,0,.9),inset 0 0 0 1px rgba(255,255,255,.03);text-align:center
+}
+.phone-top{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mint);margin-bottom:10px}
+.phone-top .dot{width:6px;height:6px;border-radius:50%;background:var(--mint)}
+.phone-name{display:inline-block;padding:5px 12px;border-radius:99px;background:var(--mint-dim);color:var(--mint);font-size:12px;font-weight:700;margin-bottom:14px}
+.pb{padding:12px;border-radius:13px;font-size:13.5px;font-weight:700;color:#fff;margin-bottom:8px}
+.pb-g{background:#fff;color:#1a1a1a}
+.pb-ya{background:#FC3F1D}
+.pb-gis{background:#00B956}
+.pb-ig{background:linear-gradient(135deg,#F9CE34,#EE2A7B 45%,#6228D7)}
+.pb-tg{background:linear-gradient(135deg,#2AABEE,#229ED9);margin-bottom:0}
+.phone-or{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:6px 0 10px}
 
 /* ─── Дашборд-макет ──────────────────────────────────── */
 .dash{
@@ -436,13 +454,12 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
   <div class="wrap top-in">
     <div class="logo">
       <div class="logo-mark">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#04121C" stroke-width="2.4" stroke-linecap="round">
-          <path d="M6.5 8.2a6 6 0 0 1 11 0"/><path d="M3.5 5.6a9.6 9.6 0 0 1 17 0"/>
-          <path d="M12 12.5v5"/><circle cx="12" cy="20" r="1.1" fill="#04121C" stroke="none"/>
+        <svg width="20" height="20" viewBox="0 0 512 512" fill="none" stroke="#04121C" stroke-width="46" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M166 214 L222 158 V378"/><path d="M280 172 a74 74 0 0 1 74 74"/><path d="M280 100 a146 146 0 0 1 146 146"/>
         </svg>
       </div>
       <div>
-        <div class="logo-name">BirTapCard</div>
+        <div class="logo-name">Bir<em class="tap">Tap</em>Card</div>
         <div class="logo-sub" data-i="brand.sub">Reputation device</div>
       </div>
     </div>
@@ -456,7 +473,7 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 <!-- ═══ ОБЛОЖКА ═══ -->
 <section class="hero">
   <div class="wrap">
-    <div class="pill"><span class="dot"></span><span data-i="hero.pill">NFC + QR для бизнеса</span></div>
+    <div class="pill"><span class="dot"></span><span data-i="hero.pill">Одно касание — один отзыв</span></div>
     <h1 data-i="hero.h1">Отзывы в Google становятся <em>проще</em></h1>
     <p data-i="hero.sub">15 секунд — и довольный гость оставляет отзыв. Без приложений, без объяснений. Одно касание телефоном.</p>
 
@@ -550,6 +567,31 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
   </div>
 </section>
 
+<!-- ═══ ОДИН ЭКРАН — ВСЕ ПЛОЩАДКИ ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="sc.eye">Экран после скана</span></div>
+    <h2 class="rv" data-i="sc.h">Одна карточка — <em>все площадки</em>, где вас ищут</h2>
+    <p class="lead rv" data-i="sc.lead">Гость приложил телефон и видит сразу всё: отзыв в Google, на Яндекс Картах, в 2ГИС — и подписку на ваш Instagram и Telegram. Оставил отзыв — кнопка гаснет, остальные ждут.</p>
+
+    <div class="phone rv">
+      <div class="phone-top"><span class="dot"></span><span data-i="sc.p1">Понравилось у нас?</span></div>
+      <div class="phone-name" data-i="sc.p2">Название заведения</div>
+      <div class="pb pb-g" data-i="sc.b1">⭐ Оставить отзыв в Google</div>
+      <div class="pb pb-ya" data-i="sc.b2">📍 Отзыв на Яндекс Картах</div>
+      <div class="pb pb-gis" data-i="sc.b3">📍 Отзыв в 2ГИС</div>
+      <div class="phone-or" data-i="sc.or">и ещё</div>
+      <div class="pb pb-ig" data-i="sc.b4">📸 Подписаться в Instagram</div>
+      <div class="pb pb-tg" data-i="sc.b5">✈️ Наш Telegram-канал</div>
+    </div>
+
+    <div class="cards" style="margin-top:14px">
+      <div class="c rv"><div class="c-ico i-mint">🎛</div><h3 data-i="sc.1h">Вы выбираете, что показывать</h3><p data-i="sc.1p">Только Google? Пожалуйста. Все шесть? Тоже. Каждая кнопка включается отдельно для каждого филиала.</p></div>
+      <div class="c rv"><div class="c-ico i-purple">🏷</div><h3 data-i="sc.2h">Ваш логотип на экране</h3><p data-i="sc.2p">Гость видит логотип и название именно вашего заведения — не безликую страницу.</p></div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══ NFC vs QR ═══ -->
 <section>
   <div class="wrap">
@@ -623,8 +665,10 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
       <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.2h">Аналитика по периодам</b><span data-i="ow.2p">День, неделя, месяц или любой выбранный диапазон</span></div></div>
       <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.3h">Сравнение филиалов</b><span data-i="ow.3p">Видно, какая точка приносит больше отзывов</span></div></div>
       <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.4h">Отчёт в Telegram каждое утро</b><span data-i="ow.4p">Сканы, уникальные гости, конверсия и лучший филиал — в 8:00</span></div></div>
-      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.5h">Разделение NFC и QR</b><span data-i="ow.5p">Понятно, каким способом гости пользуются чаще</span></div></div>
-      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.6h">Постоянные обновления</b><span data-i="ow.6p">Платформа растёт — новые функции без доплат за карточку</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.5h">Куда переходят гости</b><span data-i="ow.5p">Сколько нажали Google, сколько Яндекс, сколько подписалось в Instagram — по каждой кнопке</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.6h">Приложение для Android</b><span data-i="ow.6p">Кабинет в кармане — иконка на экране, вход сохраняется, всё как в приложении</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.7h">Разделение NFC и QR</b><span data-i="ow.7p">Понятно, каким способом гости пользуются чаще</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.8h">Постоянные обновления</b><span data-i="ow.8p">Платформа растёт — новые функции без доплат за карточку</span></div></div>
     </div>
   </div>
 </section>
@@ -644,6 +688,7 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
       <div class="chip"><s>📱</s><span data-i="mt.7">Устройства гостей</span></div>
       <div class="chip"><s>🌐</s><span data-i="mt.8">Языки</span></div>
       <div class="chip"><s>📈</s><span data-i="mt.9">Динамика по дням</span></div>
+      <div class="chip"><s>👆</s><span data-i="mt.11">Переходы по кнопкам</span></div>
       <div class="chip"><s>📂</s><span data-i="mt.10">Выгрузка в CSV</span></div>
     </div>
   </div>
@@ -819,7 +864,10 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
     </div>
 
     <footer>
-      <b>BirTapCard</b>
+      <div style="display:flex;justify-content:center;margin-bottom:10px"><div class="logo-mark"><svg width="20" height="20" viewBox="0 0 512 512" fill="none" stroke="#04121C" stroke-width="46" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M166 214 L222 158 V378"/><path d="M280 172 a74 74 0 0 1 74 74"/><path d="M280 100 a146 146 0 0 1 146 146"/>
+        </svg></div></div>
+      <b class="wm">Bir<em class="tap">Tap</em>Card</b>
       <p data-i="foot">NFC + QR для роста репутации · Самарканд · Ташкент</p>
     </footer>
   </div>
@@ -837,7 +885,7 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 const UZ = {
 'brand.sub':'Reputatsiya qurilmasi',
 
-'hero.pill':'Biznes uchun NFC + QR',
+'hero.pill':'Bir teginish — bir sharh',
 'hero.h1':'Google\'da sharh qoldirish endi <em>oson</em>',
 'hero.sub':'15 soniya — va mamnun mehmon sharh qoldiradi. Ilovasiz, ortiqcha tushuntirishsiz. Telefonning bir teginishi.',
 'hero.tag':'Kassada turadi',
@@ -894,6 +942,14 @@ const UZ = {
 'dev.4h':'Quvvat talab qilmaydi',
 'dev.4p':'Na batareya, na internet, na quvvatlash. Yorliq passiv — yillar davomida ishlaydi.',
 
+'sc.eye':'Skandan keyingi ekran',
+'sc.h':'Bitta kartochka — sizni qidiradigan <em>barcha maydonchalar</em>',
+'sc.lead':'Mehmon telefonni tegizadi va darhol hammasini ko\'radi: Google\'da, Yandex Xaritalarda, 2GIS\'da sharh — va Instagram hamda Telegram\'ingizga obuna. Sharh qoldirdi — tugma o\'chadi, qolganlari kutadi.',
+'sc.p1':'Bizda yoqdimi?','sc.p2':'Muassasa nomi',
+'sc.b1':'⭐ Google\'da sharh qoldirish','sc.b2':'📍 Yandex Xaritalarda sharh','sc.b3':'📍 2GIS\'da sharh',
+'sc.or':'va yana','sc.b4':'📸 Instagram\'da obuna','sc.b5':'✈️ Telegram kanalimiz',
+'sc.1h':'Nimani ko\'rsatishni siz tanlaysiz','sc.1p':'Faqat Google? Marhamat. Barcha oltitasi? Ham mumkin. Har bir tugma har bir filial uchun alohida yoqiladi.',
+'sc.2h':'Ekranda sizning logotipingiz','sc.2p':'Mehmon aynan sizning muassasangiz logotipi va nomini ko\'radi — nomsiz sahifani emas.',
 'vs.eye':'Texnologiya',
 'vs.h':'Nega NFC oddiy QR\'dan tezroq',
 'vs.lead':'BirTapCard ikkala usulni ham qo\'llab-quvvatlaydi — lekin «bir zumda» degan tuyg\'uni aynan NFC beradi.',
@@ -920,13 +976,15 @@ const UZ = {
 'ow.2h':'Davrlar bo\'yicha tahlil','ow.2p':'Kun, hafta, oy yoki o\'zingiz tanlagan istalgan oraliq',
 'ow.3h':'Filiallarni taqqoslash','ow.3p':'Qaysi nuqta ko\'proq sharh keltirishi ko\'rinib turadi',
 'ow.4h':'Har kuni ertalab Telegram hisoboti','ow.4p':'Skanlar, noyob mehmonlar, konversiya va eng yaxshi filial — soat 8:00 da',
-'ow.5h':'NFC va QR alohida','ow.5p':'Mehmonlar qaysi usuldan ko\'proq foydalanishi aniq ko\'rinadi',
-'ow.6h':'Doimiy yangilanishlar','ow.6p':'Platforma o\'sadi — yangi imkoniyatlar uchun qo\'shimcha to\'lov yo\'q',
+'ow.5h':'Mehmonlar qayerga o\'tadi','ow.5p':'Nechta Google\'ni, nechta Yandex\'ni bosdi, nechtasi Instagram\'ga obuna bo\'ldi — har bir tugma bo\'yicha',
+'ow.6h':'Android uchun ilova','ow.6p':'Kabinet cho\'ntagingizda — ekranda ikonka, kirish saqlanadi, hammasi ilovadagidek',
+'ow.7h':'NFC va QR alohida','ow.7p':'Mehmonlar qaysi usuldan ko\'proq foydalanishi aniq ko\'rinadi',
+'ow.8h':'Doimiy yangilanishlar','ow.8p':'Platforma o\'sadi — yangi imkoniyatlar uchun qo\'shimcha to\'lov yo\'q',
 
 'mt.eye':'Ko\'rsatkichlar','mt.h':'Nimalarni kuzatish mumkin',
 'mt.1':'Skanerlashlar','mt.2':'Konversiya','mt.3':'Noyob mehmonlar','mt.4':'Faol soatlar',
 'mt.5':'Hafta kunlari','mt.6':'Eng yaxshi filial','mt.7':'Mehmon qurilmalari','mt.8':'Tillar',
-'mt.9':'Kunlik dinamika','mt.10':'CSV\'ga yuklash',
+'mt.9':'Kunlik dinamika','mt.10':'CSV\'ga yuklash','mt.11':'Tugmalar bo\'yicha o\'tishlar',
 
 'cm.eye':'Taqqoslash','cm.h':'Oddiy <em>QR-stikerdan</em> nimasi bilan ustun','cm.old':'Oddiy QR',
 'cm.r1':'O\'qish usuli','cm.r1a':'faqat QR','cm.r1b':'NFC + QR',
