@@ -15,6 +15,7 @@ import {
   Note, Panel, Segmented, Skeleton, SkeletonRows,
 } from '@/components/ui/kit'
 import { useToast } from '@/components/ui/toast'
+import { ReviewsPanel, type ReviewSnapshot } from '@/components/reviews-panel'
 
 /* ─── Типы ───────────────────────────────────────────────────────────────── */
 
@@ -69,6 +70,8 @@ export default function DashboardPage() {
   const [langMode, setLangMode] = useState<'lang' | 'type'>('type')
   const [topBranches, setTopBranches] = useState<BranchStat[]>([])
   const [clicks, setClicks] = useState<ClickRow[]>([])
+  const [snapshots, setSnapshots] = useState<ReviewSnapshot[]>([])
+  const [since, setSince] = useState('')
   const [loading, setLoading] = useState(true)
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null)
 
@@ -100,6 +103,16 @@ export default function DashboardPage() {
     const supabase = createClient()
     const days = parseInt(tab)
     const since = new Date(Date.now() - days * 86400000).toISOString()
+    setSince(since)
+
+    // Снимки отзывов Google: берём с запасом в 2 дня до начала периода,
+    // чтобы был снимок «на старте» и прирост считался честно
+    let snapQuery = supabase
+      .from('review_snapshots')
+      .select('branch_id, rating, review_count, reviews, captured_at, branches(name)')
+      .gte('captured_at', new Date(Date.now() - (days + 2) * 86400000).toISOString())
+      .order('captured_at', { ascending: true })
+      .limit(3000)
 
     let clickQuery = supabase
       .from('link_clicks')
@@ -118,6 +131,7 @@ export default function DashboardPage() {
       // Менеджер видит только свой филиал
       query = query.eq('branch_id', profile.branch_id)
       clickQuery = clickQuery.eq('branch_id', profile.branch_id)
+      snapQuery = snapQuery.eq('branch_id', profile.branch_id)
     } else if (profile.role === 'owner' && profile.company_id) {
       // Владелец — все филиалы своей компании (RLS дублирует ограничение)
       const { data: branchIds } = await supabase
@@ -128,6 +142,7 @@ export default function DashboardPage() {
       if (ids.length > 0) {
         query = query.in('branch_id', ids)
         clickQuery = clickQuery.in('branch_id', ids)
+        snapQuery = snapQuery.in('branch_id', ids)
       } else {
         setEvents([]); setDayData([]); setDeviceData([]); setLangData([]); setTopBranches([]); setClicks([])
         setLoading(false)
@@ -136,10 +151,12 @@ export default function DashboardPage() {
     }
     // super_admin — без фильтра
 
-    const [{ data: rawEvents }, { data: rawClicks }] = await Promise.all([query, clickQuery])
+    const [{ data: rawEvents }, { data: rawClicks }, { data: rawSnaps }] = await Promise.all([query, clickQuery, snapQuery])
     const ev: ScanEvent[] = (rawEvents as ScanEvent[] | null) ?? []
     setEvents(ev)
     setClicks((rawClicks as ClickRow[] | null) ?? [])
+    // Таблицы может ещё не быть (миграция 0003) — тогда просто пусто
+    setSnapshots((rawSnaps as unknown as ReviewSnapshot[] | null) ?? [])
 
     // По дням
     const byDay: Record<string, { nfc: number; qr: number }> = {}
@@ -368,6 +385,16 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+
+      {/* ── Реальные отзывы в Google ──────────────────────────────────── */}
+      <ReviewsPanel
+        snapshots={snapshots}
+        since={since}
+        scans={events.length}
+        loading={loading}
+        canSync={role === 'super_admin'}
+        onSynced={() => loadData(true)}
+      />
 
       {/* ── AI-инсайты (super_admin и owner) ──────────────────────────── */}
       {(role === 'super_admin' || role === 'owner') && (

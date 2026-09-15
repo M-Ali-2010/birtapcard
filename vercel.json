@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/daily-report",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/reviews-sync",
+      "schedule": "30 2 * * *"
     }
   ]
 }

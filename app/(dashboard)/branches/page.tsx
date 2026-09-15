@@ -8,6 +8,7 @@ import { useProfile } from '@/lib/hooks'
 import { REFRESH_EVENT } from '@/components/nav-config'
 import { plural, shortDate, slugify } from '@/lib/format'
 import { Icon } from '@/components/ui/icons'
+import { extractPlaceId } from '@/lib/google-places'
 import {
   AccessDenied, Badge, Button, CopyLine, EmptyState, Fab, Field, IconButton, KpiCard,
   KpiSkeleton, Modal, Note, Panel, SearchInput, SkeletonRows, Switch,
@@ -81,6 +82,7 @@ type Branch = {
   name: string
   slug: string
   google_url: string
+  google_place_id: string | null
   instagram_url: string | null
   yandex_url: string | null
   gis_url: string | null
@@ -138,6 +140,7 @@ function BranchModal({
   const [name, setName] = useState(branch?.name ?? '')
   const [slug, setSlug] = useState(branch?.slug ?? '')
   const [googleUrl, setGoogleUrl] = useState(branch?.google_url ?? '')
+  const [placeId, setPlaceId] = useState(branch?.google_place_id ?? '')
   const [instagram, setInstagram] = useState(branch?.instagram_url ?? '')
   const [yandex, setYandex] = useState(branch?.yandex_url ?? '')
   const [gis, setGis] = useState(branch?.gis_url ?? '')
@@ -180,6 +183,7 @@ function BranchModal({
             name: name.trim(),
             slug: slug.trim(),
             google_url: googleUrl.trim(),
+            google_place_id: placeId.trim() || null,
             instagram_url: normalizeInstagram(instagram),
             yandex_url: yandex.trim() || null,
             gis_url: gis.trim() || null,
@@ -207,6 +211,7 @@ function BranchModal({
             name: name.trim(),
             slug: slug.trim(),
             google_url: googleUrl.trim(),
+            google_place_id: placeId.trim() || null,
             instagram_url: normalizeInstagram(instagram),
             yandex_url: yandex.trim() || null,
             gis_url: gis.trim() || null,
@@ -296,8 +301,23 @@ function BranchModal({
         hint="После скана NFC или QR гость попадёт именно сюда."
       >
         <input className="input" value={googleUrl} inputMode="url"
-          onChange={e => setGoogleUrl(e.target.value)}
+          onChange={e => {
+            setGoogleUrl(e.target.value)
+            const derived = extractPlaceId(e.target.value)
+            if (derived) setPlaceId(derived)
+          }}
           placeholder="https://g.page/r/…/review" />
+      </Field>
+
+      <Field
+        label="Google Place ID"
+        hint={placeId
+          ? 'По нему считаются реальные отзывы и рейтинг в Google.'
+          : 'Нужен для подсчёта реальных отзывов. Из ссылки вида search.google.com/local/writereview?placeid=… подставляется сам; для g.page-ссылок вставьте вручную.'}
+      >
+        <input className="input mono" value={placeId}
+          onChange={e => setPlaceId(e.target.value.trim())}
+          placeholder="ChIJ…" />
       </Field>
 
       <Field
@@ -436,13 +456,16 @@ function BranchesView() {
     setLoading(true)
     const supabase = createClient()
 
-    const [companiesRes, branchesRes] = await Promise.all([
+    const BASE = 'id, company_id, name, slug, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, paid_until, nfc_token, qr_token, nfc_url, qr_url, qr_image_url, active, created_at, companies(name, slug)'
+    const selectBranches = (cols: string) =>
+      supabase.from('branches').select(cols).order('created_at', { ascending: false })
+
+    const [companiesRes, firstTry] = await Promise.all([
       supabase.from('companies').select('id, name, active').order('name'),
-      supabase
-        .from('branches')
-        .select('id, company_id, name, slug, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, paid_until, nfc_token, qr_token, nfc_url, qr_url, qr_image_url, active, created_at, companies(name, slug)')
-        .order('created_at', { ascending: false }),
+      selectBranches(`${BASE}, google_place_id`),
     ])
+    // Пока миграция 0003 (google_place_id) не выполнена — список не должен пропадать
+    const branchesRes = firstTry.error ? await selectBranches(BASE) : firstTry
 
     setCompanies((companiesRes.data as CompanyOption[] | null) ?? [])
     setBranches((branchesRes.data as unknown as Branch[] | null) ?? [])

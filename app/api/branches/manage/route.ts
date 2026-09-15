@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
+import { extractPlaceId } from '@/lib/google-places'
 
 /** Fetches the role of the currently authenticated user. Returns null if unauthenticated. */
 async function getAuthenticatedRole(): Promise<{ userId: string; role: string } | null> {
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
   if (auth.role !== 'super_admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await request.json()
-  const { company_id, name, slug, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, paid_until, nfc_token, qr_token, active } = body
+  const { company_id, name, slug, google_url, google_place_id, instagram_url, yandex_url, gis_url, telegram_url, bot_url, paid_until, nfc_token, qr_token, active } = body
 
   if (!company_id || !name || !slug || !google_url || !nfc_token || !qr_token) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
       name,
       slug,
       google_url,
+      google_place_id: google_place_id || extractPlaceId(google_url),
       instagram_url: instagram_url || null,
       yandex_url: yandex_url || null,
       gis_url: gis_url || null,
@@ -80,11 +82,16 @@ export async function PUT(request: NextRequest) {
   // Обновляем ТОЛЬКО присланные поля. Тумблер «активен» шлёт одно поле —
   // остальные (ссылки, срок подписки) при этом не должны затираться в null.
   const PLAIN = ['company_id', 'name', 'slug', 'google_url', 'active'] as const
-  const NULLABLE = ['instagram_url', 'yandex_url', 'gis_url', 'telegram_url', 'bot_url', 'paid_until'] as const
+  const NULLABLE = ['google_place_id', 'instagram_url', 'yandex_url', 'gis_url', 'telegram_url', 'bot_url', 'paid_until'] as const
 
   const update: Record<string, unknown> = {}
   for (const k of PLAIN) if (k in body) update[k] = body[k]
   for (const k of NULLABLE) if (k in body) update[k] = body[k] || null
+  // Place ID можно не вводить — достаём из ссылки на отзыв
+  if ('google_url' in body && !update.google_place_id) {
+    const derived = extractPlaceId(body.google_url)
+    if (derived) update.google_place_id = derived
+  }
 
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })

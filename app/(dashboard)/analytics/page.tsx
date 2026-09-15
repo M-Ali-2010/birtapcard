@@ -30,12 +30,14 @@ type ScanEvent = {
 type BranchOption = { id: string; name: string; company: string }
 type ClickRow = { branch_id: string; target: string }
 type Clicks = Record<string, number>
+type SnapRow = { branch_id: string; rating: number | null; review_count: number; captured_at: string }
 type BranchRow = {
   id: string; name: string; company: string
   nfc: number; qr: number; total: number; unique: number; conversion: number
   clicks: number; byTarget: Clicks
+  reviews: number; reviewsTotal: number; rating: number | null   // реальные отзывы Google за период / всего / рейтинг
 }
-type SortKey = 'total' | 'nfc' | 'qr' | 'unique' | 'conversion' | 'clicks'
+type SortKey = 'total' | 'nfc' | 'qr' | 'unique' | 'conversion' | 'clicks' | 'reviews'
 
 const TARGET_LABEL: Record<string, string> = {
   google: 'Google', yandex: 'Яндекс', gis: '2ГИС', instagram: 'Instagram', telegram: 'Telegram', bot: 'Бот',
@@ -50,7 +52,7 @@ function clicksSummary(byTarget: Clicks): string {
 const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
 const SORT_LABELS: Record<SortKey, string> = {
-  total: 'Всего', nfc: 'NFC', qr: 'QR', unique: 'Уникальных', conversion: 'Конверсия', clicks: 'Переходы',
+  total: 'Всего', nfc: 'NFC', qr: 'QR', unique: 'Уникальных', conversion: 'Конверсия', clicks: 'Переходы', reviews: 'Отзывы',
 }
 
 /* ─── Страница ───────────────────────────────────────────────────────────── */
@@ -86,6 +88,7 @@ function AnalyticsView() {
   const [branchFilter, setBranchFilter] = useState<string>(params.get('branch') ?? 'all')
   const [events, setEvents] = useState<ScanEvent[]>([])
   const [clicks, setClicks] = useState<ClickRow[]>([])
+  const [snaps, setSnaps] = useState<SnapRow[]>([])
   const [loading, setLoading] = useState(true)
   const [sortKey, setSortKey] = useState<SortKey>('total')
   const [sortAsc, setSortAsc] = useState(false)
@@ -147,18 +150,30 @@ function AnalyticsView() {
       .order('scanned_at', { ascending: false })
       .limit(5000)
 
+    // Снимки отзывов Google с запасом до начала периода — для честного прироста
+    let snapQuery = supabase
+      .from('review_snapshots')
+      .select('branch_id, rating, review_count, captured_at')
+      .gte('captured_at', new Date(new Date(since).getTime() - 2 * 86400000).toISOString())
+      .lte('captured_at', until)
+      .order('captured_at', { ascending: true })
+      .limit(5000)
+
     // Менеджер филиала жёстко привязан к своей точке
     if (profile.role === 'branch_manager' && profile.branch_id) {
       query = query.eq('branch_id', profile.branch_id)
       clickQuery = clickQuery.eq('branch_id', profile.branch_id)
+      snapQuery = snapQuery.eq('branch_id', profile.branch_id)
     } else if (branchFilter !== 'all') {
       query = query.eq('branch_id', branchFilter)
       clickQuery = clickQuery.eq('branch_id', branchFilter)
+      snapQuery = snapQuery.eq('branch_id', branchFilter)
     }
 
-    const [{ data }, { data: clickData }] = await Promise.all([query, clickQuery])
+    const [{ data }, { data: clickData }, { data: snapData }] = await Promise.all([query, clickQuery, snapQuery])
     setEvents((data as ScanEvent[] | null) ?? [])
     setClicks((clickData as ClickRow[] | null) ?? [])
+    setSnaps((snapData as SnapRow[] | null) ?? [])
     setLoading(false)
   }, [since, until, branchFilter, profile, profileLoaded])
 
@@ -229,6 +244,7 @@ function AnalyticsView() {
           name: e.branches?.name ?? '—',
           company: e.branches?.companies?.name ?? '—',
           nfc: 0, qr: 0, total: 0, unique: 0, conversion: 0, clicks: 0, byTarget: {},
+          reviews: 0, reviewsTotal: 0, rating: null,
         }
       }
       const row = map[id]
@@ -246,12 +262,25 @@ function AnalyticsView() {
       row.byTarget[c.target] = (row.byTarget[c.target] ?? 0) + 1
     })
 
+    // Отзывы Google: последний снимок − снимок на начало периода
+    const byBranch: Record<string, SnapRow[]> = {}
+    snaps.forEach(sn => { (byBranch[sn.branch_id] ??= []).push(sn) })
+    for (const [id, arr] of Object.entries(byBranch)) {
+      const row = map[id]
+      if (!row) continue
+      const latest = arr[arr.length - 1]
+      const before = [...arr].reverse().find(x => x.captured_at <= since) ?? arr[0]
+      row.reviewsTotal = latest.review_count
+      row.reviews = Math.max(0, latest.review_count - before.review_count)
+      row.rating = latest.rating
+    }
+
     const q = search.trim().toLowerCase()
     return Object.values(map)
       .map(r => ({ ...r, conversion: pct(r.unique, r.total) }))
       .filter(r => !q || r.name.toLowerCase().includes(q) || r.company.toLowerCase().includes(q))
       .sort((a, b) => (sortAsc ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey]))
-  }, [events, clicks, sortKey, sortAsc, search])
+  }, [events, clicks, snaps, since, sortKey, sortAsc, search])
 
   function toggleSort(key: SortKey) {
     if (key === sortKey) setSortAsc(v => !v)
@@ -261,10 +290,11 @@ function AnalyticsView() {
   function exportCsv() {
     downloadCsv(
       `birtapcard-analytics-${new Date().toISOString().slice(0, 10)}.csv`,
-      ['Филиал', 'Ресторан', 'NFC', 'QR', 'Всего', 'Уникальных', 'Конверсия %', 'Переходы', 'Google', 'Яндекс', '2ГИС', 'Instagram', 'Telegram', 'Бот'],
+      ['Филиал', 'Ресторан', 'NFC', 'QR', 'Всего', 'Уникальных', 'Конверсия %', 'Переходы', 'Google', 'Яндекс', '2ГИС', 'Instagram', 'Telegram', 'Бот', 'Новых отзывов Google', 'Всего отзывов Google', 'Рейтинг Google'],
       branchRows.map(r => [
         r.name, r.company, r.nfc, r.qr, r.total, r.unique, r.conversion, r.clicks,
         ...TARGET_ORDER.map(k => r.byTarget[k] ?? 0),
+        r.reviews, r.reviewsTotal, r.rating ?? '',
       ]),
     )
     toast('Файл выгружен', { kind: 'success', desc: `${branchRows.length} строк в CSV` })
@@ -461,6 +491,9 @@ function AnalyticsView() {
                   <Badge tone="orange">QR {r.qr}</Badge>
                   <Badge tone="blue">уник. {r.unique}</Badge>
                   <Badge tone="purple">{r.conversion}%</Badge>
+                  {r.reviewsTotal > 0 && (
+                    <Badge tone="orange">★ {r.rating?.toFixed(1) ?? '—'} · +{r.reviews}</Badge>
+                  )}
                 </div>
                 {r.clicks > 0 && (
                   <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 8 }}>
@@ -503,6 +536,16 @@ function AnalyticsView() {
                       <div className="mono" style={{ fontWeight: 700 }}>{r.clicks}</div>
                       {r.clicks > 0 && (
                         <div style={{ fontSize: 10.5, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{clicksSummary(r.byTarget)}</div>
+                      )}
+                    </td>
+                    <td className="ta-r">
+                      <div className="mono" style={{ fontWeight: 700, color: r.reviews > 0 ? 'var(--mint)' : undefined }}>
+                        {r.reviewsTotal > 0 ? `+${r.reviews}` : '—'}
+                      </div>
+                      {r.reviewsTotal > 0 && (
+                        <div style={{ fontSize: 10.5, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                          всего {r.reviewsTotal} · ★ {r.rating?.toFixed(1) ?? '—'}
+                        </div>
                       )}
                     </td>
                   </tr>
