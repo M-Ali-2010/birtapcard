@@ -217,6 +217,14 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
 .brand-name{font-size:15.5px;font-weight:800;letter-spacing:-.02em}
 .brand-name em{font-style:normal;color:#00D9AE}
 .brand-tag{color:#55637F;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.langs{display:inline-flex;gap:4px;padding:4px;margin-bottom:18px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+.lang{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;border:0;
+  background:transparent;color:#8B9BB8;font:700 11.5px/1 inherit;font-family:inherit;letter-spacing:.06em;cursor:pointer;
+  -webkit-tap-highlight-color:transparent
+}
+.lang span{font-size:15px;line-height:1}
+.lang.on{background:#EDF2FA;color:#04121C}
 .thanks{
   display:inline-flex;align-items:center;gap:7px;margin-bottom:16px;
   color:#00D9AE;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase
@@ -225,6 +233,12 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
 </head>
 <body>
 <div class="box">
+
+  <div class="langs" role="group" aria-label="Language">
+    <button type="button" class="lang" data-l="ru"><span>🇷🇺</span>RU</button>
+    <button type="button" class="lang" data-l="uz"><span>🇺🇿</span>UZ</button>
+    <button type="button" class="lang" data-l="en"><span>🇬🇧</span>EN</button>
+  </div>
 
 ${logo}
   <div class="thanks"><span>★</span><span id="thx">Понравилось у нас?</span></div>
@@ -254,24 +268,51 @@ ${yandexBtn}${gisBtn}${followBlock}
   var $ = function(id){ return document.getElementById(id) };
   var setText = function(id, t){ var e = $(id); if (e) e.textContent = t };
 
-  // Узбекский по умолчанию, русский — если язык телефона русский
-  var ru = (navigator.language || "").toLowerCase().indexOf("ru") === 0;
-  if (!ru) {
-    document.documentElement.lang = "uz";
-    setText("thx", "Bizda yoqdimi?");
-    $("h").innerHTML = ${hasFollowJs}
-      ? "Sharh qoldiring<br>va obuna bo'ling"
-      : "Iltimos, biz haqimizda<br>sharh qoldiring";
-    setText("reviewText", "Google'da sharh qoldirish");
-    setText("yaText", "Yandex Xaritalarda sharh");
-    setText("gisText", "2GIS'da sharh");
-    setText("orText", "va yana");
-    setText("btnText", "Instagram'da obuna");
-    setText("tgText", "Telegram kanalimiz");
-    setText("botText", "Telegram botimiz");
-    setText("sub", "Yangiliklar, aksiyalar va tadbirlar — avval obunachilarga");
-    setText("brandTag", "Bir teginish — bir sharh");
+  // Три языка: русский, узбекский, английский. Выбор гостя запоминаем;
+  // по умолчанию — язык телефона (ru → RU, uz → UZ, остальное → EN).
+  var FOLLOW = ${hasFollowJs};
+  var T = {
+    ru: { thx: "Понравилось у нас?", h: FOLLOW ? "Оставьте отзыв<br>и подпишитесь" : "Оставьте, пожалуйста,<br>отзыв о нас",
+          reviewText: "Оставить отзыв в Google", yaText: "Отзыв на Яндекс Картах", gisText: "Отзыв в 2ГИС", orText: "и ещё",
+          btnText: "Подписаться в Instagram", tgText: "Наш Telegram-канал", botText: "Наш Telegram-бот",
+          sub: "Новости, акции и события — первыми у подписчиков", brandTag: "Одно касание — один отзыв",
+          thanks: "Спасибо за отзыв", hFollow: "Осталось подписаться<br>на нас", hDone: "Спасибо,<br>это очень помогает" },
+    uz: { thx: "Bizda yoqdimi?", h: FOLLOW ? "Sharh qoldiring<br>va obuna bo'ling" : "Iltimos, biz haqimizda<br>sharh qoldiring",
+          reviewText: "Google'da sharh qoldirish", yaText: "Yandex Xaritalarda sharh", gisText: "2GIS'da sharh", orText: "va yana",
+          btnText: "Instagram'da obuna", tgText: "Telegram kanalimiz", botText: "Telegram botimiz",
+          sub: "Yangiliklar, aksiyalar va tadbirlar — avval obunachilarga", brandTag: "Bir teginish — bir sharh",
+          thanks: "Sharh uchun rahmat", hFollow: "Endi bizga obuna<br>bo'lish qoldi", hDone: "Rahmat,<br>bu juda yordam beradi" },
+    en: { thx: "Enjoyed your visit?", h: FOLLOW ? "Leave a review<br>and follow us" : "Please leave us<br>a review",
+          reviewText: "Review on Google", yaText: "Review on Yandex Maps", gisText: "Review on 2GIS", orText: "and also",
+          btnText: "Follow on Instagram", tgText: "Our Telegram channel", botText: "Our Telegram bot",
+          sub: "News, deals and events — followers hear first", brandTag: "One tap — one review",
+          thanks: "Thanks for your review", hFollow: "One more thing —<br>follow us", hDone: "Thank you,<br>it really helps" }
+  };
+  var lang = "en";
+  try { lang = localStorage.getItem("btc:lang") || "" } catch(e){}
+  if (!T[lang]) {
+    var nl = (navigator.language || "").toLowerCase();
+    lang = nl.indexOf("ru") === 0 ? "ru" : nl.indexOf("uz") === 0 ? "uz" : "en";
   }
+  var reviewed = false;
+  function apply(){
+    var t = T[lang];
+    document.documentElement.lang = lang;
+    ["reviewText","yaText","gisText","orText","btnText","tgText","botText","sub","brandTag"].forEach(function(id){ setText(id, t[id]) });
+    if (reviewed) { setText("thx", t.thanks); $("h").innerHTML = FOLLOW ? t.hFollow : t.hDone; }
+    else { setText("thx", t.thx); $("h").innerHTML = t.h; }
+    [].slice.call(document.querySelectorAll(".lang")).forEach(function(b){
+      b.classList.toggle("on", b.getAttribute("data-l") === lang);
+    });
+  }
+  [].slice.call(document.querySelectorAll(".lang")).forEach(function(b){
+    b.addEventListener("click", function(){
+      lang = b.getAttribute("data-l");
+      try { localStorage.setItem("btc:lang", lang) } catch(e){}
+      apply();
+    });
+  });
+  apply();
 
   // Считаем нажатия: sendBeacon доживает даже если вкладка тут же уходит на другой сайт
   var TOKEN = ${tokenJs};
@@ -286,18 +327,11 @@ ${yandexBtn}${gisBtn}${followBlock}
   }, true);
 
   var revs = [].slice.call(document.querySelectorAll(".rev"));
-  var thx = $("thx"), h = $("h");
 
   // Гость уже уходил оставлять отзыв — меняем шапку на благодарность
   function afterReview(){
-    thx.textContent = ru ? "Спасибо за отзыв" : "Sharh uchun rahmat";
-    if (${hasFollowJs}) {
-      h.innerHTML = ru
-        ? "Осталось подписаться<br>на нас"
-        : "Endi bizga obuna<br>bo'lish qoldi";
-    } else {
-      h.innerHTML = ru ? "Спасибо,<br>это очень помогает" : "Rahmat,<br>bu juda yordam beradi";
-    }
+    reviewed = true;
+    apply();
   }
 
   function mark(a, k){

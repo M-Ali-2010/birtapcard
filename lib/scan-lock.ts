@@ -110,13 +110,20 @@ p{color:#8B9BB8;font-size:14.5px;line-height:1.6;margin-bottom:24px}
 </div>
 <script>
 (function(){
-  var ru = (navigator.language || "").toLowerCase().indexOf("ru") === 0;
-  if (ru) return;
-  document.documentElement.lang = "uz";
-  document.getElementById("h").innerHTML = "Qurilma obunasi<br>tugagan";
-  document.getElementById("p").textContent = "Kartochka vaqtincha ishlamaydi. Qayta yoqish uchun qo'llab-quvvatlashga murojaat qiling — bu bir necha daqiqa oladi.";
-  document.getElementById("b").textContent = "Qo'llab-quvvatlashga yozish";
-  document.getElementById("brandTag").textContent = "Bir teginish — bir sharh";
+  var T = {
+    uz: { h: "Qurilma obunasi<br>tugagan", p: "Kartochka vaqtincha ishlamaydi. Qayta yoqish uchun qo'llab-quvvatlashga murojaat qiling — bu bir necha daqiqa oladi.", b: "Qo'llab-quvvatlashga yozish", t: "Bir teginish — bir sharh" },
+    en: { h: "Device subscription<br>has expired", p: "This card is paused. Contact support to reactivate it — it only takes a few minutes.", b: "Message support", t: "One tap — one review" }
+  };
+  var lang = "";
+  try { lang = localStorage.getItem("btc:lang") || "" } catch(e){}
+  if (!lang) { var nl = (navigator.language || "").toLowerCase(); lang = nl.indexOf("ru") === 0 ? "ru" : nl.indexOf("uz") === 0 ? "uz" : "en"; }
+  var t = T[lang];
+  if (!t) return;
+  document.documentElement.lang = lang;
+  document.getElementById("h").innerHTML = t.h;
+  document.getElementById("p").textContent = t.p;
+  document.getElementById("b").textContent = t.b;
+  document.getElementById("brandTag").textContent = t.t;
 })();
 </script>
 </body>
