@@ -444,6 +444,8 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
   body{padding-bottom:0}
   .trust b{font-size:44px}
 }
+.lang button{display:inline-flex;align-items:center;gap:5px}
+.lang .fl{font-size:14px;line-height:1}
 </style>
 </head>
 <body>
@@ -464,8 +466,9 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
       </div>
     </div>
     <div class="lang">
-      <button id="btn-ru" class="on" onclick="setLang('ru')">RU</button>
-      <button id="btn-uz" onclick="setLang('uz')">UZ</button>
+      <button id="btn-ru" class="on" onclick="setLang('ru')"><span class="fl">🇷🇺</span>RU</button>
+      <button id="btn-uz" onclick="setLang('uz')"><span class="fl">🇺🇿</span>UZ</button>
+      <button id="btn-en" onclick="setLang('en')"><span class="fl">🇬🇧</span>EN</button>
     </div>
   </div>
 </header>
@@ -483,7 +486,7 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
     </div>
 
     <div class="stats3">
-      <div class="stat"><b>15<small style="font-size:13px">сек</small></b><span data-i="hero.s1">от касания до отзыва</span></div>
+      <div class="stat"><b>15<small style="font-size:13px" data-i="hero.s1u">сек</small></b><span data-i="hero.s1">от касания до отзыва</span></div>
       <div class="stat"><b>0</b><span data-i="hero.s2">приложений ставить</span></div>
       <div class="stat"><b>24/7</b><span data-i="hero.s3">аналитика в кабинете</span></div>
     </div>
@@ -701,7 +704,7 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
     <h2 class="rv" data-i="cm.h">Чем это лучше обычного <em>QR-стикера</em></h2>
     <div class="cmp">
       <div class="cmp-row rv"><b data-i="cm.r1">Способ считывания</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r1a">только QR</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r1b">NFC + QR</span></div></div></div>
-      <div class="cmp-row rv"><b data-i="cm.r2">Скорость</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad">4–6 сек</span></div><div><i>BirTapCard</i><span class="good">1–2 сек</span></div></div></div>
+      <div class="cmp-row rv"><b data-i="cm.r2">Скорость</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r2a">4–6 сек</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r2b">1–2 сек</span></div></div></div>
       <div class="cmp-row rv"><b data-i="cm.r3">Аналитика сканирований</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.no">нет</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r3b">да, в реальном времени</span></div></div></div>
       <div class="cmp-row rv"><b data-i="cm.r4">Сравнение филиалов</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.no">нет</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.yes">да</span></div></div></div>
       <div class="cmp-row rv"><b data-i="cm.r5">Вид на кассе</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r5a">бумажный стикер</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r5b">премиальная карточка</span></div></div></div>
@@ -823,7 +826,7 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
         <div class="p-head">
           <div class="p-av">АИ</div>
           <div>
-            <b>Алим Ибрагимов</b>
+            <b data-i="ct.n1">Алим Ибрагимов</b>
             <span data-i="ct.f1">Основатель · Самарканд · привозит и устанавливает устройства</span>
           </div>
         </div>
@@ -1037,12 +1040,224 @@ const UZ = {
 'fin.h':'Har bir mamnun mehmon <em>yangi sharhga</em> aylanishi mumkin',
 'fin.p':'Faqat bu qadamni imkon qadar oson qilish kerak. Biz buni allaqachon qildik — endi kartochkani sizning kassangizga qo\'yish qoldi.',
 'cta.main2':'Telegram\'ga yozish','cta.sticky':'Muassasani ulash →',
-'ct.phone':'Telefon','ct.site':'Shaxsiy kabinet',
+'ct.phone':'Telefon','ct.site':'Shaxsiy kabinet','ct.n1':'Alim Ibragimov','hero.s1u':'son','cm.r2a':'4–6 son','cm.r2b':'1–2 son',
 'ct.f1':'Asoschi · Samarqand · qurilmalarni olib kelib o\'rnatadi',
 'ct.f2n':'Hammuassis',
 'ct.f2':'Toshkent · muassasalarni ulash va tarmoqlar bilan ishlash',
 'ct.insta':'Loyihaning rasmiy Instagram\'i — har kuni qurilma qaysi muassasalarga o\'rnatilishini ko\'rsatamiz',
 'foot':'Obro\' o\'sishi uchun NFC + QR · Samarqand · Toshkent'
+};
+const EN = {
+  "brand.sub": "Reputation device",
+  "hero.pill": "One tap — one review",
+  "hero.h1": "Google reviews just got <em>easier</em>",
+  "hero.sub": "15 seconds — and a happy guest leaves a review. No apps, no explaining. One tap of the phone.",
+  "hero.tag": "Sits at the counter",
+  "hero.s1": "from tap to review",
+  "hero.s2": "apps to install",
+  "hero.s3": "analytics in your dashboard",
+  "cta.main": "Get BirTapCard",
+  "cta.how": "How it works",
+  "trust.t": "venues in Samarkand already run BirTapCard <small data-i=\"trust.s\">and the first restaurants in Tashkent are being connected</small>",
+  "trust.s": "and the first restaurants in Tashkent are being connected",
+  "pr.eye": "The problem",
+  "pr.h": "Happy guests <em>don't leave reviews</em>. Not because they don't want to.",
+  "pr.lead": "Between “loved it” and an actual Google review stand four barriers. Each one costs you reputation.",
+  "pr.1h": "They forget instantly",
+  "pr.1p": "The guest walks out the door — and the thought of a review leaves with them. Intent lives for seconds.",
+  "pr.2h": "Too many steps",
+  "pr.2p": "Open Maps, find the venue, find the “reviews” button — five or six actions kill the desire.",
+  "pr.3h": "Nobody asked",
+  "pr.3p": "Without a clear, well-timed nudge the review simply never happens.",
+  "pr.4h": "Technical friction",
+  "pr.4p": "A dead battery, bad light for a QR code, an awkward camera — and the guest puts it off “for later”.",
+  "ps.eye": "The cost of silence",
+  "ps.h": "What missing reviews <em>cost a business</em>",
+  "ps.lead": "Your Google rating is the first thing a new guest sees. A gap in reviews becomes a gap in revenue.",
+  "ps.1": "of people read reviews before choosing a venue",
+  "ps.2": "more revenue from a one-star rating increase",
+  "ps.3": "avoid businesses with poor or outdated reviews",
+  "ps.4": "happy guests write reviews far less often than unhappy ones",
+  "ps.note": "Based on aggregated public marketing research on consumer behaviour and local business reputation.",
+  "sol.eye": "The solution",
+  "sol.h": "BirTapCard removes the most expensive word in business — <em>“later”</em>",
+  "sol.lead": "The card sits at the counter. The guest leaves a review in seconds — while the emotion is still fresh.",
+  "sol.1h": "The guest pays the bill",
+  "sol.1p": "Cashier: “If you enjoyed it — leave us a review”",
+  "sol.2h": "Taps the phone on NFC or scans the QR",
+  "sol.2p": "No apps, no sign-up",
+  "sol.3h": "The Google review page opens",
+  "sol.3p": "For exactly the right venue and branch",
+  "sol.4h": "Review published, rating goes up",
+  "sol.4p": "Stars and a couple of words — that's all it takes",
+  "t.2": "+2 sec",
+  "t.3": "+3 sec",
+  "t.4": "+10 sec",
+  "dev.eye": "The device",
+  "dev.h": "One object at the counter. <em>Two ways in</em>. Zero friction.",
+  "dev.1h": "NFC tag",
+  "dev.1p": "Just bring the phone close — Android and iPhone open the review page on their own, no scanning.",
+  "dev.2h": "QR code",
+  "dev.2p": "The fallback for any phone — point the camera and you're there, even if NFC is off.",
+  "dev.3h": "Durable body",
+  "dev.3p": "A compact table card — not afraid of water, sun or daily use.",
+  "dev.4h": "No power needed",
+  "dev.4p": "No batteries, no internet, no charging. The tag is passive — it works for years.",
+  "sc.eye": "The screen after the scan",
+  "sc.h": "One card — <em>every platform</em> where guests look for you",
+  "sc.lead": "The guest taps the phone and sees everything at once: a review on Google, Yandex Maps, 2GIS — and a follow on your Instagram and Telegram. Once a review is left, that button dims and the others wait.",
+  "sc.p1": "Enjoyed your visit?",
+  "sc.p2": "Venue name",
+  "sc.b1": "⭐ Review on Google",
+  "sc.b2": "📍 Review on Yandex Maps",
+  "sc.b3": "📍 Review on 2GIS",
+  "sc.or": "and also",
+  "sc.b4": "📸 Follow on Instagram",
+  "sc.b5": "✈️ Our Telegram channel",
+  "sc.1h": "You choose what to show",
+  "sc.1p": "Only Google? Sure. All six? Also fine. Every button is switched on separately for every branch.",
+  "sc.2h": "Your logo on the screen",
+  "sc.2p": "The guest sees the logo and name of your venue — not a faceless page.",
+  "vs.eye": "Technology",
+  "vs.h": "Why NFC beats a plain QR code",
+  "vs.lead": "BirTapCard supports both — but NFC is what creates that “instant” feeling.",
+  "vs.badge": "Faster",
+  "vs.n1": "One tap — no aiming the camera, no waiting for focus",
+  "vs.n2": "The review page opens in 1–2 seconds",
+  "vs.n3": "Feels like a premium, “smart” gesture",
+  "vs.q1": "Works on any phone, even without an NFC chip",
+  "vs.q2": "Needs a camera, light and aiming — 3–5 seconds slower",
+  "vs.q3": "Familiar and understood by everyone",
+  "pl.eye": "Owner dashboard",
+  "pl.h": "The card is only the beginning. The real product is <em>the platform</em>.",
+  "pl.lead": "The owner gets a dashboard: scans, conversion, branches — in real time, from the phone.",
+  "pl.dash": "Analytics · all branches",
+  "pl.upd": "updated just now",
+  "pl.k1": "NFC scans",
+  "pl.week": "this week",
+  "pl.k2": "QR scans",
+  "pl.k3": "Unique",
+  "pl.k3s": "real guests",
+  "pl.k4": "Conversion",
+  "pl.k4s": "reached Google",
+  "pl.ch": "Scans by day",
+  "pl.ch7": "7 days",
+  "pl.top": "Top branches",
+  "ow.eye": "What the owner gets",
+  "ow.h": "A reputation-growth tool, not just <em>a piece of plastic</em>",
+  "ow.1h": "Real-time statistics",
+  "ow.1p": "Every tap and scan shows up in the dashboard immediately",
+  "ow.2h": "Analytics by period",
+  "ow.2p": "Day, week, month or any custom range",
+  "ow.3h": "Branch comparison",
+  "ow.3p": "See which location brings in more reviews",
+  "ow.4h": "Telegram report every morning",
+  "ow.4p": "Scans, unique guests, conversion and the best branch — at 8:00",
+  "ow.5h": "Where guests go",
+  "ow.5p": "How many tapped Google, how many Yandex, how many followed on Instagram — per button",
+  "ow.6h": "Android app",
+  "ow.6p": "The dashboard in your pocket — an icon on the home screen, you stay signed in, works like a native app",
+  "ow.7h": "NFC vs QR split",
+  "ow.7p": "See which method guests use more often",
+  "ow.8h": "Constant updates",
+  "ow.8p": "The platform keeps growing — new features at no extra cost for the card",
+  "mt.eye": "Metrics",
+  "mt.h": "What you can track",
+  "mt.1": "Scans",
+  "mt.2": "Conversion",
+  "mt.3": "Unique guests",
+  "mt.4": "Peak hours",
+  "mt.5": "Days of the week",
+  "mt.6": "Best branch",
+  "mt.7": "Guest devices",
+  "mt.8": "Languages",
+  "mt.9": "Daily trend",
+  "mt.10": "CSV export",
+  "mt.11": "Button clicks",
+  "cm.eye": "Comparison",
+  "cm.h": "How it beats a plain <em>QR sticker</em>",
+  "cm.old": "Plain QR",
+  "cm.r1": "How it's read",
+  "cm.r1a": "QR only",
+  "cm.r1b": "NFC + QR",
+  "cm.r2": "Speed",
+  "cm.r3": "Scan analytics",
+  "cm.r3b": "yes, in real time",
+  "cm.no": "no",
+  "cm.yes": "yes",
+  "cm.r4": "Branch comparison",
+  "cm.r5": "Look at the counter",
+  "cm.r5a": "paper sticker",
+  "cm.r5b": "premium card",
+  "cm.r6": "Durability",
+  "cm.r6a": "fades, tears",
+  "cm.r6b": "durable body",
+  "wh.eye": "Who it's for",
+  "wh.h": "Any business with a counter and happy guests",
+  "wh.1": "Restaurants",
+  "wh.2": "Coffee shops",
+  "wh.3": "Hookah lounges",
+  "wh.4": "Hotels",
+  "wh.5": "Beauty salons",
+  "wh.6": "Car services",
+  "wh.7": "Shops",
+  "wh.8": "Chains & franchises",
+  "pz.eye": "Pricing",
+  "pz.h": "What it costs",
+  "pz.lead": "Two options. Both include the device, on-site installation and the owner dashboard.",
+  "pz.m": "Monthly",
+  "pz.y": "Yearly",
+  "pz.ybadge": "better value",
+  "pz.sum": "UZS",
+  "pz.mnote": "Device, connection, installation and the first month — all included",
+  "pz.then": "then",
+  "pz.permonth": "UZS per month",
+  "pz.ynote": "12 months in one payment. Everything the monthly plan has",
+  "pz.save": "Save 97&nbsp;000 UZS — two months free",
+  "pz.now": "What you get right away",
+  "pz.n1": "The <b>NFC + QR</b> device",
+  "pz.n2": "Connection to your venue and redirect setup to Google",
+  "pz.n3": "On-site installation and a working check",
+  "pz.sub": "What the subscription includes",
+  "pz.s1": "<b>Owner dashboard</b> with statistics: how many guests scanned, how many reviews were left, on which days and hours. The platform keeps evolving — new features are included for free",
+  "pz.s2": "<b>“Follow us on Instagram” screen</b> after the review — you get a follower, not just a review",
+  "pz.s3": "<b>Device replacement</b> if it breaks or goes missing — twice a year for free, then at device cost",
+  "pz.s4": "<b>Direct support</b> — message us on Telegram, no tickets or call centres",
+  "pz.lockh": "Your price is locked in.",
+  "pz.lockp": "The platform grows and gains features — but for those who join now the subscription price won't change in a year or in three. Everything we add later, you get at no extra cost. New venues will pay more later — you won't.",
+  "pz.offh": "If the subscription isn't renewed.",
+  "pz.offp": "The redirect and the dashboard stop working; the device stays with you. You can resume at any time — at your locked-in price.",
+  "pz.term": "Connected within 1–2 days after confirmation",
+  "cta.price": "Get BirTapCard",
+  "fq.eye": "FAQ",
+  "fq.h": "The essentials, briefly",
+  "fq.1q": "Does the guest need an app or internet?",
+  "fq.1a": "No app. Just a phone with NFC or a camera. Internet is needed to open the Google page — everyone has it.",
+  "fq.2q": "What if I have several branches?",
+  "fq.2a": "Each branch gets its own card and its own link. In the dashboard you see both the big picture and a branch-by-branch comparison.",
+  "fq.3q": "Does the device need power or charging?",
+  "fq.3a": "No. The NFC tag is fully passive — it needs no power and works indefinitely.",
+  "fq.4q": "How fast is the setup?",
+  "fq.4a": "Usually within a day: we link the card to your Google Business profile, set up the dashboard and hand you the access.",
+  "fq.5q": "What if a guest wants to leave a bad review?",
+  "fq.5a": "The card is shown to guests who are happy — that's the cashier's or waiter's job. The tool amplifies what you already have: satisfied guests.",
+  "fq.6q": "Who installs the card?",
+  "fq.6a": "We do. We bring it, place it at the counter, connect the dashboard and show the staff how to offer it to guests.",
+  "fin.h": "Every happy guest can become <em>a new review</em>",
+  "fin.p": "All it takes is making that step effortless. We've already done it — what's left is putting the card on your counter.",
+  "cta.main2": "Message on Telegram",
+  "cta.sticky": "Get BirTapCard →",
+  "ct.phone": "Phone",
+  "ct.site": "Owner dashboard",
+  "ct.f1": "Founder · Samarkand · delivers and installs the devices",
+  "ct.f2n": "Co-founder",
+  "ct.f2": "Tashkent · onboarding venues and working with chains",
+  "ct.insta": "The project's official Instagram — every day we show which venues get the device",
+  "foot": "NFC + QR for reputation growth · Samarkand · Tashkent",
+  "ct.n1": "Alim Ibragimov",
+  "hero.s1u": "sec",
+  "cm.r2a": "4–6 sec",
+  "cm.r2b": "1–2 sec"
 };
 
 /* ─── Переключение языка ─────────────────────────────── */
@@ -1050,21 +1265,24 @@ const nodes = document.querySelectorAll('[data-i]');
 nodes.forEach(el => el.dataset.ruHtml = el.innerHTML);
 
 function setLang(l){
+  const D = l === 'uz' ? UZ : l === 'en' ? EN : null;
   nodes.forEach(el => {
     const k = el.dataset.i;
-    el.innerHTML = (l === 'uz' && UZ[k]) ? UZ[k] : el.dataset.ruHtml;
+    el.innerHTML = (D && D[k]) ? D[k] : el.dataset.ruHtml;
   });
-  document.documentElement.lang = l === 'uz' ? 'uz' : 'ru';
-  document.getElementById('btn-ru').classList.toggle('on', l !== 'uz');
-  document.getElementById('btn-uz').classList.toggle('on', l === 'uz');
+  document.documentElement.lang = l;
+  ['ru','uz','en'].forEach(x => document.getElementById('btn-' + x).classList.toggle('on', l === x));
   try { localStorage.setItem('btc-lang', l) } catch(e){}
 }
 
 (function initLang(){
   let l = null;
   try { l = localStorage.getItem('btc-lang') } catch(e){}
-  if (!l) l = (navigator.language || '').toLowerCase().startsWith('ru') ? 'ru' : 'uz';
-  if (l === 'uz') setLang('uz');
+  if (!['ru','uz','en'].includes(l)) {
+    const nl = (navigator.language || '').toLowerCase();
+    l = nl.startsWith('ru') ? 'ru' : nl.startsWith('uz') ? 'uz' : 'en';
+  }
+  if (l !== 'ru') setLang(l);
 })();
 
 /* ─── Появление блоков при прокрутке ─────────────────── */
