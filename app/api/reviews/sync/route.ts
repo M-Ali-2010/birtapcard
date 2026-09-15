@@ -18,8 +18,11 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.GOOGLE_PLACES_API_KEY ?? ''
     const { data: b } = await createServiceRoleClient().from('branches').select('name, google_place_id').not('google_place_id', 'is', null).limit(1).single()
     if (!b?.google_place_id) return NextResponse.json({ error: 'no place id' })
-    const res = await fetch(`https://places.googleapis.com/v1/places/${b.google_place_id}?languageCode=ru`, {
-      headers: { 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': 'rating,userRatingCount,reviews' }, cache: 'no-store',
+    const lc = request.nextUrl.searchParams.get('lc')
+    const fm = request.nextUrl.searchParams.get('fm') ?? 'rating,userRatingCount,reviews'
+    const pid = request.nextUrl.searchParams.get('pid') ?? b.google_place_id
+    const res = await fetch(`https://places.googleapis.com/v1/places/${pid}${lc ? `?languageCode=${lc}` : ''}`, {
+      headers: { 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': fm }, cache: 'no-store',
     })
     const text = await res.text()
     return NextResponse.json({ branch: b.name, status: res.status, body: text.slice(0, 3000) })
