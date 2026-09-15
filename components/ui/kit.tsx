@@ -21,9 +21,28 @@ export function Portal({ children }: { children: React.ReactNode }) {
 /** Плавающая кнопка действия для телефона. Рендерится в body — внутри .content
  *  position:fixed ломается анимацией страницы. Страница добавляет класс has-fab. */
 export function Fab({ icon = 'plus', label, onClick }: { icon?: IconName; label: string; onClick: () => void }) {
+  // Прячется при прокрутке вниз, чтобы не закрывать кнопки карточек; возвращается при прокрутке вверх
+  const [hidden, setHidden] = useState(false)
+  useEffect(() => {
+    let last = window.scrollY
+    let ticking = false
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const y = window.scrollY
+        if (y > last + 6 && y > 80) setHidden(true)
+        else if (y < last - 6) setHidden(false)
+        last = y
+        ticking = false
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
   return (
     <Portal>
-      <button className="fab" onClick={onClick} aria-label={label}>
+      <button className={`fab${hidden ? ' fab--hidden' : ''}`} onClick={onClick} aria-label={label}>
         <Icon name={icon} size={18} strokeWidth={2.4} /> {label}
       </button>
     </Portal>
@@ -637,15 +656,17 @@ export function KpiCard({
       className="kpi"
       style={{ ['--kpi-accent' as string]: a.color, ['--kpi-dim' as string]: a.dim }}
     >
-      {spark && spark.length > 1 && <Sparkline values={spark} color={a.color} />}
       <div className="kpi__top">
         <span className="kpi__label">{label}</span>
         <span className="kpi__icon"><Icon name={icon} size={16} /></span>
       </div>
-      <div className="kpi__value">
-        {loading ? <span style={{ opacity: 0.35 }}>—</span>
-          : typeof value === 'number' ? <AnimatedNumber value={value} suffix={suffix ?? ''} />
-          : value}
+      <div className="kpi__body">
+        <div className="kpi__value">
+          {loading ? <span style={{ opacity: 0.35 }}>—</span>
+            : typeof value === 'number' ? <AnimatedNumber value={value} suffix={suffix ?? ''} />
+            : value}
+        </div>
+        {spark && spark.length > 1 && <Sparkline values={spark} color={a.color} height={30} />}
       </div>
       <div className="kpi__foot">
         {delta && (

@@ -398,11 +398,12 @@ export default function CompaniesPage() {
             const branchCount = c.branches?.length ?? 0
             return (
               <div key={c.id} className="row-item">
-                <div
-                  className="thumb"
-                  style={c.logo_url ? { background: `url(${c.logo_url}) center/cover` } : undefined}
-                >
-                  {!c.logo_url && <Icon name="restaurants" size={20} style={{ color: 'var(--text-muted)' }} />}
+                <div className="thumb thumb--logo">
+                  <Icon name="restaurants" size={20} style={{ color: 'var(--text-muted)' }} />
+                  {c.logo_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={c.logo_url} alt="" onError={e => { e.currentTarget.style.display = 'none' }} />
+                  )}
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -410,8 +411,8 @@ export default function CompaniesPage() {
                     <span className="truncate" style={{ fontSize: 14, fontWeight: 650 }}>{c.name}</span>
                     <span className="hide-xs"><StatusBadge active={c.active} /></span>
                   </div>
-                  <div className="truncate" style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 3 }}>
-                    /{c.slug} · {branchCount} {plural(branchCount, ['филиал', 'филиала', 'филиалов'])} · c {shortDate(c.created_at)}
+                  <div className="row-item__meta" style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 3 }}>
+                    <span className="hide-xs">/{c.slug} · </span>{branchCount} {plural(branchCount, ['филиал', 'филиала', 'филиалов'])} · c {shortDate(c.created_at)}
                   </div>
                 </div>
 

@@ -112,7 +112,7 @@ export default function LoginPage() {
                   style={{
                     position: 'absolute', right: 8, top: '50%', translate: '0 -50%',
                     background: 'none', border: 'none', cursor: 'pointer',
-                    color: 'var(--text-muted)', padding: 6, display: 'flex',
+                    color: 'var(--text-muted)', padding: 10, display: 'flex', borderRadius: 8,
                   }}
                 >
                   <Icon name={showPassword ? 'eyeOff' : 'eye'} size={16} />

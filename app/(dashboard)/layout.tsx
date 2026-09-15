@@ -11,6 +11,8 @@ import { ThemeToggle } from '@/components/ui/theme'
 import { CommandPalette, useCommandHotkey } from '@/components/ui/command-palette'
 import { getNavByRole, flatNav, PAGE_META, requestRefresh } from '@/components/nav-config'
 import { haptic, isNativeApp } from '@/components/native-bridge'
+import { MoreSheet } from '@/components/more-sheet'
+import { useIsMobile } from '@/lib/hooks'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -18,6 +20,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { profile, role, loaded } = useProfile()
 
   const [drawer, setDrawer] = useState(false)
+  const [more, setMore] = useState(false)
+  const isMobile = useIsMobile()
   const [palette, setPalette] = useState(false)
   const [time, setTime] = useState('')
   const [pull, setPull] = useState(0)
@@ -41,7 +45,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [])
 
   // Меню закрывается при переходе
-  useEffect(() => { setDrawer(false) }, [pathname])
+  useEffect(() => { setDrawer(false); setMore(false) }, [pathname])
 
   // Блокировка прокрутки под открытым меню
   useEffect(() => {
@@ -187,7 +191,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <header className="topbar">
           <button
             className="icon-btn only-mobile"
-            onClick={() => setDrawer(true)}
+            onClick={() => (isMobile ? setMore(true) : setDrawer(true))}
             aria-label="Открыть меню"
           >
             <Icon name="menu" size={18} />
@@ -284,14 +288,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         ))}
         {showMore && (
           <button
-            className={`bottom-nav__item${drawer ? ' bottom-nav__item--active' : ''}`}
-            onClick={() => setDrawer(true)}
+            className={`bottom-nav__item${more || drawer ? ' bottom-nav__item--active' : ''}`}
+            onClick={() => setMore(true)}
           >
             <Icon name="more" size={19} />
             Ещё
           </button>
         )}
       </nav>
+
+      {more && (
+        <MoreSheet
+          items={navItems.filter(i => !quick.includes(i))}
+          name={profile?.full_name}
+          role={role}
+          onClose={() => setMore(false)}
+          onSearch={() => setPalette(true)}
+          onLogout={handleLogout}
+        />
+      )}
 
       <CommandPalette
         open={palette}

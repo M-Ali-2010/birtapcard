@@ -200,7 +200,7 @@ export default function SettingsPage() {
               style={{
                 position: 'absolute', right: 8, top: '50%', translate: '0 -50%',
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--text-muted)', padding: 6, display: 'flex',
+                color: 'var(--text-muted)', padding: 10, display: 'flex', borderRadius: 8,
               }}
             >
               <Icon name={showNew ? 'eyeOff' : 'eye'} size={16} />
@@ -243,7 +243,7 @@ export default function SettingsPage() {
               style={{
                 position: 'absolute', right: 8, top: '50%', translate: '0 -50%',
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--text-muted)', padding: 6, display: 'flex',
+                color: 'var(--text-muted)', padding: 10, display: 'flex', borderRadius: 8,
               }}
             >
               <Icon name={showConfirm ? 'eyeOff' : 'eye'} size={16} />

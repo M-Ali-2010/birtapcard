@@ -76,7 +76,7 @@ function QrCard({
           title={selected ? 'Убрать из печати' : 'Добавить в печать'}
           style={{
             position: 'absolute', top: 8, right: 8,
-            width: 26, height: 26, borderRadius: 8, cursor: 'pointer',
+            width: 32, height: 32, borderRadius: 10, cursor: 'pointer',
             display: 'grid', placeItems: 'center',
             background: selected ? 'var(--mint)' : 'rgba(255,255,255,0.92)',
             border: `1px solid ${selected ? 'var(--mint)' : '#CBD5E1'}`,

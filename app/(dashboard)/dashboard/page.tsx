@@ -66,6 +66,7 @@ export default function DashboardPage() {
   const [dayData, setDayData] = useState<DayPoint[]>([])
   const [deviceData, setDeviceData] = useState<Slice[]>([])
   const [langData, setLangData] = useState<Slice[]>([])
+  const [langMode, setLangMode] = useState<'lang' | 'type'>('type')
   const [topBranches, setTopBranches] = useState<BranchStat[]>([])
   const [clicks, setClicks] = useState<ClickRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -177,12 +178,26 @@ export default function DashboardPage() {
       const l = (e.browser_lang ?? 'unknown').split('-')[0].toLowerCase()
       langCount[l] = (langCount[l] ?? 0) + 1
     })
-    setLangData(
-      Object.entries(langCount)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([k, v], i) => ({ name: LANG_NAMES[k] ?? k.toUpperCase(), value: v, color: LANG_COLORS[i] }))
-    )
+    // Пока язык не пишется в базу, вместо бесполезного «UNKNOWN 100%»
+    // показываем разрез NFC / QR — он всегда есть и реально полезен
+    const known = Object.entries(langCount).filter(([k]) => k !== 'unknown' && k !== '')
+    if (known.length > 0) {
+      setLangMode('lang')
+      setLangData(
+        known
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([k, v], i) => ({ name: LANG_NAMES[k] ?? k.toUpperCase(), value: v, color: LANG_COLORS[i] }))
+      )
+    } else {
+      setLangMode('type')
+      const nfc = ev.filter(e => e.scan_type === 'nfc').length
+      const qr = ev.length - nfc
+      setLangData([
+        { name: 'NFC', value: nfc, color: 'var(--mint)' },
+        { name: 'QR', value: qr, color: 'var(--orange)' },
+      ].filter(d => d.value > 0))
+    }
 
     // Топ филиалов
     const branchCount: Record<string, { name: string; company: string; count: number }> = {}
@@ -426,7 +441,7 @@ export default function DashboardPage() {
             <Skeleton h={isMobile ? 190 : 224} r={12} />
           ) : (
             <ResponsiveContainer width="100%" height={isMobile ? 190 : 224}>
-              <AreaChart data={dayData} margin={{ top: 6, right: 6, left: -22, bottom: 0 }}>
+              <AreaChart data={dayData} margin={{ top: 6, right: 14, left: -22, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gNfc" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="var(--mint)" stopOpacity="0.35" />
@@ -545,7 +560,10 @@ export default function DashboardPage() {
               : <Donut data={deviceData} centerLabel="сканов" />}
         </Panel>
 
-        <Panel title="Языки" sub="Язык браузера гостя">
+        <Panel
+          title={langMode === 'lang' ? 'Языки' : 'NFC или QR'}
+          sub={langMode === 'lang' ? 'Язык браузера гостя' : 'Чем гости пользуются чаще'}
+        >
           {loading ? <Skeleton h={120} r={12} />
             : langData.length === 0
               ? <EmptyState icon="globe" title="Нет данных" />
