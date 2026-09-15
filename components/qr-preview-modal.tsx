@@ -5,15 +5,19 @@ import { Button, CopyField, Modal, Note } from './ui/kit'
 
 /** Увеличенный просмотр QR-кода с загрузкой PNG — общий для «Филиалов» и «QR-кодов». */
 export function QrPreviewModal({
-  title, sub, imageUrl, url, slug, onClose,
+  title, sub, imageUrl, url, slug, branchId, onClose,
 }: {
   title: string
   sub?: string
   imageUrl: string | null
   url?: string
   slug: string
+  branchId?: string
   onClose: () => void
 }) {
+  // Через свой домен скачивание работает и в браузере, и в приложении
+  const downloadHref = branchId ? `/api/branches/qr-download?id=${branchId}` : imageUrl ?? undefined
+
   return (
     <Modal
       width="narrow"
@@ -24,7 +28,7 @@ export function QrPreviewModal({
         <>
           <Button onClick={onClose}>Закрыть</Button>
           {imageUrl && (
-            <a href={imageUrl} download={`qr-${slug}.png`} style={{ textDecoration: 'none' }}>
+            <a href={downloadHref} download={`qr-${slug}.png`} style={{ textDecoration: 'none' }}>
               <span className="btn btn--primary btn--block">
                 <Icon name="download" size={16} /> Скачать PNG
               </span>

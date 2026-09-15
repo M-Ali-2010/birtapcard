@@ -102,7 +102,7 @@ function QrCard({
       <div className="row" style={{ gap: 7 }}>
         <Button size="sm" icon="eye" onClick={onPreview}>Просмотр</Button>
         {branch.qr_image_url ? (
-          <a href={branch.qr_image_url} download={`qr-${branch.slug}.png`} style={{ flex: 1, textDecoration: 'none' }}>
+          <a href={`/api/branches/qr-download?id=${branch.id}`} download={`qr-${branch.slug}.png`} style={{ flex: 1, textDecoration: 'none' }}>
             <span className="btn btn--primary btn--sm btn--block">
               <Icon name="download" size={13} /> PNG
             </span>
@@ -324,6 +324,7 @@ export default function QrCodesPage() {
           imageUrl={preview.qr_image_url}
           url={preview.qr_url}
           slug={preview.slug}
+          branchId={preview.id}
           onClose={() => setPreview(null)}
         />
       )}

@@ -707,6 +707,7 @@ function BranchesView() {
           imageUrl={qrPreview.qr_image_url}
           url={qrPreview.qr_url}
           slug={qrPreview.slug}
+          branchId={qrPreview.id}
           onClose={() => setQrPreview(null)}
         />
       )}
