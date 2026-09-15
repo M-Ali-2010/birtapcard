@@ -12,7 +12,7 @@ import { Icon } from '@/components/ui/icons'
 import { ChartLegend, ChartTooltip, Donut } from '@/components/ui/charts'
 import {
   Badge, Button, EmptyState, IconButton, KpiCard, KpiSkeleton,
-  Panel, Segmented, Skeleton, SkeletonRows,
+  Note, Panel, Segmented, Skeleton, SkeletonRows,
 } from '@/components/ui/kit'
 import { useToast } from '@/components/ui/toast'
 
@@ -270,8 +270,25 @@ export default function DashboardPage() {
     )
   }
 
+  // Новый аккаунт: профиль есть, но не привязан ни к ресторану, ни к филиалу —
+  // данных не будет, пока Super Admin не выдаст роль в «Пользователях»
+  const unlinked =
+    !!profile &&
+    ((profile.role === 'owner' && !profile.company_id) ||
+      (profile.role === 'branch_manager' && !profile.branch_id && !profile.company_id))
+
   return (
     <div className="stack">
+
+      {unlinked && (
+        <Note tone="warning" icon="alert">
+          <strong>Аккаунт ещё не подключён.</strong> Вы вошли, но администратор пока не выдал
+          вам роль и не привязал к ресторану — поэтому рестораны, филиалы и статистика пусты.
+          Напишите нам в Telegram:{' '}
+          <a href="https://t.me/Jrkhnv777" target="_blank" rel="noopener" style={{ color: 'var(--blue)' }}>@Jrkhnv777</a>
+          {' '}— подключим за пару минут.
+        </Note>
+      )}
 
       {/* ── Период + живой режим ──────────────────────────────────────── */}
       <div className="toolbar" style={{ marginBottom: 0 }}>
