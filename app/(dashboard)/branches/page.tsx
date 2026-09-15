@@ -270,7 +270,7 @@ function BranchModal({
         </>
       }
     >
-      <Field label="Ресторан">
+      <Field label="Ресторан" hint="Логотип на экране после скана берётся из карточки ресторана.">
         <select className="select" value={companyId} onChange={e => setCompanyId(e.target.value)}>
           {companies.length === 0 && <option value="">Нет ресторанов</option>}
           {companies.map(c => (

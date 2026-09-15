@@ -1173,3 +1173,9 @@ button { font-family: inherit; }
 
 .wordmark { font-weight: 800; letter-spacing: -0.035em; line-height: 1; }
 .wordmark em { font-style: normal; color: var(--mint); }
+
+/* ───── 11. Загрузка логотипа ресторана ───── */
+.logo-pick { display: flex; align-items: center; gap: 14px; }
+.logo-pick__thumb { width: 64px; height: 64px; border-radius: var(--r-lg); background-color: #fff; }
+.logo-pick__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.logo-pick .btn { cursor: pointer; }

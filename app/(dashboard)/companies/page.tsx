@@ -25,6 +25,33 @@ type Company = {
   branches?: { id: string }[] | null
 }
 
+/* ─── Подготовка логотипа ────────────────────────────────────────────────── */
+
+const LOGO_SIZE = 512
+
+/** Вписывает картинку в квадрат 512×512 (прозрачные поля) и отдаёт PNG data-URL. */
+function squareLogo(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const canvas = document.createElement('canvas')
+      canvas.width = LOGO_SIZE
+      canvas.height = LOGO_SIZE
+      const ctx = canvas.getContext('2d')
+      if (!ctx) { reject(new Error('canvas')); return }
+      const k = Math.min(LOGO_SIZE / img.width, LOGO_SIZE / img.height, 1)
+      const w = Math.round(img.width * k)
+      const h = Math.round(img.height * k)
+      ctx.drawImage(img, (LOGO_SIZE - w) / 2, (LOGO_SIZE - h) / 2, w, h)
+      resolve(canvas.toDataURL('image/png'))
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('decode')) }
+    img.src = url
+  })
+}
+
 /* ─── Модалка создания / редактирования ──────────────────────────────────── */
 
 function CompanyModal({
@@ -38,6 +65,9 @@ function CompanyModal({
   const [name, setName] = useState(company?.name ?? '')
   const [slug, setSlug] = useState(company?.slug ?? '')
   const [logoUrl, setLogoUrl] = useState(company?.logo_url ?? '')
+  // Новый файл ждёт сохранения: сначала создаём/обновляем ресторан, потом грузим логотип
+  const [logoFile, setLogoFile] = useState<string | null>(null)
+  const [logoError, setLogoError] = useState<string | null>(null)
   const [active, setActive] = useState(company?.active ?? true)
   const [slugTouched, setSlugTouched] = useState(isEdit)
   const [saving, setSaving] = useState(false)
@@ -46,6 +76,24 @@ function CompanyModal({
   function handleNameChange(v: string) {
     setName(v)
     if (!slugTouched) setSlug(slugify(v))
+  }
+
+  async function handleLogoPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setLogoError(null)
+    try {
+      setLogoFile(await squareLogo(file))
+    } catch {
+      setLogoError('Не удалось прочитать картинку — нужен PNG, JPG или WebP')
+    }
+  }
+
+  function handleLogoRemove() {
+    setLogoFile(null)
+    setLogoUrl('')
+    setLogoError(null)
   }
 
   async function handleSave() {
@@ -65,9 +113,26 @@ function CompanyModal({
 
     if (!res.ok) { setError(json.error ?? 'Не удалось сохранить'); setSaving(false); return }
 
+    if (logoFile) {
+      const companyId: string = isEdit ? company!.id : json.id
+      const up = await fetch('/api/companies/logo-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId, imageBase64: logoFile }),
+      })
+      const upJson = await up.json().catch(() => ({}))
+      if (!up.ok) {
+        setSaving(false)
+        setError(`${isEdit ? 'Ресторан обновлён' : 'Ресторан создан'}, но логотип не загрузился: ${upJson.error ?? up.status}`)
+        return
+      }
+    }
+
     setSaving(false)
     onSaved(isEdit ? 'Ресторан обновлён' : 'Ресторан создан')
   }
+
+  const logoPreview = logoFile ?? (logoUrl.trim() || null)
 
   return (
     <Modal
@@ -95,9 +160,26 @@ function CompanyModal({
           placeholder="grand-registan" />
       </Field>
 
-      <Field label="Логотип" hint="Ссылка на изображение — необязательно.">
-        <input className="input" value={logoUrl}
-          onChange={e => setLogoUrl(e.target.value)} placeholder="https://…" />
+      <Field label="Логотип" error={logoError ?? undefined}
+        hint="Гость увидит его на экране после скана. PNG, JPG или WebP — лучше квадратный.">
+        <div className="logo-pick">
+          <div
+            className="thumb logo-pick__thumb"
+            style={logoPreview ? { backgroundImage: `url(${logoPreview})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+          >
+            {!logoPreview && <Icon name="restaurants" size={22} style={{ color: 'var(--text-muted)' }} />}
+          </div>
+          <div className="logo-pick__actions">
+            <label className="btn btn--ghost btn--sm">
+              <Icon name="download" size={14} />
+              {logoPreview ? 'Заменить' : 'Загрузить'}
+              <input type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={handleLogoPick} />
+            </label>
+            {logoPreview && (
+              <Button size="sm" variant="danger" icon="trash" onClick={handleLogoRemove}>Убрать</Button>
+            )}
+          </div>
+        </div>
       </Field>
 
       <div style={{ marginBottom: 15 }}>
