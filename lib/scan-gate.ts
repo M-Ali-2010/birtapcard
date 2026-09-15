@@ -204,6 +204,19 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
   width:84px;height:84px;border-radius:24px;object-fit:cover;margin:0 auto 18px;display:block;
   background:#fff;border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 40px -18px rgba(0,0,0,.8)
 }
+.brand{
+  display:inline-flex;flex-direction:column;align-items:center;gap:9px;
+  margin-top:36px;text-decoration:none;color:#EDF2FA
+}
+.brand-row{display:inline-flex;align-items:center;gap:9px}
+.brand-mark{
+  width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#5CE8C4,#00C89A);box-shadow:0 8px 20px -10px rgba(0,217,174,.7)
+}
+.brand-mark svg{width:18px;height:18px}
+.brand-name{font-size:15.5px;font-weight:800;letter-spacing:-.02em}
+.brand-name em{font-style:normal;color:#00D9AE}
+.brand-tag{color:#55637F;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
 .thanks{
   display:inline-flex;align-items:center;gap:7px;margin-bottom:16px;
   color:#00D9AE;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase
@@ -226,6 +239,13 @@ ${logo}
     <span id="reviewText">Оставить отзыв в Google</span><span class="ok">✓</span>
   </a>
 ${yandexBtn}${gisBtn}${followBlock}
+  <a class="brand" href="https://birtapcard.vercel.app/info" target="_blank" rel="noopener">
+    <span class="brand-row">
+      <span class="brand-mark"><svg viewBox="0 0 512 512" fill="none" stroke="#04121C" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"><path d="M166 214 L222 158 V378"/><path d="M280 172 a74 74 0 0 1 74 74"/><path d="M280 100 a146 146 0 0 1 146 146"/></svg></span>
+      <span class="brand-name">Bir<em>Tap</em>Card</span>
+    </span>
+    <span class="brand-tag" id="brandTag">Одно касание — один отзыв</span>
+  </a>
 </div>
 
 <script>
@@ -250,6 +270,7 @@ ${yandexBtn}${gisBtn}${followBlock}
     setText("tgText", "Telegram kanalimiz");
     setText("botText", "Telegram botimiz");
     setText("sub", "Yangiliklar, aksiyalar va tadbirlar — avval obunachilarga");
+    setText("brandTag", "Bir teginish — bir sharh");
   }
 
   // Считаем нажатия: sendBeacon доживает даже если вкладка тут же уходит на другой сайт

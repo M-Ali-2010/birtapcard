@@ -69,7 +69,19 @@ p{color:#8B9BB8;font-size:14.5px;line-height:1.6;margin-bottom:24px}
   box-shadow:0 14px 34px -14px rgba(34,158,217,.6)
 }
 .btn:active{transform:scale(.975)}
-.foot{margin-top:26px;font-size:11px;color:#4C5A79;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+.brand{
+  display:inline-flex;flex-direction:column;align-items:center;gap:9px;
+  margin-top:30px;text-decoration:none;color:#EDF2FA
+}
+.brand-row{display:inline-flex;align-items:center;gap:9px}
+.brand-mark{
+  width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#5CE8C4,#00C89A);box-shadow:0 8px 20px -10px rgba(0,217,174,.7)
+}
+.brand-mark svg{width:18px;height:18px}
+.brand-name{font-size:15.5px;font-weight:800;letter-spacing:-.02em}
+.brand-name em{font-style:normal;color:#00D9AE}
+.brand-tag{color:#55637F;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -88,7 +100,13 @@ p{color:#8B9BB8;font-size:14.5px;line-height:1.6;margin-bottom:24px}
     </svg>
     <span id="b">Написать в поддержку</span>
   </a>
-  <div class="foot">BirTapCard</div>
+  <a class="brand" href="https://birtapcard.vercel.app/info" target="_blank" rel="noopener">
+    <span class="brand-row">
+      <span class="brand-mark"><svg viewBox="0 0 512 512" fill="none" stroke="#04121C" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"><path d="M166 214 L222 158 V378"/><path d="M280 172 a74 74 0 0 1 74 74"/><path d="M280 100 a146 146 0 0 1 146 146"/></svg></span>
+      <span class="brand-name">Bir<em>Tap</em>Card</span>
+    </span>
+    <span class="brand-tag" id="brandTag">Одно касание — один отзыв</span>
+  </a>
 </div>
 <script>
 (function(){
@@ -98,6 +116,7 @@ p{color:#8B9BB8;font-size:14.5px;line-height:1.6;margin-bottom:24px}
   document.getElementById("h").innerHTML = "Qurilma obunasi<br>tugagan";
   document.getElementById("p").textContent = "Kartochka vaqtincha ishlamaydi. Qayta yoqish uchun qo'llab-quvvatlashga murojaat qiling — bu bir necha daqiqa oladi.";
   document.getElementById("b").textContent = "Qo'llab-quvvatlashga yozish";
+  document.getElementById("brandTag").textContent = "Bir teginish — bir sharh";
 })();
 </script>
 </body>
