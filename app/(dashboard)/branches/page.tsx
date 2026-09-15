@@ -9,8 +9,8 @@ import { REFRESH_EVENT } from '@/components/nav-config'
 import { plural, shortDate, slugify } from '@/lib/format'
 import { Icon } from '@/components/ui/icons'
 import {
-  AccessDenied, Badge, Button, CopyField, EmptyState, Field, IconButton, KpiCard,
-  KpiSkeleton, Modal, Note, Panel, SearchInput, SkeletonRows, StatusBadge, Switch,
+  AccessDenied, Badge, Button, CopyLine, EmptyState, Field, IconButton, KpiCard,
+  KpiSkeleton, Modal, Note, Panel, SearchInput, SkeletonRows, Switch,
   useConfirm,
 } from '@/components/ui/kit'
 import { useToast } from '@/components/ui/toast'
@@ -612,78 +612,75 @@ function BranchesView() {
           />
         ) : (
           <div className="stack" style={{ gap: 12 }}>
-            {filtered.map(b => (
-              <div key={b.id} className="card" style={{ padding: 13 }}>
-                <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
-                  <button
-                    onClick={() => setQrPreview(b)}
-                    title="Показать QR-код"
-                    className="thumb"
-                    style={{ background: '#fff', padding: 4, cursor: 'pointer' }}
-                  >
-                    {b.qr_image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={b.qr_image_url} alt="QR" width={38} height={38} style={{ display: 'block' }} />
-                    ) : (
-                      <Icon name="qrcodes" size={20} style={{ color: '#94A3B8' }} />
-                    )}
-                  </button>
+            {filtered.map(b => {
+              const st = subState(b.paid_until)
+              const chips: React.ReactNode[] = []
+              if (st.tone !== 'muted') chips.push(<Badge key="sub" tone={st.tone}>{st.label}</Badge>)
+              if (b.instagram_url) chips.push(
+                <Badge key="ig" tone="purple">
+                  <Icon name="share" size={10} />
+                  {b.instagram_url.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '@').replace(/\/+$/, '')}
+                </Badge>,
+              )
+              if (b.yandex_url) chips.push(<Badge key="ya" tone="danger">Яндекс</Badge>)
+              if (b.gis_url) chips.push(<Badge key="gis" tone="success">2ГИС</Badge>)
+              if (b.telegram_url) chips.push(
+                <Badge key="tg" tone="blue">
+                  <Icon name="telegram" size={10} />
+                  {b.telegram_url.replace(/^https?:\/\/(www\.)?t\.me\//i, '@').replace(/\/+$/, '')}
+                </Badge>,
+              )
+              if (b.bot_url) chips.push(
+                <Badge key="bot" tone="purple">
+                  <Icon name="zap" size={10} />
+                  {b.bot_url.replace(/^https?:\/\/(www\.)?t\.me\//i, '@').replace(/\/+$/, '')}
+                </Badge>,
+              )
 
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="row" style={{ gap: 8 }}>
-                      <span className="truncate" style={{ fontSize: 14, fontWeight: 650 }}>{b.name}</span>
-                      <StatusBadge active={b.active} />
-                      {(() => { const st = subState(b.paid_until); return st.tone !== 'muted' ? <Badge tone={st.tone}>{st.label}</Badge> : null })()}
+              return (
+                <article key={b.id} className={`bcard${b.active ? '' : ' bcard--off'}`}>
+                  <div className="bcard__head">
+                    <button onClick={() => setQrPreview(b)} title="Показать QR-код" className="bcard__qr">
+                      {b.qr_image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={b.qr_image_url} alt="QR" />
+                      ) : (
+                        <Icon name="qrcodes" size={20} style={{ color: '#94A3B8' }} />
+                      )}
+                    </button>
+                    <div className="bcard__main">
+                      <div className="bcard__name truncate">{b.name}</div>
+                      <div className="bcard__meta truncate">{b.companies?.name ?? '—'} · /{b.slug}</div>
                     </div>
-                    <div className="truncate" style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 3 }}>
-                      {b.companies?.name ?? '—'} · /{b.slug}
-                    </div>
-                    {(b.instagram_url || b.yandex_url || b.gis_url || b.telegram_url || b.bot_url) && (
-                      <div className="row row--wrap" style={{ gap: 5, marginTop: 5 }}>
-                        {b.instagram_url && (
-                          <Badge tone="purple">
-                            <Icon name="share" size={10} />
-                            {b.instagram_url.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '@')}
-                          </Badge>
-                        )}
-                        {b.yandex_url && <Badge tone="danger">Яндекс</Badge>}
-                        {b.gis_url && <Badge tone="success">2ГИС</Badge>}
-                        {b.bot_url && (
-                          <Badge tone="purple">
-                            <Icon name="zap" size={10} />
-                            {b.bot_url.replace(/^https?:\/\/(www\.)?t\.me\//i, '@')}
-                          </Badge>
-                        )}
-                        {b.telegram_url && (
-                          <Badge tone="blue">
-                            <Icon name="telegram" size={10} />
-                            {b.telegram_url.replace(/^https?:\/\/(www\.)?t\.me\//i, '@')}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
                   </div>
 
-                  <div className="row" style={{ gap: 7, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                    <Switch checked={b.active} disabled={busyId === b.id} onChange={() => handleToggleActive(b)} />
-                    <IconButton
-                      icon="refresh" title="Перегенерировать QR"
-                      disabled={regenId === b.id}
-                      onClick={() => handleRegenerateQr(b)}
-                    />
-                    <IconButton icon="edit" title="Редактировать"
-                      onClick={() => { setEditing(b); setModalOpen(true) }} />
-                    <IconButton icon="trash" title="Удалить" danger
-                      disabled={busyId === b.id} onClick={() => handleDelete(b)} />
-                  </div>
-                </div>
+                  {chips.length > 0 && <div className="bcard__chips">{chips}</div>}
 
-                <div className="grid grid--2" style={{ gap: 10, marginTop: 12 }}>
-                  <CopyField value={b.nfc_url} label="NFC-ссылка" compact />
-                  <CopyField value={b.qr_url} label="QR-ссылка" compact />
-                </div>
-              </div>
-            ))}
+                  <div className="bcard__links">
+                    <CopyLine tag="NFC" tone="mint" value={b.nfc_url} />
+                    <CopyLine tag="QR" tone="purple" value={b.qr_url} />
+                  </div>
+
+                  <div className="bcard__foot">
+                    <label className={`bcard__toggle${b.active ? '' : ' bcard__toggle--off'}`}>
+                      <Switch checked={b.active} disabled={busyId === b.id} onChange={() => handleToggleActive(b)} />
+                      <span>{b.active ? 'Активен' : 'Отключен'}</span>
+                    </label>
+                    <div className="bcard__actions">
+                      <IconButton
+                        icon="refresh" title="Перегенерировать QR"
+                        disabled={regenId === b.id}
+                        onClick={() => handleRegenerateQr(b)}
+                      />
+                      <IconButton icon="edit" title="Редактировать"
+                        onClick={() => { setEditing(b); setModalOpen(true) }} />
+                      <IconButton icon="trash" title="Удалить" danger
+                        disabled={busyId === b.id} onClick={() => handleDelete(b)} />
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
           </div>
         )}
       </Panel>

@@ -90,14 +90,14 @@ function QrCard({
       <div style={{ minWidth: 0 }}>
         <div className="row" style={{ gap: 7, marginBottom: 3 }}>
           <span className="truncate" style={{ fontSize: 13, fontWeight: 650, flex: 1 }}>{branch.name}</span>
-          <StatusBadge active={branch.active} />
+          {!branch.active && <StatusBadge active={false} />}
         </div>
         <div className="truncate" style={{ fontSize: 11, color: 'var(--text-muted)' }}>
           {branch.companies?.name ?? '—'} · /{branch.slug}
         </div>
       </div>
 
-      <CopyField value={branch.qr_url} compact />
+      <div className="hide-xs"><CopyField value={branch.qr_url} compact /></div>
 
       <div className="row" style={{ gap: 7 }}>
         <Button size="sm" icon="eye" onClick={onPreview}>Просмотр</Button>

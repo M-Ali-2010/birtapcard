@@ -447,7 +447,8 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
 
 /* ─── Копирование значения ────────────────────────────────────────────────── */
 
-export function CopyField({ value, label, compact }: { value: string; label?: string; compact?: boolean }) {
+/** Копирование в буфер с фолбэком для WebView и тостом; `copied` держится 1.6 с. */
+export function useCopy(value: string) {
   const [copied, setCopied] = useState(false)
   const { toast } = useToast()
 
@@ -468,6 +469,29 @@ export function CopyField({ value, label, compact }: { value: string; label?: st
     toast('Скопировано', { kind: 'success', desc: value.length > 46 ? value.slice(0, 46) + '…' : value })
     setTimeout(() => setCopied(false), 1600)
   }
+
+  return { copied, copy }
+}
+
+/** Компактная строка ссылки: тег · адрес · копировать · открыть. Для карточек на телефоне. */
+export function CopyLine({ tag, tone = 'mint', value }: { tag: string; tone?: 'mint' | 'purple'; value: string }) {
+  const { copied, copy } = useCopy(value)
+  return (
+    <div className="lrow">
+      <span className={`lrow__tag lrow__tag--${tone}`}>{tag}</span>
+      <span className="lrow__url" title={value}>{value.replace(/^https?:\/\//, '')}</span>
+      <IconButton small title="Скопировать" onClick={copy}>
+        <Icon name={copied ? 'check' : 'copy'} size={14} style={copied ? { color: 'var(--mint)' } : undefined} />
+      </IconButton>
+      <a className="icon-btn icon-btn--sm" href={value} target="_blank" rel="noopener" title="Открыть" aria-label="Открыть">
+        <Icon name="external" size={14} />
+      </a>
+    </div>
+  )
+}
+
+export function CopyField({ value, label, compact }: { value: string; label?: string; compact?: boolean }) {
+  const { copied, copy } = useCopy(value)
 
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 

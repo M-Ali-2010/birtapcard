@@ -406,14 +406,14 @@ export default function CompaniesPage() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="row" style={{ gap: 8 }}>
                     <span className="truncate" style={{ fontSize: 14, fontWeight: 650 }}>{c.name}</span>
-                    <StatusBadge active={c.active} />
+                    <span className="hide-xs"><StatusBadge active={c.active} /></span>
                   </div>
                   <div className="truncate" style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 3 }}>
                     /{c.slug} · {branchCount} {plural(branchCount, ['филиал', 'филиала', 'филиалов'])} · c {shortDate(c.created_at)}
                   </div>
                 </div>
 
-                <div className="row" style={{ gap: 8, flexShrink: 0 }}>
+                <div className="row row-item__actions">
                   <Switch
                     checked={c.active}
                     disabled={busyId === c.id}
