@@ -7,7 +7,7 @@ import { REFRESH_EVENT } from '@/components/nav-config'
 import { plural, shortDate, slugify } from '@/lib/format'
 import { Icon } from '@/components/ui/icons'
 import {
-  AccessDenied, Button, EmptyState, Field, IconButton, KpiCard, KpiSkeleton,
+  AccessDenied, Button, EmptyState, Fab, Field, IconButton, KpiCard, KpiSkeleton,
   Modal, Note, Panel, SearchInput, SkeletonRows, StatusBadge, Switch, useConfirm,
 } from '@/components/ui/kit'
 import { useToast } from '@/components/ui/toast'
@@ -348,7 +348,7 @@ export default function CompaniesPage() {
   if (!isSuperAdmin) return <AccessDenied what="Рестораны" />
 
   return (
-    <div className="stack">
+    <div className="stack has-fab">
 
       <div className="grid grid--kpi-3">
         {loading ? <KpiSkeleton count={3} /> : (
@@ -365,12 +365,14 @@ export default function CompaniesPage() {
 
       <div className="toolbar" style={{ marginBottom: 0 }}>
         <SearchInput value={search} onChange={setSearch} placeholder="Поиск по названию или slug…" />
-        <div className="toolbar__spacer">
+        <div className="toolbar__spacer hide-mobile">
           <Button variant="primary" icon="plus" onClick={() => { setEditing(null); setModalOpen(true) }}>
             Добавить ресторан
           </Button>
         </div>
       </div>
+
+      <Fab label="Ресторан" onClick={() => { setEditing(null); setModalOpen(true) }} />
 
       <Panel
         title="Рестораны"

@@ -10,6 +10,7 @@ import { Avatar, IconButton, roleLabel } from '@/components/ui/kit'
 import { ThemeToggle } from '@/components/ui/theme'
 import { CommandPalette, useCommandHotkey } from '@/components/ui/command-palette'
 import { getNavByRole, flatNav, PAGE_META, requestRefresh } from '@/components/nav-config'
+import { haptic, isNativeApp } from '@/components/native-bridge'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -86,7 +87,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (reached) {
         setRefreshing(true)
         requestRefresh()
-        if ('vibrate' in navigator) { try { navigator.vibrate(12) } catch {} }
+        haptic('MEDIUM')
+        if (!isNativeApp() && 'vibrate' in navigator) { try { navigator.vibrate(12) } catch {} }
         setTimeout(() => setRefreshing(false), 900)
       }
     }

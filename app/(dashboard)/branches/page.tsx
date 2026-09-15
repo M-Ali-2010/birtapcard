@@ -9,7 +9,7 @@ import { REFRESH_EVENT } from '@/components/nav-config'
 import { plural, shortDate, slugify } from '@/lib/format'
 import { Icon } from '@/components/ui/icons'
 import {
-  AccessDenied, Badge, Button, CopyLine, EmptyState, Field, IconButton, KpiCard,
+  AccessDenied, Badge, Button, CopyLine, EmptyState, Fab, Field, IconButton, KpiCard,
   KpiSkeleton, Modal, Note, Panel, SearchInput, SkeletonRows, Switch,
   useConfirm,
 } from '@/components/ui/kit'
@@ -547,7 +547,7 @@ function BranchesView() {
   if (!isSuperAdmin) return <AccessDenied what="Филиалы" />
 
   return (
-    <div className="stack">
+    <div className="stack has-fab">
 
       <div className="grid grid--kpi">
         {loading ? <KpiSkeleton /> : (
@@ -577,7 +577,7 @@ function BranchesView() {
 
         <SearchInput value={search} onChange={setSearch} placeholder="Поиск филиала…" />
 
-        <div className="toolbar__spacer">
+        <div className="toolbar__spacer hide-mobile">
           <Button
             variant="primary" icon="plus"
             disabled={companies.length === 0}
@@ -587,6 +587,10 @@ function BranchesView() {
           </Button>
         </div>
       </div>
+
+      {companies.length > 0 && (
+        <Fab label="Филиал" onClick={() => { setEditing(null); setModalOpen(true) }} />
+      )}
 
       {companies.length === 0 && !loading && (
         <Note tone="warning">

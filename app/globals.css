@@ -316,7 +316,7 @@ button { font-family: inherit; }
   padding: 22px var(--pad-x) 40px;
   max-width: 1560px;
   width: 100%;
-  animation: page-in 0.32s var(--ease-out) both;
+  animation: page-in 0.32s var(--ease-out) backwards; /* не both: forward-fill оставляет transform и ломает position:fixed внутри */
 }
 
 .bottom-nav { display: none; }
@@ -1133,6 +1133,9 @@ button { font-family: inherit; }
 @media (max-width: 720px) {
   .hide-xs { display: none !important; }
 }
+@media (max-width: 960px) {
+  .hide-mobile { display: none !important; }
+}
 
 .print-only { display: none; }
 @media print { .print-only { display: block; } }
@@ -1257,15 +1260,33 @@ button { font-family: inherit; }
   .row-item__actions .icon-btn { width: 34px; height: 34px; }
 }
 
-/* Потянуть вниз — обновить (только в приложении) */
-.ptr {
-  position: fixed; top: calc(var(--topbar-h) + env(safe-area-inset-top)); left: 50%; z-index: 120;
-  width: 36px; height: 36px; border-radius: 50%;
-  display: grid; place-items: center;
-  background: var(--card); border: 1px solid var(--border); color: var(--mint);
+/* Нет сети */
+.offline {
+  position: fixed; left: 50%; bottom: calc(var(--bottomnav-h) + 14px + env(safe-area-inset-bottom)); z-index: 130;
+  translate: -50% 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 14px; border-radius: var(--r-full);
+  background: var(--card2); border: 1px solid var(--border); color: var(--text-dim);
+  font-size: 12.5px; font-weight: 600; white-space: nowrap; max-width: calc(100vw - 24px);
   box-shadow: var(--sh-2);
-  pointer-events: none;
-  transition: opacity 0.15s var(--ease);
+  animation: sheet-up 0.3s var(--ease-out) both;
 }
-.ptr--spin { transition: transform 0.2s var(--ease-out), opacity 0.15s var(--ease); }
-.ptr--spin svg { animation: spin 0.8s linear infinite; }
+@media (min-width: 961px) { .offline { bottom: 18px; } }
+.offline__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 0 3px var(--danger-dim); }
+
+/* Плавающая кнопка действия (телефон) */
+.fab {
+  position: fixed; right: 16px; bottom: calc(var(--bottomnav-h) + 16px + env(safe-area-inset-bottom)); z-index: 94;
+  display: none; align-items: center; gap: 8px;
+  height: 50px; padding: 0 18px 0 16px; border-radius: var(--r-full);
+  background: var(--mint); color: #04121C; border: none;
+  font-size: 14px; font-weight: 700; font-family: inherit;
+  box-shadow: var(--sh-mint), var(--sh-2);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+}
+.fab:active { transform: scale(0.95); }
+@media (max-width: 960px) {
+  .fab { display: inline-flex; }
+  .has-fab { padding-bottom: 72px; }
+}

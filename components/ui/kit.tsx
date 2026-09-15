@@ -7,6 +7,7 @@ import {
 import { createPortal } from 'react-dom'
 import { Icon, type IconName } from './icons'
 import { useToast } from './toast'
+import { haptic } from '../native-bridge'
 
 /* ─── Портал ──────────────────────────────────────────────────────────────── */
 
@@ -15,6 +16,18 @@ export function Portal({ children }: { children: React.ReactNode }) {
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
   return createPortal(children, document.body)
+}
+
+/** Плавающая кнопка действия для телефона. Рендерится в body — внутри .content
+ *  position:fixed ломается анимацией страницы. Страница добавляет класс has-fab. */
+export function Fab({ icon = 'plus', label, onClick }: { icon?: IconName; label: string; onClick: () => void }) {
+  return (
+    <Portal>
+      <button className="fab" onClick={onClick} aria-label={label}>
+        <Icon name={icon} size={18} strokeWidth={2.4} /> {label}
+      </button>
+    </Portal>
+  )
 }
 
 /* ─── Панель ──────────────────────────────────────────────────────────────── */
@@ -466,6 +479,7 @@ export function useCopy(value: string) {
       document.body.removeChild(ta)
     }
     setCopied(true)
+    haptic('LIGHT')
     toast('Скопировано', { kind: 'success', desc: value.length > 46 ? value.slice(0, 46) + '…' : value })
     setTimeout(() => setCopied(false), 1600)
   }
