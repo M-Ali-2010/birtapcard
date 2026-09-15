@@ -5,6 +5,7 @@ import { ThemeProvider, themeInitScript } from '@/components/ui/theme'
 import { ToastProvider } from '@/components/ui/toast'
 import { ConfirmProvider } from '@/components/ui/kit'
 import { NativeBridge } from '@/components/native-bridge'
+import { AppSplash } from '@/components/app-splash'
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -58,6 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ToastProvider>
             <ConfirmProvider>
               <NativeBridge />
+              <AppSplash />
               {children}
             </ConfirmProvider>
           </ToastProvider>

@@ -36,6 +36,7 @@ const PATHS: Record<string, ReactNode> = {
   chevronLeft: <><path d="m15 5-7 7 7 7" /></>,
   arrowUp: <><path d="M12 20V5" /><path d="m5.5 11.5 6.5-6.5 6.5 6.5" /></>,
   arrowDown: <><path d="M12 4v15" /><path d="m5.5 12.5 6.5 6.5 6.5-6.5" /></>,
+  arrowRight: <><path d="M4 12h15" /><path d="m12.5 5.5 6.5 6.5-6.5 6.5" /></>,
   filter: <><path d="M4 5h16l-6.2 7.4V19l-3.6 2v-8.6z" /></>,
   print: <><path d="M6.5 9V3.5h11V9" /><rect x="3.5" y="9" width="17" height="7.5" rx="2" /><path d="M6.5 14.5h11V21h-11z" /></>,
   share: <><circle cx="18" cy="5.5" r="2.8" /><circle cx="6" cy="12" r="2.8" /><circle cx="18" cy="18.5" r="2.8" /><path d="m8.4 10.7 7.2-3.9M8.4 13.3l7.2 3.9" /></>,

@@ -1342,3 +1342,68 @@ button { font-family: inherit; }
   display: flex; align-items: center; justify-content: center; gap: 10px;
   padding: 4px 0 2px; font-size: 11px; color: var(--text-muted);
 }
+
+/* ───── 15. Заставка и онбординг приложения ───── */
+.splash {
+  position: fixed; inset: 0; z-index: 600;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  background: #060A14; color: #EDF2FA;
+  transition: opacity 0.45s var(--ease);
+}
+.splash--out { opacity: 0; pointer-events: none; }
+.splash .brand-orbs { z-index: 0; }
+.splash > *:not(.brand-orbs) { position: relative; z-index: 1; }
+.splash__mark {
+  width: 104px; height: 104px; border-radius: 30px;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, #5CE8C4, #00C89A);
+  box-shadow: 0 30px 60px -20px rgba(0, 217, 174, 0.7);
+  animation: splash-pop 0.7s var(--ease-out) both;
+}
+.splash__mark svg { width: 74px; height: 74px; }
+.splash__one { stroke-dasharray: 320; stroke-dashoffset: 320; animation: splash-draw 0.55s var(--ease-out) 0.25s forwards; }
+.splash__arc { stroke-dasharray: 260; stroke-dashoffset: 260; animation: splash-draw 0.45s var(--ease-out) forwards; }
+.splash__arc--1 { animation-delay: 0.65s; }
+.splash__arc--2 { animation-delay: 0.85s; }
+.splash__name { font-size: 30px; color: #F2F6FC; margin-top: 12px; animation: brand-in 0.6s var(--ease-out) 0.5s both; }
+.splash__name em { color: #00D9AE; }
+.splash__tag {
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #00D9AE;
+  animation: brand-in 0.6s var(--ease-out) 0.7s both;
+}
+.splash__bar {
+  position: absolute; bottom: calc(52px + env(safe-area-inset-bottom)); left: 50%; translate: -50% 0;
+  width: 120px; height: 3px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden;
+}
+.splash__bar span { display: block; height: 100%; width: 40%; border-radius: 3px; background: #00D9AE; animation: splash-bar 1.4s var(--ease) 0.2s infinite; }
+@keyframes splash-pop { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: none; } }
+@keyframes splash-draw { to { stroke-dashoffset: 0; } }
+@keyframes splash-bar { from { transform: translateX(-120%); } to { transform: translateX(320%); } }
+
+.onb {
+  position: fixed; inset: 0; z-index: 590;
+  display: flex; flex-direction: column;
+  padding: calc(18px + env(safe-area-inset-top)) 22px calc(22px + env(safe-area-inset-bottom));
+  background: var(--bg); color: var(--text);
+  animation: fade-in 0.35s var(--ease-out) both;
+}
+.onb .brand-orbs { z-index: 0; }
+.onb > *:not(.brand-orbs) { position: relative; z-index: 1; }
+.onb__top { display: flex; align-items: center; justify-content: space-between; }
+.onb__skip { background: none; border: none; color: var(--text-muted); font: inherit; font-size: 13px; font-weight: 600; padding: 8px 0 8px 12px; cursor: pointer; }
+.onb__body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 18px; animation: brand-in 0.45s var(--ease-out) both; }
+.onb__icon {
+  width: 84px; height: 84px; border-radius: 26px;
+  display: grid; place-items: center;
+  color: var(--onb-accent, var(--mint));
+  background: color-mix(in srgb, var(--onb-accent, var(--mint)) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--onb-accent, var(--mint)) 30%, transparent);
+  box-shadow: 0 24px 50px -24px var(--onb-accent, var(--mint));
+}
+.onb__title { font-size: clamp(30px, 8.5vw, 38px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; white-space: pre-line; }
+.onb__text { font-size: 15.5px; line-height: 1.55; color: var(--text-dim); max-width: 34ch; }
+.onb__foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.onb__dots { display: flex; gap: 6px; }
+.onb__dots span { width: 7px; height: 7px; border-radius: 7px; background: var(--border-strong); transition: width var(--normal) var(--ease), background var(--normal) var(--ease); }
+.onb__dots span.is-on { width: 22px; background: var(--mint); }
+.onb__next { min-height: 50px; padding: 0 22px; border-radius: var(--r-full); font-size: 15px; }
