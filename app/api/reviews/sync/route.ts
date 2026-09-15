@@ -25,7 +25,9 @@ export async function POST(request: NextRequest) {
       headers: { 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': fm }, cache: 'no-store',
     })
     const text = await res.text()
-    return NextResponse.json({ branch: b.name, status: res.status, body: text.slice(0, 3000) })
+    let keys: string[] = []; let reviews: unknown = null
+    try { const j = JSON.parse(text); keys = Object.keys(j); reviews = j.reviews ?? null } catch {}
+    return NextResponse.json({ branch: b.name, status: res.status, keys, reviews, body: text.slice(0, 1500) })
   }
 
   try {
