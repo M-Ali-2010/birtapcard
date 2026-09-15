@@ -5,6 +5,7 @@ export type SyncResult = {
   synced: number
   skipped: number
   errors: { branch: string; error: string }[]
+  details: { branch: string; count: number; rating: number | null; reviews: number }[]
 }
 
 /**
@@ -24,7 +25,7 @@ export async function syncGoogleReviews(): Promise<SyncResult> {
     .eq('active', true)
   if (error) throw new Error(error.message)
 
-  const result: SyncResult = { synced: 0, skipped: 0, errors: [] }
+  const result: SyncResult = { synced: 0, skipped: 0, errors: [], details: [] }
 
   for (const b of branches ?? []) {
     let placeId: string | null = b.google_place_id
@@ -45,6 +46,7 @@ export async function syncGoogleReviews(): Promise<SyncResult> {
       })
       if (insErr) throw new Error(insErr.message)
       result.synced++
+      result.details.push({ branch: b.name, count: stats.count, rating: stats.rating, reviews: stats.reviews.length })
     } catch (e) {
       result.errors.push({ branch: b.name, error: e instanceof Error ? e.message : String(e) })
     }
