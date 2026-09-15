@@ -28,28 +28,80 @@ type Company = {
 /* ─── Подготовка логотипа ────────────────────────────────────────────────── */
 
 const LOGO_SIZE = 512
+const LOGO_PAD = 0.04
 
-/** Вписывает картинку в квадрат 512×512 (прозрачные поля) и отдаёт PNG data-URL. */
+/**
+ * Обрезает пустые поля по краям (прозрачные или в цвет фона по углам),
+ * вписывает картинку в квадрат 512×512 и отдаёт PNG data-URL.
+ */
 function squareLogo(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file)
     const img = new Image()
     img.onload = () => {
       URL.revokeObjectURL(url)
-      const canvas = document.createElement('canvas')
-      canvas.width = LOGO_SIZE
-      canvas.height = LOGO_SIZE
-      const ctx = canvas.getContext('2d')
-      if (!ctx) { reject(new Error('canvas')); return }
-      const k = Math.min(LOGO_SIZE / img.width, LOGO_SIZE / img.height, 1)
-      const w = Math.round(img.width * k)
-      const h = Math.round(img.height * k)
-      ctx.drawImage(img, (LOGO_SIZE - w) / 2, (LOGO_SIZE - h) / 2, w, h)
-      resolve(canvas.toDataURL('image/png'))
+      try {
+        resolve(fitLogo(img))
+      } catch (e) {
+        reject(e)
+      }
     }
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('decode')) }
     img.src = url
   })
+}
+
+function fitLogo(img: HTMLImageElement): string {
+  // Уменьшаем до разумного размера, чтобы не гонять пиксели огромных файлов
+  const k0 = Math.min(1, 1024 / Math.max(img.width, img.height))
+  const sw = Math.max(1, Math.round(img.width * k0))
+  const sh = Math.max(1, Math.round(img.height * k0))
+  const src = document.createElement('canvas')
+  src.width = sw
+  src.height = sh
+  const sctx = src.getContext('2d', { willReadFrequently: true })
+  if (!sctx) throw new Error('canvas')
+  sctx.drawImage(img, 0, 0, sw, sh)
+
+  const { data } = sctx.getImageData(0, 0, sw, sh)
+  const px = (x: number, y: number) => {
+    const i = (y * sw + x) * 4
+    return [data[i], data[i + 1], data[i + 2], data[i + 3]]
+  }
+  // Цвет фона — по углам. Прозрачный угол = прозрачный фон.
+  const corners = [px(0, 0), px(sw - 1, 0), px(0, sh - 1), px(sw - 1, sh - 1)]
+  const transparentBg = corners.some(c => c[3] < 20)
+  const bg = corners[0]
+  const isBg = (x: number, y: number) => {
+    const [r, g, b, a] = px(x, y)
+    if (transparentBg) return a < 20
+    return Math.abs(r - bg[0]) + Math.abs(g - bg[1]) + Math.abs(b - bg[2]) < 60
+  }
+
+  let top = 0, bottom = sh - 1, left = 0, right = sw - 1
+  const rowEmpty = (y: number) => { for (let x = 0; x < sw; x++) if (!isBg(x, y)) return false; return true }
+  const colEmpty = (x: number) => { for (let y = top; y <= bottom; y++) if (!isBg(x, y)) return false; return true }
+  while (top < bottom && rowEmpty(top)) top++
+  while (bottom > top && rowEmpty(bottom)) bottom--
+  while (left < right && colEmpty(left)) left++
+  while (right > left && colEmpty(right)) right--
+  if (right - left < 8 || bottom - top < 8) { top = 0; left = 0; bottom = sh - 1; right = sw - 1 }
+
+  const cw = right - left + 1
+  const ch = bottom - top + 1
+  const inner = LOGO_SIZE * (1 - LOGO_PAD * 2)
+  const k = Math.min(inner / cw, inner / ch)
+  const w = Math.round(cw * k)
+  const h = Math.round(ch * k)
+
+  const out = document.createElement('canvas')
+  out.width = LOGO_SIZE
+  out.height = LOGO_SIZE
+  const ctx = out.getContext('2d')
+  if (!ctx) throw new Error('canvas')
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(src, left, top, cw, ch, (LOGO_SIZE - w) / 2, (LOGO_SIZE - h) / 2, w, h)
+  return out.toDataURL('image/png')
 }
 
 /* ─── Модалка создания / редактирования ──────────────────────────────────── */

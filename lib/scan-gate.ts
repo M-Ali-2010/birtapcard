@@ -201,8 +201,8 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
   text-decoration:none;padding:8px 14px
 }
 .logo{
-  width:84px;height:84px;border-radius:24px;object-fit:cover;margin:0 auto 18px;display:block;
-  background:#fff;border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 40px -18px rgba(0,0,0,.8)
+  width:96px;height:96px;border-radius:50%;object-fit:cover;margin:0 auto 16px;display:block;
+  background:#fff;border:2px solid rgba(255,255,255,.14);box-shadow:0 18px 40px -18px rgba(0,0,0,.8)
 }
 .brand{
   display:inline-flex;flex-direction:column;align-items:center;gap:9px;
