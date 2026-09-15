@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Icon } from '@/components/ui/icons'
 import { Avatar, Modal, roleLabel } from '@/components/ui/kit'
 import { useTheme } from '@/components/ui/theme'
+import { LangSwitch } from '@/components/i18n-runtime'
 import type { NavItem } from '@/components/nav-config'
 
 /**
@@ -59,6 +60,11 @@ export function MoreSheet({
             <span className="more__icon"><Icon name={resolved === 'dark' ? 'sun' : 'moon'} size={19} /></span>
             <span>{resolved === 'dark' ? 'Светлая тема' : 'Тёмная тема'}</span>
           </button>
+        </div>
+
+        <div className="more__row">
+          <span className="more__row-label"><Icon name="globe" size={16} /> Язык</span>
+          <LangSwitch />
         </div>
 
         <button className="more__logout" onClick={onLogout}>

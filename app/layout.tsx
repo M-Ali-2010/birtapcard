@@ -6,6 +6,7 @@ import { ToastProvider } from '@/components/ui/toast'
 import { ConfirmProvider } from '@/components/ui/kit'
 import { NativeBridge } from '@/components/native-bridge'
 import { AppSplash } from '@/components/app-splash'
+import { LangProvider } from '@/components/i18n-runtime'
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -56,13 +57,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="h-full">
         <ThemeProvider>
-          <ToastProvider>
-            <ConfirmProvider>
-              <NativeBridge />
-              <AppSplash />
-              {children}
-            </ConfirmProvider>
-          </ToastProvider>
+          <LangProvider>
+            <ToastProvider>
+              <ConfirmProvider>
+                <NativeBridge />
+                <AppSplash />
+                {children}
+              </ConfirmProvider>
+            </ToastProvider>
+          </LangProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -12,6 +12,7 @@ import { CommandPalette, useCommandHotkey } from '@/components/ui/command-palett
 import { getNavByRole, flatNav, PAGE_META, requestRefresh } from '@/components/nav-config'
 import { haptic, isNativeApp } from '@/components/native-bridge'
 import { MoreSheet } from '@/components/more-sheet'
+import { LangSwitch } from '@/components/i18n-runtime'
 import { useIsMobile } from '@/lib/hooks'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -246,6 +247,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Icon name="refresh" size={16} style={refreshing ? { animation: 'spin 0.8s linear infinite' } : undefined} />
             </button>
 
+            <div className="only-desktop"><LangSwitch compact /></div>
             <ThemeToggle />
           </div>
         </header>

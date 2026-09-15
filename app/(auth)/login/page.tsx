@@ -7,6 +7,7 @@ import { clearProfileCache } from '@/lib/hooks'
 import { Icon, Logo } from '@/components/ui/icons'
 import { Button, Field, Note } from '@/components/ui/kit'
 import { ThemeToggle } from '@/components/ui/theme'
+import { LangSwitch } from '@/components/i18n-runtime'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -48,7 +49,8 @@ export default function LoginPage() {
         <div className="brand-orb brand-orb--c" />
       </div>
 
-      <div style={{ position: 'absolute', top: 'max(16px, env(safe-area-inset-top))', right: 16 }}>
+      <div style={{ position: 'absolute', top: 'max(16px, env(safe-area-inset-top))', right: 16, display: 'flex', gap: 8, alignItems: 'center' }}>
+        <LangSwitch />
         <ThemeToggle />
       </div>
 

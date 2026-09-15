@@ -1331,6 +1331,8 @@ button { font-family: inherit; }
   display: grid; place-items: center;
   background: var(--mint-dim); color: var(--mint);
 }
+.more__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 2px; }
+.more__row-label { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; color: var(--text-dim); }
 .more__logout {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   padding: 12px; border-radius: var(--r-md);
@@ -1435,3 +1437,17 @@ button { font-family: inherit; }
   .rv-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .rv-stat__value { font-size: 20px; }
 }
+
+/* ───── 17. Переключатель языка ───── */
+.langsw { display: inline-flex; gap: 2px; padding: 3px; border-radius: var(--r-full); background: var(--card2); border: 1px solid var(--border); }
+.langsw__btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; border-radius: var(--r-full); border: none;
+  background: transparent; color: var(--text-muted);
+  font: inherit; font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.langsw__btn.is-on { background: var(--card); color: var(--text); box-shadow: var(--sh-1); }
+.langsw__flag { font-size: 15px; line-height: 1; }
+.langsw--compact .langsw__btn { padding: 6px 8px; }

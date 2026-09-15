@@ -9,6 +9,7 @@ import {
   AccessDenied, Avatar, Badge, Button, Field, IconButton, Note,
   Panel, Segmented, Skeleton, roleLabel,
 } from '@/components/ui/kit'
+import { LangSwitch } from '@/components/i18n-runtime'
 import { useToast } from '@/components/ui/toast'
 
 /* ─── Индикатор надёжности пароля ────────────────────────────────────────── */
@@ -161,6 +162,10 @@ export default function SettingsPage() {
             { value: 'system', label: '⚙️ Как в системе' },
           ]}
         />
+        <div className="row" style={{ gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 13, color: 'var(--text-dim)' }}>Язык</span>
+          <LangSwitch />
+        </div>
       </Panel>
 
       {/* Личные данные */}
