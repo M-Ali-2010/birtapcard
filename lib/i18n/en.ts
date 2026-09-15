@@ -210,6 +210,21 @@ export const EN: Record<string, string> = {
   'Загрузка…': 'Loading…', 'Понятно': 'Got it', 'Сбросить': 'Reset', 'Переключить': 'Toggle', 'Регистрация': 'Registration',
   'есть несохранённые изменения': 'you have unsaved changes', 'Ошибка обновления': 'Update error', 'Обновлено:': 'Updated:', 'Ошибок:': 'Errors:', 'Без Place ID:': 'Without Place ID:',
   'из': 'of', 'из 5': 'of 5', 'за период': 'this period', 'дн.': 'd', 'вчера,': 'yesterday,', 'мин назад': 'min ago', 'назад': 'ago',
+  'BirTapCard — Аналитика': 'BirTapCard — Analytics', 'BirTapCard — Вход': 'BirTapCard — Sign in',
+  'филиал': 'branch', 'филиала': 'branches', 'филиалов': 'branches', '· с': '· since', '· c': '· since', 'с': 'since',
+  'Используется в ссылках.': 'Used in links.', 'Grand Registan — Чорсу': 'Grand Registan — Chorsu',
+  'BirTapCard · QR-коды (': 'BirTapCard · QR codes (', 'кодов': 'codes', 'код': 'code', 'кода': 'codes',
+  '📊 BirTapCard · Отчёт за 26.06.2026': '📊 BirTapCard · Report for 26.06.2026', '📡 NFC: 247 сканирований': '📡 NFC: 247 scans',
+  '⬛ QR: 389 сканирований': '⬛ QR: 389 scans', '📈 Конверсия: 81.3%': '📈 Conversion: 81.3%', '👥 Уникальных: 512': '👥 Unique: 512',
+  '🏆 Лучший филиал: Grand Airport (+23%)': '🏆 Best branch: Grand Airport (+23%)',
+}
+
+/** Последний рубеж: если все русские слова строки известны — переводим по словам («Google 9 · Яндекс 8») */
+export const EN_WORDS: Record<string, string> = {
+  'Яндекс': 'Yandex', 'ГИС': 'GIS', 'Бот': 'Bot', 'филиал': 'branch', 'филиала': 'branches', 'филиалов': 'branches',
+  'сканов': 'scans', 'скан': 'scan', 'скана': 'scans', 'отзыв': 'review', 'отзыва': 'reviews', 'отзывов': 'reviews',
+  'всего': 'total', 'из': 'of', 'до': 'until', 'с': 'since', 'за': 'over', 'дн': 'd', 'мин': 'min', 'назад': 'ago',
+  'вчера': 'yesterday', 'сегодня': 'today', 'пик': 'peak', 'лучший': 'best', 'уник': 'unique', 'перех': 'clicks',
 }
 
 /** Строки с числами/датами: регулярка → замена */
@@ -253,4 +268,6 @@ export const EN_PATTERNS: [RegExp, string][] = [
   [/^У ресторана «(.+)» есть (\d+) филиал\(а\) — сначала удалите все филиалы$/, 'Restaurant “$1” still has $2 branches — delete them first'],
   [/^(\d+) из (\d+) · отмечено для печати: (\d+)$/, '$1 of $2 · selected for print: $3'],
   [/^BirTapCard · QR-коды \((\d+)\)$/, 'BirTapCard · QR codes ($1)'],
+  [/^Филиал добавлен (\d{2}\.\d{2}\.\d{4}) — «\+1 месяц» и «\+1 год» считают от этой даты, если срок ещё не задан\. Дату можно поправить вручную\.$/, 'Branch added on $1 — “+1 month” and “+1 year” count from this date if no expiry is set yet. You can adjust the date manually.'],
+  [/^(\d[\d\s]*) (?:код|кода|кодов)$/, '$1 codes'],
 ]

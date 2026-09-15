@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { EN, EN_PATTERNS } from '@/lib/i18n/en'
+import { EN, EN_PATTERNS, EN_WORDS } from '@/lib/i18n/en'
 
 /**
  * Язык панели. Русский — исходный (строки лежат прямо в компонентах).
@@ -34,6 +34,16 @@ function translateText(raw: string): string | null {
     for (const [re, rep] of EN_PATTERNS) {
       if (re.test(key)) { out = key.replace(re, rep); break }
     }
+  }
+  if (out === null) {
+    // По словам — только если знаем каждое русское слово в строке
+    let ok = true
+    const replaced = key.replace(/[А-Яа-яЁё]+/g, w => {
+      const t = EN_WORDS[w] ?? EN_WORDS[w.toLowerCase()]
+      if (t === undefined) { ok = false; return w }
+      return t
+    })
+    if (ok) out = replaced
   }
   if (out === null) return null
   const lead = raw.match(/^\s*/)![0]
