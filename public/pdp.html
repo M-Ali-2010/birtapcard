@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>BirTapCard × PDP School — отзывы родителей за одно касание</title>
-<meta name="description" content="Предложение для PDP School: NFC + QR карточка на ресепшн и в приёмной комиссии. Родитель прикладывает телефон — и оставляет отзыв о школе в Google, Яндекс, 2ГИС, подписывается на Telegram-канал.">
+<title>BirTapCard × PDP School — все сервисы школы в одном касании</title>
+<meta name="description" content="BirTapCard для PDP School: одна карточка — приложение, сайт, Telegram-бот, Wi-Fi и отзыв в Google за одно касание.">
 <meta name="theme-color" content="#05070E">
 
 <!-- Превью для Telegram/WhatsApp. После деплоя замените домен на свой -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="BirTapCard × PDP School">
-<meta property="og:description" content="Каждый довольный родитель — новый отзыв о школе. Одно касание телефоном.">
+<meta property="og:description" content="Все сервисы школы — в одном касании. Карточка и экран в стиле PDP School, кабинет с цифрами, цена.">
 <meta property="og:url" content="https://birtapcard.vercel.app/pdp">
 <meta property="og:image" content="https://birtapcard.vercel.app/card.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -469,6 +469,21 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 .callout.col{flex-direction:column;gap:5px}
 .callout.col>span{font-size:13.5px;line-height:1.6}
 .callout.col>b{font-size:14.5px}
+.showcase{display:grid;gap:14px;margin:18px 0 6px}
+.shot{margin:0;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:10px;overflow:hidden}
+.shot img{display:block;width:100%;height:auto;border-radius:12px}
+.shot figcaption{padding:12px 6px 4px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.shot figcaption b{display:block;color:var(--text);font-size:14px;margin-bottom:3px}
+.tiles{display:grid;gap:9px}
+.tile{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px}
+.tile .ic{flex:0 0 auto;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#2F6BFF,#1445C4);box-shadow:0 4px 12px rgba(20,69,196,.35)}
+.tile .ic-maps{background:#fff}
+.tile .ic-play{background:#0F172A}
+.tile .ic-tg{background:#2AABEE}
+.tile h3{font-size:14.5px;font-weight:700;margin:0 0 3px;letter-spacing:-.01em}
+.tile p{font-size:13px;color:var(--muted);line-height:1.5;margin:0}
+.tile .who{display:inline-block;margin-top:7px;font-size:10.5px;font-weight:800;color:#FFC700;letter-spacing:.06em;text-transform:uppercase}
+@media(min-width:720px){.showcase{grid-template-columns:1fr 1fr;gap:18px}.tiles{grid-template-columns:1fr 1fr;gap:12px}}
 </style>
 </head>
 <body>
@@ -504,13 +519,13 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
       <span class="wm" style="font-size:15px;font-weight:800">Bir<em class="tap">Tap</em>Card</span>
     </div>
     <div class="pill"><span class="dot"></span><span data-i="hero.pill">Предложение для школы</span></div>
-    <h1 data-i="hero.h1">Каждый довольный родитель — <em>новый отзыв о школе</em></h1>
-    <p data-i="hero.sub">Родители выбирают частную школу по отзывам в Google и на картах. Карточка на ресепшн превращает благодарность родителя в опубликованный отзыв — за одно касание телефоном.</p>
+    <h1 data-i="hero.h1">Все сервисы школы — <em>в одном касании</em></h1>
+    <p data-i="hero.sub">Одна карточка на ресепшн и в корпусах. Родитель или ученик прикладывает телефон — и сразу видит приложение школы, сайт, Telegram-бот, Wi-Fi и кнопку отзыва в Google. Без объяснений, без листовок с паролями.</p>
 
     <div class="stats3">
-      <div class="stat pdp"><b>612</b><span data-i="hero.s1">мест на 2026–2027 — и они заполняются по отзывам</span></div>
-      <div class="stat"><b>15<small style="font-size:13px" data-i="hero.s2u">сек</small></b><span data-i="hero.s2">от касания до отзыва</span></div>
-      <div class="stat"><b>0</b><span data-i="hero.s3">приложений и регистраций для родителя</span></div>
+      <div class="stat pdp"><b>6</b><span data-i="hero.s1">сервисов школы на одном экране</span></div>
+      <div class="stat"><b>2<small style="font-size:13px" data-i="hero.s2u">сек</small></b><span data-i="hero.s2">от касания до экрана</span></div>
+      <div class="stat"><b>3</b><span data-i="hero.s3">языка: узбекский, русский, английский</span></div>
     </div>
 
     <div class="cta-row">
@@ -520,22 +535,23 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
   </div>
 </section>
 
-<!-- ═══ ПРОБЛЕМА ═══ -->
+<!-- ═══ СИТУАЦИЯ ═══ -->
 <section>
   <div class="wrap">
     <div class="eyebrow rv"><i></i><span data-i="pr.eye">Ситуация</span></div>
-    <h2 class="rv" data-i="pr.h">Результаты у школы сильные. <em>Отзывов — мало.</em></h2>
-    <p class="lead rv" data-i="pr.lead">100% выпускников на гранте, IELTS до 8.0, SAT до 1480 — но новый родитель этого не видит. Он открывает Google Maps и смотрит на звёзды и число отзывов. Довольные родители пишут редко: не потому что не хотят — потому что «потом».</p>
+    <h2 class="rv" data-i="pr.h">Одни и те же вопросы — <em>каждый день на ресепшн</em></h2>
+    <p class="lead rv" data-i="pr.lead">У PDP School есть приложение, сайт, Telegram-бот, Wi-Fi и профиль в Google. Но каждый из них родитель ищет отдельно: спрашивает администратора, ждёт ссылку в чате, набирает пароль с бумажки. А довольные родители до отзыва так и не доходят.</p>
 
     <div class="cards">
-      <div class="c rv"><div class="c-ico i-orange">🔍</div><h3 data-i="pr.1h">Родитель начинает с карт</h3><p data-i="pr.1p">Google, Яндекс, 2ГИС — первое, что открывают при выборе школы. Рейтинг и свежие отзывы решают, позвонят ли вообще.</p></div>
-      <div class="c rv"><div class="c-ico i-purple">⏳</div><h3 data-i="pr.2h">Благодарность не доходит до публикации</h3><p data-i="pr.2p">На собрании родитель говорит «спасибо», дома забывает. Пять шагов до кнопки «Отзыв» убивают намерение.</p></div>
-      <div class="c rv"><div class="c-ico i-blue">📣</div><h3 data-i="pr.3h">Канал @pdpschooll растёт медленнее, чем мог бы</h3><p data-i="pr.3p">Родители в школе каждый день — но подписаться им никто не предлагает в нужный момент.</p></div>
+      <div class="c rv"><div class="c-ico i-blue">📶</div><h3 data-i="pr.1h">«Какой пароль от Wi-Fi?»</h3><p data-i="pr.1p">Администратор диктует, родитель переспрашивает, ученик набирает с ошибкой. Каждый день, десятки раз.</p></div>
+      <div class="c rv"><div class="c-ico i-purple">📲</div><h3 data-i="pr.2h">«Где скачать приложение?»</h3><p data-i="pr.2p">Ищут в сторе по названию, находят не то или откладывают. Установок меньше, чем могло бы быть.</p></div>
+      <div class="c rv"><div class="c-ico i-orange">🤖</div><h3 data-i="pr.3h">«Как найти бот школы?»</h3><p data-i="pr.3p">Ссылка на бот и канал теряется в переписке. Родитель, который не в боте, снова звонит на ресепшн.</p></div>
+      <div class="c rv"><div class="c-ico i-mint">⭐</div><h3 data-i="pr.4h">Отзыв в Google так и не написан</h3><p data-i="pr.4p">На собрании говорят «спасибо», дома забывают. А новые родители выбирают школу именно по звёздам в Google Maps.</p></div>
     </div>
 
     <div class="quote rv">
       <p data-i="q.p">«Siz mijoz emassiz — hamkorsiz!»</p>
-      <span data-i="q.s">С сайта PDP School. Отзыв родителя — это и есть партнёрство: открытая, регулярная обратная связь, которую видят все.</span>
+      <span data-i="q.s">С сайта PDP School. Партнёру не объясняют по десять раз — ему дают всё нужное сразу.</span>
     </div>
   </div>
 </section>
@@ -544,39 +560,56 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 <section id="how">
   <div class="wrap">
     <div class="eyebrow rv"><i></i><span data-i="how.eye">Решение</span></div>
-    <h2 class="rv" data-i="how.h">Карточка на ресепшн. <em>Одно касание</em> — и отзыв опубликован</h2>
-    <p class="lead rv" data-i="how.lead">Никаких приложений и объяснений. Родитель прикладывает телефон — открывается страница с логотипом PDP School и кнопками площадок.</p>
+    <h2 class="rv" data-i="how.h">Карточка PDP School. <em>Одно касание</em> — и всё на экране</h2>
+    <p class="lead rv" data-i="how.lead">Никаких приложений и регистраций. Родитель прикладывает телефон — открывается страница в стиле PDP School с шестью кнопками. Нажал нужную — готово.</p>
 
     <div class="steps">
-      <div class="step rv"><div class="n">1</div><h3 data-i="how.1h">Родитель у ресепшн или на собрании</h3><p data-i="how.1p">Администратор: «Если вам всё понравилось — оставьте отзыв о школе, одно касание»</p></div>
-      <div class="step rv"><div class="n">2</div><h3 data-i="how.2h">Прикладывает телефон к карточке</h3><p data-i="how.2p">NFC — Android и iPhone открывают страницу сами. Запасной вариант — QR на той же карточке</p><div class="t" data-i="t.2">+2 сек</div></div>
-      <div class="step rv"><div class="n">3</div><h3 data-i="how.3h">Видит экран PDP School</h3><p data-i="how.3p">Google · Яндекс · 2ГИС · Telegram-канал · Instagram — выбирает удобное</p><div class="t" data-i="t.3">+3 сек</div></div>
-      <div class="step rv"><div class="n">4</div><h3 data-i="how.4h">Отзыв опубликован, рейтинг вырос</h3><p data-i="how.4p">Звёзды и пара слов — всё, что нужно. Школа видит это в кабинете в ту же минуту</p><div class="t" data-i="t.4">+10 сек</div></div>
+      <div class="step rv"><div class="n">1</div><h3 data-i="how.1h">Карточка на ресепшн и у входа в корпус</h3><p data-i="how.1p">«Всё в одном касании» — родитель видит карточку и понимает, что делать, без слов администратора</p></div>
+      <div class="step rv"><div class="n">2</div><h3 data-i="how.2h">Прикладывает телефон или сканирует QR</h3><p data-i="how.2p">NFC — Android и iPhone открывают страницу сами. Нет NFC — QR на той же карточке</p><div class="t" data-i="t.2">+2 сек</div></div>
+      <div class="step rv"><div class="n">3</div><h3 data-i="how.3h">Видит экран PDP School</h3><p data-i="how.3p">Google Maps · Сайт · Google Play · App Store · Telegram-бот · Wi-Fi — на узбекском, русском или английском</p><div class="t" data-i="t.3">+1 сек</div></div>
+      <div class="step rv"><div class="n">4</div><h3 data-i="how.4h">Нажимает нужное — и уходит довольным</h3><p data-i="how.4p">Скачал приложение, подключился к Wi-Fi, открыл бот или оставил отзыв. Школа видит каждое нажатие в кабинете</p><div class="t" data-i="t.4">+5 сек</div></div>
     </div>
   </div>
 </section>
 
-<!-- ═══ ЭКРАН ═══ -->
+<!-- ═══ КАРТОЧКА И ЭКРАН ═══ -->
+<section id="design">
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="ds.eye">Дизайн уже готов</span></div>
+    <h2 class="rv" data-i="ds.h">Карточка и экран — <em>в фирменном стиле PDP School</em></h2>
+    <p class="lead rv" data-i="ds.lead">Синий цвет школы, логотип, слоган. Родитель не видит чужого бренда — только PDP School. Мы под низом, мелко.</p>
+
+    <div class="showcase">
+      <figure class="shot rv">
+        <img src="/pdp-card.webp" alt="Карточка PDP School — всё в одном касании" loading="lazy">
+        <figcaption><b data-i="ds.c1h">Карточка на стойку</b><span data-i="ds.c1p">NFC-метка и QR-код на одной карточке. Печать под ваш логотип, ставится на ресепшн, в приёмную, в коридоры корпусов.</span></figcaption>
+      </figure>
+      <figure class="shot rv">
+        <img src="/pdp-screen.jpg" alt="Экран после касания — сервисы PDP School" loading="lazy">
+        <figcaption><b data-i="ds.c2h">Экран после касания</b><span data-i="ds.c2p">Открывается на телефоне родителя. Шесть кнопок, переключатель UZ / RU / EN. Меняем набор кнопок из кабинета за минуту.</span></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ЧТО НА ЭКРАНЕ ═══ -->
 <section>
   <div class="wrap">
-    <div class="eyebrow rv"><i></i><span data-i="sc.eye">Экран после касания</span></div>
-    <h2 class="rv" data-i="sc.h">Все площадки школы <em>на одном экране</em></h2>
-    <p class="lead rv" data-i="sc.lead">Родитель видит именно вашу школу — логотип и название. Оставил отзыв — кнопка гаснет, остальные ждут. Экран сам переключается на русский, узбекский или английский по языку телефона.</p>
+    <div class="eyebrow rv"><i></i><span data-i="tl.eye">Что на экране</span></div>
+    <h2 class="rv" data-i="tl.h">Шесть кнопок — <em>шесть задач школы</em></h2>
 
-    <div class="phone rv">
-      <div class="phone-top"><span class="dot"></span><span data-i="sc.p1">Понравилось у нас?</span></div>
-      <div class="phone-name">PDP School</div>
-      <div class="pb pb-g" data-i="sc.b1">⭐ Оставить отзыв в Google</div>
-      <div class="pb pb-ya" data-i="sc.b2">📍 Отзыв на Яндекс Картах</div>
-      <div class="pb pb-gis" data-i="sc.b3">📍 Отзыв в 2ГИС</div>
-      <div class="phone-or" data-i="sc.or">и ещё</div>
-      <div class="pb pb-tg" data-i="sc.b5">✈️ Telegram-канал @pdpschooll</div>
-      <div class="pb pb-ig" style="margin-top:8px" data-i="sc.b4">📸 Подписаться в Instagram</div>
+    <div class="tiles">
+      <div class="tile rv"><div class="ic ic-maps"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 22s7-6.6 7-12.5A7 7 0 0 0 5 9.5C5 15.4 12 22 12 22z" fill="#EA4335"/><circle cx="12" cy="9.5" r="2.7" fill="#fff"/></svg></div><div><h3>Google Maps</h3><p data-i="tl.1p">Найти школу на карте и оставить отзыв. Каждый отзыв — это то, что видят новые родители при выборе школы.</p><span class="who" data-i="tl.1w">Родители · репутация</span></div></div>
+      <div class="tile rv"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg></div><div><h3 data-i="tl.2h">Сайт pdp.uz</h3><p data-i="tl.2p">Официальный сайт: приём, программы, новости. Без набора адреса — одно нажатие.</p><span class="who" data-i="tl.2w">Гости · приёмная комиссия</span></div></div>
+      <div class="tile rv"><div class="ic ic-play"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 3.5v17l9.5-8.5z" fill="#34A853"/><path d="M4 3.5l9.5 8.5 3-2.7L5.4 3z" fill="#FBBC04"/><path d="M4 20.5l9.5-8.5 3 2.7L5.4 21z" fill="#EA4335"/><path d="M13.5 12l3-2.7 3.3 1.9c.9.5.9 1.1 0 1.6l-3.3 1.9z" fill="#4285F4"/></svg></div><div><h3>Google Play</h3><p data-i="tl.3p">Приложение PDP School для Android — сразу страница установки. Родитель не ищет по названию.</p><span class="who" data-i="tl.3w">Родители · ученики</span></div></div>
+      <div class="tile rv"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M13.5 4.5l-6 10.5M10.5 4.5l6 10.5M4 15h16M6.2 19l1.3-2.2M17.8 19l-1.3-2.2"/></svg></div><div><h3>App Store</h3><p data-i="tl.4p">То же самое для iPhone. Две кнопки — потому что у родителей разные телефоны.</p><span class="who" data-i="tl.4w">Родители · ученики</span></div></div>
+      <div class="tile rv"><div class="ic ic-tg"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M21.5 3.6L2.9 10.8c-1 .4-1 1 0 1.3l4.6 1.4 1.8 5.5c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.4-2.3 4.7 3.5c.9.5 1.5.2 1.7-.8l3-14.3c.3-1.3-.5-1.9-1.4-1.8zM9.2 13.8l8.6-5.4c.4-.3.8 0 .5.2l-7 6.3-.3 3-1.8-4.1z"/></svg></div><div><h3 data-i="tl.5h">Telegram-бот</h3><p data-i="tl.5p">Быстрая связь: вопрос, расписание, оплата, новости. Родитель в боте — значит, не звонит на ресепшн.</p><span class="who" data-i="tl.5w">Родители · связь со школой</span></div></div>
+      <div class="tile rv"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.8 12.5a9 9 0 0 1 12.4 0M9.1 16a4.2 4.2 0 0 1 5.8 0"/><circle cx="12" cy="19.3" r="1.2" fill="#fff" stroke="none"/></svg></div><div><h3>Wi-Fi</h3><p data-i="tl.6p">Сеть школы: название и пароль в одно нажатие — скопировал и подключился. Диктовать больше не нужно.</p><span class="who" data-i="tl.6w">Ученики · гости</span></div></div>
     </div>
 
     <div class="cards" style="margin-top:14px">
-      <div class="c rv"><div class="c-ico i-mint">🎛</div><h3 data-i="sc.1h">Школа решает, что показывать</h3><p data-i="sc.1p">Только Google и Telegram? Пожалуйста. Все пять? Тоже. Каждая кнопка включается отдельно — меняется из кабинета за минуту.</p></div>
-      <div class="c rv"><div class="c-ico i-purple">🌐</div><h3 data-i="sc.2h">Три языка автоматически</h3><p data-i="sc.2p">Родителю с узбекским телефоном — узбекский, с русским — русский, остальным — английский. Ничего выбирать не нужно.</p></div>
+      <div class="c rv"><div class="c-ico i-mint">🎛</div><h3 data-i="tl.7h">Набор кнопок — ваш</h3><p data-i="tl.7p">Нужен Instagram, канал или оплата — добавляем. Убрать Wi-Fi на карточке в приёмной — убираем. Всё меняется из кабинета, карточку перепечатывать не надо.</p></div>
+      <div class="c rv"><div class="c-ico i-purple">🌐</div><h3 data-i="tl.8h">Три языка</h3><p data-i="tl.8p">Экран открывается на языке телефона — узбекском, русском или английском. Переключатель сверху, если нужно иначе.</p></div>
     </div>
   </div>
 </section>
@@ -585,14 +618,14 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 <section>
   <div class="wrap">
     <div class="eyebrow rv"><i></i><span data-i="mo.eye">Где это работает в школе</span></div>
-    <h2 class="rv" data-i="mo.h">Пять моментов, когда родитель <em>готов сказать спасибо</em></h2>
+    <h2 class="rv" data-i="mo.h">Пять точек — <em>пять разных задач</em></h2>
 
     <div class="moments">
-      <div class="moment rv"><div class="ic">🏛</div><div><h3 data-i="mo.1h">Приёмная комиссия</h3><p data-i="mo.1p">Договор подписан, ребёнок зачислен — самый благодарный момент. Карточка лежит рядом с ручкой.</p></div></div>
-      <div class="moment rv"><div class="ic">👨‍👩‍👧</div><div><h3 data-i="mo.2h">Родительские собрания</h3><p data-i="mo.2p">Классный руководитель показывает результаты — и предлагает поделиться мнением о школе.</p></div></div>
-      <div class="moment rv"><div class="ic">🚪</div><div><h3 data-i="mo.3h">Дни открытых дверей</h3><p data-i="mo.3p">Гости уходят под впечатлением. Карточка у выхода ловит это впечатление, пока оно свежее.</p></div></div>
-      <div class="moment rv"><div class="ic">🎓</div><div><h3 data-i="mo.4h">Выпускной и грант</h3><p data-i="mo.4p">100% выпускников на гранте — это те самые истории, которые должны быть в отзывах.</p></div></div>
-      <div class="moment rv"><div class="ic">🛎</div><div><h3 data-i="mo.5h">Ресепшн — каждый день</h3><p data-i="mo.5p">Родители приходят за детьми, оплачивать, на встречи. Карточка работает всё время, пока открыта школа.</p></div></div>
+      <div class="moment rv"><div class="ic">🛎</div><div><h3 data-i="mo.1h">Ресепшн главного корпуса</h3><p data-i="mo.1p">Главная точка. Родители приходят за детьми, оплачивать, на встречи. Карточка работает всё время, пока открыта школа.</p></div></div>
+      <div class="moment rv"><div class="ic">🏛</div><div><h3 data-i="mo.2h">Приёмная комиссия</h3><p data-i="mo.2p">Договор подписан — родитель тут же ставит приложение и заходит в бот. И оставляет отзыв, пока впечатление свежее.</p></div></div>
+      <div class="moment rv"><div class="ic">🏫</div><div><h3 data-i="mo.3h">Коридоры и классы</h3><p data-i="mo.3p">Ученики подключаются к Wi-Fi и открывают бот сами. Учителю не нужно диктовать пароль каждому новому классу.</p></div></div>
+      <div class="moment rv"><div class="ic">👨‍👩‍👧</div><div><h3 data-i="mo.4h">Родительские собрания</h3><p data-i="mo.4p">Классный руководитель показывает результаты и просит поделиться мнением о школе — карточка на столе.</p></div></div>
+      <div class="moment rv"><div class="ic">🚪</div><div><h3 data-i="mo.5h">Дни открытых дверей</h3><p data-i="mo.5p">Гости уходят под впечатлением: сайт, карта, приложение — всё с одной карточки у выхода.</p></div></div>
     </div>
   </div>
 </section>
@@ -601,29 +634,29 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 <section>
   <div class="wrap">
     <div class="eyebrow rv"><i></i><span data-i="ow.eye">Что получает школа</span></div>
-    <h2 class="rv" data-i="ow.h">Не карточка, а <em>инструмент репутации</em> с кабинетом</h2>
+    <h2 class="rv" data-i="ow.h">Не карточка, а <em>инструмент с кабинетом</em> и цифрами</h2>
 
     <div class="dash rv">
       <div class="dash-top"><span class="d"></span><b data-i="pl.dash">PDP School · кабинет</b><span data-i="pl.upd">обновлено сейчас</span></div>
       <div class="kpis">
-        <div class="kpi"><i data-i="pl.k1">Касаний за неделю</i><b class="mono" data-count="184">0</b><u data-i="pl.k1s">родители и гости</u>
+        <div class="kpi"><i data-i="pl.k1">Касаний за неделю</i><b class="mono" data-count="312">0</b><u data-i="pl.k1s">родители, ученики, гости</u>
           <svg viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0,24 L15,20 L30,22 L45,12 L60,15 L75,7 L100,4" fill="none" stroke="#00D9AE" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>
-        <div class="kpi"><i data-i="pl.k2">Новых отзывов Google</i><b class="mono" data-count="27" data-suffix="">0</b><u data-i="pl.k2s">считаем реальные, не переходы</u>
-          <svg viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0,20 L20,24 L40,14 L55,18 L75,10 L100,8" fill="none" stroke="#FF6B35" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>
-        <div class="kpi"><i data-i="pl.k3">Рейтинг Google</i><b class="mono">4.9</b><u data-i="pl.k3s">по всем отзывам</u></div>
-        <div class="kpi"><i data-i="pl.k4">Подписок на канал</i><b class="mono" data-count="61">0</b><u data-i="pl.k4s">@pdpschooll за неделю</u></div>
+        <div class="kpi"><i data-i="pl.k2">Переходов в App Store / Google Play</i><b class="mono" data-count="96">0</b><u data-i="pl.k2s">за неделю</u>
+          <svg viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0,20 L20,24 L40,14 L55,18 L75,10 L100,8" fill="none" stroke="#4285F4" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>
+        <div class="kpi"><i data-i="pl.k3">Новых отзывов Google</i><b class="mono" data-count="19">0</b><u data-i="pl.k3s">считаем реальные, не переходы</u></div>
+        <div class="kpi"><i data-i="pl.k4">Подключений к Wi-Fi</i><b class="mono" data-count="84">0</b><u data-i="pl.k4s">нажатий на кнопку</u></div>
       </div>
-      <div class="top-row"><i>1</i><span data-i="pl.r1">Приёмная комиссия</span><em>71</em></div>
-      <div class="top-row"><i>2</i><span data-i="pl.r2">Ресепшн, главный корпус</span><em>64</em></div>
-      <div class="top-row"><i>3</i><span data-i="pl.r3">День открытых дверей</span><em>49</em></div>
+      <div class="top-row"><i>1</i><span data-i="pl.r1">Ресепшн, главный корпус</span><em>143</em></div>
+      <div class="top-row"><i>2</i><span data-i="pl.r2">Приёмная комиссия</span><em>98</em></div>
+      <div class="top-row"><i>3</i><span data-i="pl.r3">Коридор, 2 этаж</span><em>71</em></div>
     </div>
     <p style="font-size:11.5px;color:var(--dim);margin:8px 0 22px;text-align:center" data-i="pl.note">Цифры в макете иллюстративные</p>
 
     <div class="cards">
-      <div class="c rv"><div class="c-ico i-mint">📈</div><h3 data-i="ow.1h">Реальные отзывы, а не «переходы»</h3><p data-i="ow.1p">Кабинет раз в сутки сверяется с Google и показывает, сколько отзывов прибавилось и какой рейтинг. Честная цифра для отчёта директору.</p></div>
-      <div class="c rv"><div class="c-ico i-blue">📊</div><h3 data-i="ow.2h">Куда нажимают родители</h3><p data-i="ow.2p">Google, Яндекс, 2ГИС, Telegram, Instagram — по каждой кнопке отдельно. Видно, что реально работает.</p></div>
-      <div class="c rv"><div class="c-ico i-purple">🏢</div><h3 data-i="ow.3h">Несколько точек — одна картина</h3><p data-i="ow.3p">Ресепшн, приёмная комиссия, второй корпус, другие школы экосистемы PDP — каждая карточка считается отдельно и сравнивается в одном кабинете.</p></div>
-      <div class="c rv"><div class="c-ico i-orange">✈️</div><h3 data-i="ow.4h">Отчёт в Telegram каждое утро</h3><p data-i="ow.4p">Касания, новые отзывы, лучшая точка — в 8:00 в чат администрации. Ничего открывать не нужно.</p></div>
+      <div class="c rv"><div class="c-ico i-blue">📊</div><h3 data-i="ow.1h">Куда нажимают</h3><p data-i="ow.1p">По каждой кнопке отдельно: сколько пошли в App Store, сколько в бот, сколько к Wi-Fi. Видно, что реально нужно людям.</p></div>
+      <div class="c rv"><div class="c-ico i-mint">📈</div><h3 data-i="ow.2h">Реальные отзывы Google, а не «переходы»</h3><p data-i="ow.2p">Кабинет раз в сутки сверяется с Google и показывает, сколько отзывов прибавилось и какой рейтинг. Честная цифра для отчёта.</p></div>
+      <div class="c rv"><div class="c-ico i-purple">🏢</div><h3 data-i="ow.3h">Несколько точек — одна картина</h3><p data-i="ow.3p">Ресепшн, приёмная, корпуса, другие школы экосистемы PDP — каждая карточка считается отдельно и сравнивается в одном кабинете.</p></div>
+      <div class="c rv"><div class="c-ico i-orange">✈️</div><h3 data-i="ow.4h">Отчёт в Telegram каждое утро</h3><p data-i="ow.4p">Касания, нажатия, новые отзывы, лучшая точка — в 8:00 в чат администрации. Ничего открывать не нужно.</p></div>
       <div class="c rv"><div class="c-ico i-mint">📱</div><h3 data-i="ow.5h">Кабинет с телефона</h3><p data-i="ow.5p">Приложение для Android и веб-версия. Директор видит статистику в дороге.</p></div>
       <div class="c rv"><div class="c-ico i-blue">🔄</div><h3 data-i="ow.6h">Обновления без доплат</h3><p data-i="ow.6p">Платформа развивается каждую неделю. Всё новое достаётся школе в рамках подписки.</p></div>
     </div>
@@ -638,7 +671,7 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
     <div class="cards">
       <div class="c rv"><div class="c-ico i-mint">📡</div><h3 data-i="dev.1h">NFC + QR в одном</h3><p data-i="dev.1p">Поднёс телефон — открылось. Нет NFC — навёл камеру на QR. Работает на любом телефоне.</p></div>
       <div class="c rv"><div class="c-ico i-orange">🔋</div><h3 data-i="dev.2h">Без питания и интернета</h3><p data-i="dev.2p">Метка пассивная — ни батареек, ни зарядки, ни настроек. Стоит годами.</p></div>
-      <div class="c rv"><div class="c-ico i-purple">🎨</div><h3 data-i="dev.3h">В стиле школы</h3><p data-i="dev.3p">Дизайн карточки с логотипом PDP School, в цветах школы. На экране после касания — тоже ваш логотип.</p></div>
+      <div class="c rv"><div class="c-ico i-purple">🎨</div><h3 data-i="dev.3h">В стиле школы</h3><p data-i="dev.3p">Дизайн под PDP School уже готов — выше. Печатаем, привозим, ставим. Ссылки за карточкой меняются без перепечатки.</p></div>
     </div>
   </div>
 </section>
@@ -648,13 +681,13 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
   <div class="wrap">
     <div class="eyebrow rv"><i></i><span data-i="pz.eye">Условия</span></div>
     <h2 class="rv" data-i="pz.h">Сколько это стоит</h2>
-    <p class="lead rv" data-i="pz.lead">Цена за одну точку. В неё входит устройство, установка на месте и личный кабинет.</p>
+    <p class="lead rv" data-i="pz.lead">Цена за одну точку. В неё входит карточка в дизайне PDP School, установка на месте и личный кабинет.</p>
 
     <div class="prices">
       <div class="price rv">
         <div class="price-top"><b data-i="pz.m">Помесячно</b></div>
         <div class="price-sum"><b>200&nbsp;000</b><span data-i="pz.sum">сум</span></div>
-        <div class="price-note" data-i="pz.mnote">Устройство, подключение, установка и первый месяц — всё включено</div>
+        <div class="price-note" data-i="pz.mnote">Устройство, дизайн, подключение, установка и первый месяц — всё включено</div>
         <div class="price-then"><span data-i="pz.then">далее</span> <b>47&nbsp;000</b> <span data-i="pz.permonth">сум в месяц</span></div>
       </div>
       <div class="price hi rv">
@@ -667,12 +700,13 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 
     <div class="callout callout--lock col rv" style="margin-bottom:18px">
       <b data-i="pz.multi">Несколько точек в школе?</b>
-      <span data-i="pz.multip">Ресепшн + приёмная комиссия + корпус — считаем пакетом, каждая точка со своей статистикой в одном кабинете.</span>
+      <span data-i="pz.multip">Ресепшн + приёмная комиссия + корпуса — считаем пакетом, каждая точка со своей статистикой в одном кабинете.</span>
     </div>
 
     <h3 class="rv" style="font-size:16px;margin:0 0 10px" data-i="pz.sub">Что входит в подписку</h3>
     <div class="need" style="margin-bottom:22px">
-      <div class="rv"><b>✓</b><span data-i="pz.s1">Личный кабинет с реальными отзывами Google, переходами и сравнением точек</span></div>
+      <div class="rv"><b>✓</b><span data-i="pz.s0">Карточка в фирменном дизайне PDP School — без доплаты за дизайн</span></div>
+      <div class="rv"><b>✓</b><span data-i="pz.s1">Личный кабинет: нажатия по каждой кнопке, реальные отзывы Google, сравнение точек</span></div>
       <div class="rv"><b>✓</b><span data-i="pz.s2">Экран после касания на трёх языках с логотипом школы</span></div>
       <div class="rv"><b>✓</b><span data-i="pz.s3">Ежедневный отчёт в Telegram администрации</span></div>
       <div class="rv"><b>✓</b><span data-i="pz.s4">Замена устройства — 2 раза в год бесплатно</span></div>
@@ -692,12 +726,12 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
     <div class="eyebrow rv"><i></i><span data-i="nd.eye">Запуск</span></div>
     <h2 class="rv" data-i="nd.h">От школы нужно <em>четыре вещи</em> — остальное делаем мы</h2>
     <div class="need">
-      <div class="rv"><b>1</b><span data-i="nd.1">Ссылка на профиль школы в Google (и, если есть, Яндекс / 2ГИС)</span></div>
-      <div class="rv"><b>2</b><span data-i="nd.2">Telegram-канал и Instagram, куда вести родителей</span></div>
-      <div class="rv"><b>3</b><span data-i="nd.3">Логотип школы для карточки и экрана</span></div>
+      <div class="rv"><b>1</b><span data-i="nd.1">Ссылки: приложение в App Store и Google Play, сайт, Telegram-бот, профиль в Google Maps</span></div>
+      <div class="rv"><b>2</b><span data-i="nd.2">Wi-Fi: название сети и пароль (лучше — гостевой сети)</span></div>
+      <div class="rv"><b>3</b><span data-i="nd.3">Логотип в векторе для печати — если есть; иначе возьмём с сайта</span></div>
       <div class="rv"><b>4</b><span data-i="nd.4">Где будут стоять карточки и кто из администрации получает отчёт</span></div>
     </div>
-    <p class="pz-final rv" data-i="nd.term">Привозим, ставим и показываем администраторам, как предлагать родителям. Запуск — за 1–2 дня после подтверждения.</p>
+    <p class="pz-final rv" data-i="nd.term">Печатаем, привозим, ставим и показываем администраторам. Запуск — за 2–3 дня после подтверждения.</p>
   </div>
 </section>
 
@@ -705,8 +739,8 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 <section>
   <div class="wrap">
     <div class="final rv">
-      <h2 data-i="fin.h">612 мест заполнятся быстрее, <em>когда за школу говорят родители</em></h2>
-      <p data-i="fin.p">Сильные результаты у вас уже есть. Мы сделаем так, чтобы о них рассказывали там, где новые родители ищут школу.</p>
+      <h2 data-i="fin.h">Один экран <em>вместо десяти объяснений</em></h2>
+      <p data-i="fin.p">Родители и ученики получают всё нужное за одно касание. Школа — установки приложения, подписки в боте и отзывы в Google, которые можно посчитать.</p>
       <a class="btn btn-p" href="https://t.me/Jrkhnv777" data-i="cta.main2">Написать в Telegram</a>
     </div>
 
@@ -771,130 +805,158 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 const UZ = {
 'brand.sub':'PDP School uchun',
 'hero.pill':'Maktab uchun taklif',
-'hero.h1':'Har bir mamnun ota-ona — <em>maktab haqida yangi sharh</em>',
-'hero.sub':"Ota-onalar xususiy maktabni Google va xaritalardagi sharhlarga qarab tanlaydi. Resepshndagi kartochka ota-onaning minnatdorchiligini e'lon qilingan sharhga aylantiradi — telefonni bir tegizish bilan.",
-'hero.s1':"2026–2027 uchun o'rin — va ular sharhlar orqali to'ladi",
+'hero.h1':'Maktabning barcha xizmatlari — <em>bir tegizishda</em>',
+'hero.sub':"Resepshn va binolarda bitta kartochka. Ota-ona yoki o'quvchi telefonini tegizadi — va darhol maktab ilovasi, sayt, Telegram-bot, Wi-Fi hamda Google'da sharh qoldirish tugmasini ko'radi. Tushuntirishlarsiz, parol yozilgan qog'ozlarsiz.",
+'hero.s1':"maktab xizmati bitta ekranda",
 'hero.s2u':'son',
-'hero.s2':'tegizishdan sharhgacha',
-'hero.s3':"ota-ona uchun ilova va ro'yxatdan o'tish",
+'hero.s2':'tegizishdan ekrangacha',
+'hero.s3':"til: o'zbek, rus, ingliz",
 'cta.how':'Bu qanday ishlaydi',
 'cta.price0':'Shartlar va narx',
 
 'pr.eye':'Vaziyat',
-'pr.h':"Maktab natijalari kuchli. <em>Sharhlar — kam.</em>",
-'pr.lead':"Bitiruvchilarning 100%i grantda, IELTS 8.0 gacha, SAT 1480 gacha — lekin yangi ota-ona buni ko'rmaydi. U Google Maps'ni ochadi va yulduzlar hamda sharhlar soniga qaraydi. Mamnun ota-onalar kam yozadi: xohlamagani uchun emas — «keyin» deb qo'ygani uchun.",
-'pr.1h':'Ota-ona xaritadan boshlaydi',
-'pr.1p':"Google, Yandex, 2GIS — maktab tanlashda birinchi ochiladigan joy. Reyting va yangi sharhlar umuman qo'ng'iroq qilish-qilmaslikni hal qiladi.",
-'pr.2h':"Minnatdorchilik e'longa yetib bormaydi",
-'pr.2p':"Majlisda ota-ona «rahmat» deydi, uyda unutadi. «Sharh» tugmasigacha besh qadam niyatni o'ldiradi.",
-'pr.3h':"@pdpschooll kanali imkonidan sekinroq o'sadi",
-'pr.3p':"Ota-onalar har kuni maktabda — lekin kerakli paytda obuna bo'lishni hech kim taklif qilmaydi.",
+'pr.h':"Har kuni resepshnda — <em>bir xil savollar</em>",
+'pr.lead':"PDP School'da ilova, sayt, Telegram-bot, Wi-Fi va Google'da profil bor. Lekin ota-ona har birini alohida qidiradi: administratordan so'raydi, chatda havolani kutadi, parolni qog'ozdan teradi. Mamnun ota-onalar esa sharhgacha yetib bormaydi.",
+'pr.1h':'«Wi-Fi paroli qanaqa?»',
+'pr.1p':"Administrator aytadi, ota-ona qayta so'raydi, o'quvchi xato teradi. Har kuni, o'nlab marta.",
+'pr.2h':'«Ilovani qayerdan yuklab olsam?»',
+'pr.2p':"Do'konda nomi bo'yicha qidiradi, boshqasini topadi yoki keyinga qoldiradi. O'rnatishlar bo'lishi mumkin bo'lganidan kam.",
+'pr.3h':'«Maktab botini qanday topsam?»',
+'pr.3p':"Bot va kanal havolasi yozishmalarda yo'qoladi. Botda bo'lmagan ota-ona yana resepshnga qo'ng'iroq qiladi.",
+'pr.4h':"Google'dagi sharh yozilmay qolaveradi",
+'pr.4p':"Majlisda «rahmat» deyishadi, uyda unutishadi. Yangi ota-onalar esa maktabni aynan Google Maps'dagi yulduzlarga qarab tanlaydi.",
 'q.p':'«Siz mijoz emassiz — hamkorsiz!»',
-'q.s':"PDP School saytidan. Ota-onaning sharhi — bu hamkorlikning o'zi: hamma ko'radigan ochiq, muntazam qaytish.",
+'q.s':"PDP School saytidan. Hamkorga o'n marta tushuntirilmaydi — unga kerak bo'lgan hamma narsa darhol beriladi.",
 
 'how.eye':'Yechim',
-'how.h':"Resepshndagi kartochka. <em>Bir teginish</em> — va sharh e'lon qilindi",
-'how.lead':"Hech qanday ilova va tushuntirishsiz. Ota-ona telefonni tegizadi — PDP School logotipi va platforma tugmalari bo'lgan sahifa ochiladi.",
-'how.1h':'Ota-ona resepshnda yoki majlisda',
-'how.1p':"Administrator: «Agar sizga hammasi yoqqan bo'lsa — maktab haqida sharh qoldiring, bir teginish»",
-'how.2h':'Telefonni kartochkaga tegizadi',
-'how.2p':"NFC — Android va iPhone sahifani o'zi ochadi. Zaxira varianti — o'sha kartochkadagi QR",
+'how.h':"PDP School kartochkasi. <em>Bir tegizish</em> — va hammasi ekranda",
+'how.lead':"Hech qanday ilova va ro'yxatdan o'tish yo'q. Ota-ona telefonini tegizadi — PDP School uslubidagi oltita tugmali sahifa ochiladi. Keraklisini bosdi — tayyor.",
+'how.1h':'Resepshnda va bino kiraverishida kartochka',
+'how.1p':"«Hammasi bir tegizishda» — ota-ona kartochkani ko'radi va administratorning so'zisiz nima qilishni tushunadi",
+'how.2h':'Telefonini tegizadi yoki QR skanerlaydi',
+'how.2p':"NFC — Android va iPhone sahifani o'zi ochadi. NFC yo'q bo'lsa — o'sha kartochkadagi QR",
 'how.3h':"PDP School ekranini ko'radi",
-'how.3p':"Google · Yandex · 2GIS · Telegram-kanal · Instagram — qulayini tanlaydi",
-'how.4h':"Sharh e'lon qilindi, reyting oshdi",
-'how.4p':"Yulduzlar va bir-ikki so'z — shu kifoya. Maktab buni o'sha daqiqada kabinetda ko'radi",
-'t.2':'+2 son','t.3':'+3 son','t.4':'+10 son',
+'how.3p':"Google Maps · Sayt · Google Play · App Store · Telegram-bot · Wi-Fi — o'zbek, rus yoki ingliz tilida",
+'how.4h':'Keraklisini bosadi — va mamnun ketadi',
+'how.4p':"Ilovani yuklab oldi, Wi-Fi'ga ulandi, botni ochdi yoki sharh qoldirdi. Maktab har bir bosishni kabinetda ko'radi",
+'t.2':'+2 son',
+'t.3':'+1 son',
+'t.4':'+5 son',
 
-'sc.eye':'Teginishdan keyingi ekran',
-'sc.h':"Maktabning barcha platformalari <em>bitta ekranda</em>",
-'sc.lead':"Ota-ona aynan sizning maktabingizni ko'radi — logotip va nom. Sharh qoldirdi — tugma o'chadi, qolganlari kutadi. Ekran telefon tiliga qarab o'zi rus, o'zbek yoki ingliz tiliga o'tadi.",
-'sc.p1':'Bizda yoqdimi?',
-'sc.b1':"⭐ Google'da sharh qoldirish",
-'sc.b2':'📍 Yandex Xaritalarda sharh',
-'sc.b3':"📍 2GIS'da sharh",
-'sc.or':'va yana',
-'sc.b5':'✈️ Telegram-kanal @pdpschooll',
-'sc.b4':"📸 Instagram'ga obuna",
-'sc.1h':"Nimani ko'rsatishni maktab hal qiladi",
-'sc.1p':"Faqat Google va Telegram? Marhamat. Beshtasi ham? Mumkin. Har bir tugma alohida yoqiladi — kabinetdan bir daqiqada o'zgartiriladi.",
-'sc.2h':"Uch til avtomatik",
-'sc.2p':"O'zbek tilidagi telefonga — o'zbekcha, ruschaga — ruscha, qolganlarga — inglizcha. Hech narsa tanlash shart emas.",
+'ds.eye':'Dizayn allaqachon tayyor',
+'ds.h':"Kartochka va ekran — <em>PDP School firma uslubida</em>",
+'ds.lead':"Maktabning ko'k rangi, logotip, shior. Ota-ona begona brendni ko'rmaydi — faqat PDP School. Biz pastda, mayda.",
+'ds.c1h':'Stol uchun kartochka',
+'ds.c1p':"NFC-belgi va QR-kod bitta kartochkada. Logotipingiz bilan chop etiladi, resepshnga, qabul komissiyasiga, bino yo'laklariga qo'yiladi.",
+'ds.c2h':'Tegizishdan keyingi ekran',
+'ds.c2p':"Ota-onaning telefonida ochiladi. Oltita tugma, UZ / RU / EN almashtirgich. Tugmalar to'plamini kabinetdan bir daqiqada o'zgartiramiz.",
 
-'mo.eye':'Maktabda bu qayerda ishlaydi',
-'mo.h':"Ota-ona <em>rahmat aytishga tayyor</em> bo'ladigan besh lahza",
-'mo.1h':'Qabul komissiyasi',
-'mo.1p':"Shartnoma imzolandi, bola qabul qilindi — eng minnatdor lahza. Kartochka ruchka yonida turadi.",
-'mo.2h':'Ota-onalar majlislari',
-'mo.2p':"Sinf rahbari natijalarni ko'rsatadi — va maktab haqida fikr bildirishni taklif qiladi.",
-'mo.3h':'Ochiq eshiklar kunlari',
-'mo.3p':"Mehmonlar taassurot bilan ketadi. Chiqishdagi kartochka bu taassurotni yangiligida ushlab qoladi.",
-'mo.4h':'Bitiruv va grant',
-'mo.4p':"Bitiruvchilarning 100%i grantda — aynan shu hikoyalar sharhlarda bo'lishi kerak.",
-'mo.5h':'Resepshn — har kuni',
-'mo.5p':"Ota-onalar bolalarni olib ketishga, to'lovga, uchrashuvga keladi. Kartochka maktab ochiq bo'lgan butun vaqt ishlaydi.",
+'tl.eye':'Ekranda nima bor',
+'tl.h':"Oltita tugma — <em>maktabning oltita vazifasi</em>",
+'tl.1p':"Maktabni xaritada topish va sharh qoldirish. Har bir sharh — yangi ota-onalar maktab tanlashda ko'radigan narsa.",
+'tl.1w':'Ota-onalar · obroʻ',
+'tl.2h':'pdp.uz sayti',
+'tl.2p':"Rasmiy sayt: qabul, dasturlar, yangiliklar. Manzil terilmaydi — bir bosish.",
+'tl.2w':'Mehmonlar · qabul komissiyasi',
+'tl.3p':"Android uchun PDP School ilovasi — to'g'ridan-to'g'ri o'rnatish sahifasi. Ota-ona nomi bo'yicha qidirmaydi.",
+'tl.3w':"Ota-onalar · o'quvchilar",
+'tl.4p':"iPhone uchun ham xuddi shu. Ikkita tugma — chunki ota-onalarning telefoni har xil.",
+'tl.4w':"Ota-onalar · o'quvchilar",
+'tl.5h':'Telegram-bot',
+'tl.5p':"Tezkor aloqa: savol, dars jadvali, to'lov, yangiliklar. Ota-ona botda — demak, resepshnga qo'ng'iroq qilmaydi.",
+'tl.5w':"Ota-onalar · maktab bilan aloqa",
+'tl.6p':"Maktab tarmog'i: nomi va paroli bir bosishda — nusxaladi va ulandi. Endi aytib turish shart emas.",
+'tl.6w':"O'quvchilar · mehmonlar",
+'tl.7h':"Tugmalar to'plami — sizniki",
+'tl.7p':"Instagram, kanal yoki to'lov kerak — qo'shamiz. Qabul komissiyasidagi kartochkadan Wi-Fi'ni olib tashlash kerak — olib tashlaymiz. Hammasi kabinetdan o'zgaradi, kartochkani qayta chop etish shart emas.",
+'tl.8h':'Uch til',
+'tl.8p':"Ekran telefon tilida ochiladi — o'zbek, rus yoki ingliz. Boshqacha kerak bo'lsa — yuqorida almashtirgich.",
+
+'mo.eye':'Bu maktabda qayerda ishlaydi',
+'mo.h':"Beshta nuqta — <em>beshta turli vazifa</em>",
+'mo.1h':'Asosiy bino resepshni',
+'mo.1p':"Asosiy nuqta. Ota-onalar bolalarini olgani, to'lov qilgani, uchrashuvga keladi. Kartochka maktab ochiq bo'lgan butun vaqt ishlaydi.",
+'mo.2h':'Qabul komissiyasi',
+'mo.2p':"Shartnoma imzolandi — ota-ona shu yerning o'zida ilovani o'rnatadi va botga kiradi. Taassurot yangi ekan — sharh ham qoldiradi.",
+'mo.3h':"Yo'laklar va sinflar",
+'mo.3p':"O'quvchilar Wi-Fi'ga o'zlari ulanadi va botni ochadi. O'qituvchi har yangi sinfga parolni aytib o'tirmaydi.",
+'mo.4h':'Ota-onalar majlislari',
+'mo.4p':"Sinf rahbari natijalarni ko'rsatadi va maktab haqida fikr bildirishni so'raydi — kartochka stolda.",
+'mo.5h':'Ochiq eshiklar kunlari',
+'mo.5p':"Mehmonlar taassurot bilan ketadi: sayt, xarita, ilova — hammasi chiqishdagi bitta kartochkadan.",
 
 'ow.eye':'Maktab nima oladi',
-'ow.h':"Kartochka emas, kabinetli <em>reputatsiya vositasi</em>",
+'ow.h':"Kartochka emas, <em>kabinetli va raqamli</em> vosita",
 'pl.dash':'PDP School · kabinet',
-'pl.upd':'hozirgina yangilandi',
-'pl.k1':'Haftalik teginishlar','pl.k1s':'ota-onalar va mehmonlar',
-'pl.k2':'Yangi Google sharhlari','pl.k2s':"haqiqiylarini sanaymiz, o'tishlarni emas",
-'pl.k3':'Google reytingi','pl.k3s':"barcha sharhlar bo'yicha",
-'pl.k4':'Kanalga obunalar','pl.k4s':'@pdpschooll bir haftada',
-'pl.r1':'Qabul komissiyasi','pl.r2':'Resepshn, asosiy bino','pl.r3':'Ochiq eshiklar kuni',
-'pl.note':'Maketdagi raqamlar namuna uchun',
-'ow.1h':"Haqiqiy sharhlar, «o'tishlar» emas",
-'ow.1p':"Kabinet sutkada bir marta Google bilan solishtiradi va nechta sharh qo'shilgani hamda reytingni ko'rsatadi. Direktorga hisobot uchun halol raqam.",
-'ow.2h':'Ota-onalar qayerga bosadi',
-'ow.2p':"Google, Yandex, 2GIS, Telegram, Instagram — har bir tugma alohida. Nima haqiqatan ishlashi ko'rinadi.",
-'ow.3h':'Bir nechta nuqta — bitta manzara',
-'ow.3p':"Resepshn, qabul komissiyasi, ikkinchi bino, PDP ekotizimidagi boshqa maktablar — har bir kartochka alohida hisoblanadi va bitta kabinetda taqqoslanadi.",
-'ow.4h':'Har tong Telegram hisoboti',
-'ow.4p':"Teginishlar, yangi sharhlar, eng yaxshi nuqta — soat 8:00 da ma'muriyat chatiga. Hech narsa ochish shart emas.",
-'ow.5h':'Kabinet telefondan',
-'ow.5p':"Android ilovasi va veb-versiya. Direktor statistikani yo'lda ko'radi.",
+'pl.upd':'hozir yangilandi',
+'pl.k1':'Haftalik tegizishlar',
+'pl.k1s':"ota-onalar, o'quvchilar, mehmonlar",
+'pl.k2':"App Store / Google Play'ga o'tishlar",
+'pl.k2s':'bir haftada',
+'pl.k3':'Yangi Google sharhlari',
+'pl.k3s':"haqiqiylarini sanaymiz, o'tishlarni emas",
+'pl.k4':"Wi-Fi'ga ulanishlar",
+'pl.k4s':'tugma bosishlari',
+'pl.r1':'Resepshn, asosiy bino',
+'pl.r2':'Qabul komissiyasi',
+'pl.r3':"Yo'lak, 2-qavat",
+'pl.note':"Maketdagi raqamlar namuna uchun",
+'ow.1h':'Qayerga bosishadi',
+'ow.1p':"Har bir tugma bo'yicha alohida: nechtasi App Store'ga, nechtasi botga, nechtasi Wi-Fi'ga o'tdi. Odamlarga aslida nima kerakligi ko'rinadi.",
+'ow.2h':"Haqiqiy Google sharhlari, «o'tishlar» emas",
+'ow.2p':"Kabinet kuniga bir marta Google bilan solishtiradi va nechta sharh qo'shilgani hamda reytingni ko'rsatadi. Hisobot uchun halol raqam.",
+'ow.3h':"Bir nechta nuqta — bitta manzara",
+'ow.3p':"Resepshn, qabul komissiyasi, binolar, PDP ekotizimidagi boshqa maktablar — har bir kartochka alohida sanaladi va bitta kabinetda taqqoslanadi.",
+'ow.4h':"Har kuni ertalab Telegram'da hisobot",
+'ow.4p':"Tegizishlar, bosishlar, yangi sharhlar, eng yaxshi nuqta — soat 8:00 da ma'muriyat chatiga. Hech narsani ochish shart emas.",
+'ow.5h':'Telefondan kabinet',
+'ow.5p':"Android uchun ilova va veb-versiya. Direktor statistikani yo'lda ko'radi.",
 'ow.6h':"Qo'shimcha to'lovsiz yangilanishlar",
-'ow.6p':"Platforma har hafta rivojlanadi. Barcha yangiliklar maktabga obuna doirasida tegadi.",
+'ow.6p':"Platforma har hafta rivojlanadi. Barcha yangiliklar obuna doirasida maktabga tegadi.",
 
 'dev.eye':'Qurilma',
-'dev.h':"Ozoda kartochka, <em>buzilmaydigan</em>",
-'dev.1h':'NFC + QR bitta kartochkada',
-'dev.1p':"Telefonni tegizdi — ochildi. NFC yo'q — kamerani QR ga qaratdi. Har qanday telefonda ishlaydi.",
+'dev.h':"Chiroyli kartochka, <em>buzilmaydigan</em>",
+'dev.1h':'NFC + QR bittada',
+'dev.1p':"Telefonni tegizdi — ochildi. NFC yo'q — kamerani QR'ga qaratdi. Har qanday telefonda ishlaydi.",
 'dev.2h':'Quvvat va internetsiz',
-'dev.2p':"Belgi passiv — batareya ham, zaryad ham, sozlash ham kerak emas. Yillab turadi.",
+'dev.2p':"Belgi passiv — batareya ham, zaryad ham, sozlash ham yo'q. Yillab turadi.",
 'dev.3h':'Maktab uslubida',
-'dev.3p':"PDP School logotipi va maktab ranglarida kartochka dizayni. Teginishdan keyingi ekranda ham — sizning logotipingiz.",
+'dev.3p':"PDP School uchun dizayn allaqachon tayyor — yuqorida. Chop etamiz, olib kelamiz, o'rnatamiz. Kartochka ortidagi havolalar qayta chop etmasdan o'zgaradi.",
 
 'pz.eye':'Shartlar',
 'pz.h':'Bu qancha turadi',
-'pz.lead':"Bir nuqta uchun narx. Unga qurilma, joyida o'rnatish va shaxsiy kabinet kiradi.",
-'pz.m':'Oylik','pz.sum':"so'm",
-'pz.mnote':"Qurilma, ulash, o'rnatish va birinchi oy — hammasi kiradi",
-'pz.then':"keyin",'pz.permonth':"so'm oyiga",
-'pz.y':'Yillik','pz.ybadge':'foydali',
-'pz.ynote':"12 oy uchun bitta to'lov. Oylik bilan bir xil hamma narsa",
-'pz.save':"97 000 so'm arzon — ikki oy bepul",
-'pz.multi':'Maktabda bir nechta nuqta?',
-'pz.multip':"Resepshn + qabul komissiyasi + bino — paket qilib hisoblaymiz, har nuqta bitta kabinetda o'z statistikasi bilan.",
+'pz.lead':"Bitta nuqta uchun narx. Unga PDP School dizaynidagi kartochka, joyida o'rnatish va shaxsiy kabinet kiradi.",
+'pz.m':'Oylik',
+'pz.sum':"so'm",
+'pz.mnote':"Qurilma, dizayn, ulash, o'rnatish va birinchi oy — hammasi kiritilgan",
+'pz.then':"keyin",
+'pz.permonth':"so'm oyiga",
+'pz.y':'Yillik bir yoʻla',
+'pz.ybadge':'foydaliroq',
+'pz.ynote':"12 oy uchun bitta to'lov. Oylik bilan bir xil",
+'pz.save':"97&nbsp;000 so'mga arzon — ikki oy bepul",
+'pz.multi':'Maktabda bir nechta nuqta kerakmi?',
+'pz.multip':"Resepshn + qabul komissiyasi + binolar — paket sifatida hisoblaymiz, har bir nuqta o'z statistikasi bilan bitta kabinetda.",
 'pz.sub':'Obunaga nima kiradi',
-'pz.s1':"Haqiqiy Google sharhlari, o'tishlar va nuqtalar taqqoslanadigan shaxsiy kabinet",
-'pz.s2':'Maktab logotipi bilan uch tildagi teginish ekrani',
-'pz.s3':"Ma'muriyatga har kunlik Telegram hisoboti",
-'pz.s4':'Qurilma almashtirish — yiliga 2 marta bepul',
-'pz.s5':"Telegram orqali to'g'ridan-to'g'ri qo'llab-quvvatlash",
-'pz.lockh':'Narx maktab uchun qotiriladi.',
+'pz.s0':"PDP School firma dizaynidagi kartochka — dizayn uchun qo'shimcha to'lovsiz",
+'pz.s1':"Shaxsiy kabinet: har bir tugma bo'yicha bosishlar, haqiqiy Google sharhlari, nuqtalarni taqqoslash",
+'pz.s2':"Maktab logotipi bilan uch tilda tegizishdan keyingi ekran",
+'pz.s3':"Ma'muriyatga har kuni Telegram'da hisobot",
+'pz.s4':"Qurilmani almashtirish — yiliga 2 marta bepul",
+'pz.s5':"To'g'ridan-to'g'ri Telegram'da qo'llab-quvvatlash — tiketlarsiz",
+'pz.lockh':"Narx maktab uchun muhrlanadi.",
 'pz.lockp':"Keyin qo'shadigan hamma narsani PDP School qo'shimcha to'lovsiz oladi. Yangi mijozlar uchun narx keyinroq yuqori bo'ladi — lekin siz uchun emas.",
 
 'nd.eye':'Ishga tushirish',
 'nd.h':"Maktabdan <em>to'rtta narsa</em> kerak — qolganini biz qilamiz",
-'nd.1':"Maktabning Google profiliga havola (bor bo'lsa, Yandex / 2GIS ham)",
-'nd.2':"Ota-onalarni yo'naltiradigan Telegram-kanal va Instagram",
-'nd.3':'Kartochka va ekran uchun maktab logotipi',
+'nd.1':"Havolalar: App Store va Google Play'dagi ilova, sayt, Telegram-bot, Google Maps'dagi profil",
+'nd.2':"Wi-Fi: tarmoq nomi va paroli (yaxshisi — mehmon tarmog'i)",
+'nd.3':"Chop etish uchun vektor logotip — bo'lsa; bo'lmasa saytdan olamiz",
 'nd.4':"Kartochkalar qayerda turadi va ma'muriyatdan kim hisobot oladi",
-'nd.term':"Olib kelamiz, o'rnatamiz va administratorlarga ota-onalarga qanday taklif qilishni ko'rsatamiz. Tasdiqdan keyin 1–2 kunda ishga tushadi.",
+'nd.term':"Chop etamiz, olib kelamiz, o'rnatamiz va administratorlarga ko'rsatamiz. Ishga tushirish — tasdiqlangandan keyin 2–3 kun ichida.",
 
-'fin.h':"612 o'rin tezroq to'ladi, <em>maktab haqida ota-onalar gapirganda</em>",
-'fin.p':"Kuchli natijalar sizda allaqachon bor. Biz ular haqida yangi ota-onalar maktab qidiradigan joyda gapirilishini ta'minlaymiz.",
+'fin.h':"O'nta tushuntirish o'rniga <em>bitta ekran</em>",
+'fin.p':"Ota-onalar va o'quvchilar kerak bo'lgan hamma narsani bir tegizishda oladi. Maktab esa — ilova o'rnatishlari, botdagi obunalar va Google'dagi sharhlar, ularni sanash mumkin.",
 'cta.main2':"Telegram'da yozish",
 'cta.sticky':"PDP School'da ishga tushirishni muhokama qilish →",
 'ct.n2':'Muhammad Ali',
