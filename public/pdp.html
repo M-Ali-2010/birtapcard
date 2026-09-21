@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BirTapCard × PDP School — отзывы родителей за одно касание</title>
+<meta name="description" content="Предложение для PDP School: NFC + QR карточка на ресепшн и в приёмной комиссии. Родитель прикладывает телефон — и оставляет отзыв о школе в Google, Яндекс, 2ГИС, подписывается на Telegram-канал.">
+<meta name="theme-color" content="#05070E">
+
+<!-- Превью для Telegram/WhatsApp. После деплоя замените домен на свой -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="BirTapCard × PDP School">
+<meta property="og:description" content="Каждый довольный родитель — новый отзыв о школе. Одно касание телефоном.">
+<meta property="og:url" content="https://birtapcard.vercel.app/pdp">
+<meta property="og:image" content="https://birtapcard.vercel.app/card.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#05070E; --bg2:#0A101F; --card:#0E1526; --card2:#131C33;
+  --border:rgba(120,160,220,.13); --border2:rgba(120,160,220,.26);
+  --mint:#00D9AE; --mint2:#00F5C4; --mint-dim:rgba(0,217,174,.12);
+  --orange:#FF6B35; --orange-dim:rgba(255,107,53,.13);
+  --blue:#3B82F6; --blue-dim:rgba(59,130,246,.13);
+  --purple:#8B5CF6; --purple-dim:rgba(139,92,246,.13);
+  --gold:#F5A524;
+  --text:#EDF2FA; --muted:#8B9BB8; --dim:#55637F;
+  --gblue:#4285F4; --gred:#EA4335; --gyellow:#FBBC05; --ggreen:#34A853;
+  --r:16px; --r-lg:22px;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+
+html{background:var(--bg);-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg); color:var(--text);
+  font-size:16px; line-height:1.55; letter-spacing:-.01em;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom));
+}
+body::before{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(70vw 50vh at 80% -5%, rgba(0,217,174,.13), transparent 65%),
+    radial-gradient(60vw 45vh at 10% 25%, rgba(59,130,246,.10), transparent 62%),
+    radial-gradient(70vw 50vh at 90% 75%, rgba(139,92,246,.09), transparent 62%);
+}
+img{max-width:100%;height:auto;display:block}
+.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+
+/* ─── Каркас ─────────────────────────────────────────── */
+.wrap{width:100%;max-width:560px;margin:0 auto;padding:0 18px}
+section{padding:52px 0;position:relative}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--mint);margin-bottom:14px
+}
+.eyebrow i{width:20px;height:1px;background:var(--mint);opacity:.5;display:block}
+h2{font-size:27px;line-height:1.18;font-weight:800;letter-spacing:-.035em;margin-bottom:12px}
+h2 em{font-style:normal;color:var(--mint)}
+.lead{color:var(--muted);font-size:15px;line-height:1.62;margin-bottom:26px}
+
+/* ─── Шапка ──────────────────────────────────────────── */
+.top{
+  position:sticky;top:0;z-index:60;
+  background:rgba(5,7,14,.78);backdrop-filter:blur(16px) saturate(150%);
+  -webkit-backdrop-filter:blur(16px) saturate(150%);
+  border-bottom:1px solid var(--border)
+}
+.top-in{display:flex;align-items:center;gap:10px;height:58px}
+.logo{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
+.logo-mark{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--mint2),#00A882);
+  box-shadow:0 6px 18px -6px rgba(0,217,174,.55)
+}
+.logo-name{font-size:15px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.logo-name .tap,.wm .tap{font-style:normal;color:var(--mint)}
+.logo-sub{font-size:8.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--mint)}
+.lang{display:flex;gap:2px;padding:3px;background:var(--card);border:1px solid var(--border);border-radius:11px}
+.lang button{
+  padding:6px 11px;border:0;border-radius:8px;background:transparent;
+  color:var(--dim);font:700 12px/1 'Inter',sans-serif;cursor:pointer;
+  transition:.18s var(--ease);-webkit-tap-highlight-color:transparent
+}
+.lang button.on{background:var(--mint);color:#04121C}
+
+/* ─── Обложка ────────────────────────────────────────── */
+.hero{padding:34px 0 42px;text-align:center}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:99px;
+  background:var(--mint-dim);border:1px solid rgba(0,217,174,.3);
+  font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mint);
+  margin-bottom:20px
+}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:var(--mint);animation:ping 2s infinite}
+@keyframes ping{0%,100%{opacity:1}50%{opacity:.25}}
+h1{font-size:38px;line-height:1.06;font-weight:900;letter-spacing:-.045em;margin-bottom:16px}
+h1 em{font-style:normal;background:linear-gradient(120deg,var(--mint2),var(--mint) 55%,#5EEAD4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);font-size:16px;line-height:1.6;margin:0 auto 26px;max-width:400px}
+
+.card-shot{
+  position:relative;margin:0 auto 26px;max-width:290px;border-radius:24px;overflow:hidden;
+  border:1px solid var(--border2);
+  box-shadow:0 30px 70px -25px rgba(0,0,0,.9),0 0 0 1px rgba(0,217,174,.1)
+}
+.card-shot::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(5,7,14,.55),transparent 45%)
+}
+.card-shot.crop{aspect-ratio:5/6}
+.card-shot.crop img{width:100%;height:100%;object-fit:cover;object-position:center 42%}
+.card-shot .tag{
+  position:absolute;left:12px;bottom:12px;z-index:2;
+  display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:99px;
+  background:rgba(5,7,14,.7);backdrop-filter:blur(8px);border:1px solid var(--border2);
+  font-size:11px;font-weight:700;color:var(--text)
+}
+
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:24px}
+.stat{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 8px;
+  text-align:center
+}
+.stat b{display:block;font:800 22px/1 'JetBrains Mono',monospace;color:var(--mint);letter-spacing:-.03em;margin-bottom:5px}
+.stat span{display:block;font-size:10.5px;line-height:1.35;color:var(--muted)}
+
+.cta-row{display:flex;flex-direction:column;gap:10px}
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:15px 22px;border-radius:14px;border:1px solid transparent;
+  font:700 15px/1 'Inter',sans-serif;text-decoration:none;cursor:pointer;
+  transition:.2s var(--ease);-webkit-tap-highlight-color:transparent
+}
+.btn:active{transform:scale(.975)}
+.btn-p{background:linear-gradient(135deg,var(--mint2),#00B189);color:#04121C;box-shadow:0 14px 34px -12px rgba(0,217,174,.65)}
+.btn-g{background:var(--card);border-color:var(--border2);color:var(--text)}
+
+/* ─── Полоса доверия ─────────────────────────────────── */
+.trust{
+  background:linear-gradient(135deg,rgba(0,217,174,.09),rgba(59,130,246,.06));
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:22px 0
+}
+.trust-in{display:flex;align-items:center;gap:14px}
+.trust b{font:800 34px/1 'JetBrains Mono',monospace;color:var(--mint);letter-spacing:-.04em}
+.trust span{font-size:13.5px;line-height:1.45;color:var(--text);font-weight:600}
+.trust small{display:block;color:var(--muted);font-weight:400;font-size:12px;margin-top:3px}
+
+/* ─── Карточки ───────────────────────────────────────── */
+.cards{display:grid;gap:11px}
+.c{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:17px;position:relative;overflow:hidden
+}
+.c-ico{
+  width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  margin-bottom:12px;font-size:19px
+}
+.c h3{font-size:15.5px;font-weight:700;margin-bottom:6px;letter-spacing:-.02em}
+.c p{font-size:13.5px;line-height:1.55;color:var(--muted)}
+.i-mint{background:var(--mint-dim);color:var(--mint)}
+.i-orange{background:var(--orange-dim);color:var(--orange)}
+.i-blue{background:var(--blue-dim);color:var(--blue)}
+.i-purple{background:var(--purple-dim);color:var(--purple)}
+
+/* ─── Большие цифры ──────────────────────────────────── */
+.bigstats{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.bs{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 15px;position:relative;overflow:hidden}
+.bs::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--mint),transparent)}
+.bs b{display:block;font:800 30px/1 'JetBrains Mono',monospace;letter-spacing:-.05em;color:var(--mint);margin-bottom:8px}
+.bs span{font-size:12px;line-height:1.45;color:var(--muted)}
+.bs.o::before{background:linear-gradient(90deg,var(--orange),transparent)} .bs.o b{color:var(--orange)}
+.bs.b::before{background:linear-gradient(90deg,var(--blue),transparent)}   .bs.b b{color:var(--blue)}
+.bs.p::before{background:linear-gradient(90deg,var(--purple),transparent)} .bs.p b{color:var(--purple)}
+.note{font-size:11.5px;line-height:1.5;color:var(--dim);margin-top:14px}
+
+/* ─── Шаги ───────────────────────────────────────────── */
+.steps{position:relative;padding-left:38px}
+.steps::before{content:'';position:absolute;left:13px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--mint),rgba(0,217,174,.05))}
+.step{position:relative;padding-bottom:22px}
+.step:last-child{padding-bottom:0}
+.step .n{
+  position:absolute;left:-38px;top:0;width:28px;height:28px;border-radius:50%;
+  display:grid;place-items:center;background:var(--bg);border:2px solid var(--mint);
+  font:800 11px/1 'JetBrains Mono',monospace;color:var(--mint)
+}
+.step h3{font-size:15.5px;font-weight:700;margin-bottom:4px;letter-spacing:-.02em}
+.step p{font-size:13.5px;color:var(--muted);line-height:1.5}
+.step .t{
+  display:inline-block;margin-top:7px;padding:3px 9px;border-radius:99px;
+  background:var(--card2);font:700 11px/1.4 'JetBrains Mono',monospace;color:var(--mint)
+}
+
+/* ─── Сравнение NFC/QR ───────────────────────────────── */
+.vs{display:grid;gap:11px}
+.vs-col{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:17px}
+.vs-col.hi{border-color:rgba(0,217,174,.35);background:linear-gradient(160deg,rgba(0,217,174,.07),var(--card))}
+.vs-h{display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.vs-h b{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.vs-b{font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;background:var(--mint);color:#04121C;letter-spacing:.05em}
+.vs-col ul{list-style:none;display:grid;gap:9px}
+.vs-col li{display:flex;gap:9px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.vs-col li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--mint);flex-shrink:0;margin-top:7px}
+.vs-col:not(.hi) li::before{background:var(--dim)}
+
+/* ─── Макет экрана после скана ───────────────────────── */
+.phone{
+  max-width:340px;margin:0 auto;padding:22px 16px 18px;border-radius:30px;
+  background:linear-gradient(170deg,#0B1222,#05070E);border:1px solid var(--border2);
+  box-shadow:0 30px 70px -26px rgba(0,0,0,.9),inset 0 0 0 1px rgba(255,255,255,.03);text-align:center
+}
+.phone-top{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mint);margin-bottom:10px}
+.phone-top .dot{width:6px;height:6px;border-radius:50%;background:var(--mint)}
+.phone-name{display:inline-block;padding:5px 12px;border-radius:99px;background:var(--mint-dim);color:var(--mint);font-size:12px;font-weight:700;margin-bottom:14px}
+.pb{padding:12px;border-radius:13px;font-size:13.5px;font-weight:700;color:#fff;margin-bottom:8px}
+.pb-g{background:#fff;color:#1a1a1a}
+.pb-ya{background:#FC3F1D}
+.pb-gis{background:#00B956}
+.pb-ig{background:linear-gradient(135deg,#F9CE34,#EE2A7B 45%,#6228D7)}
+.pb-tg{background:linear-gradient(135deg,#2AABEE,#229ED9);margin-bottom:0}
+.phone-or{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:6px 0 10px}
+
+/* ─── Дашборд-макет ──────────────────────────────────── */
+.dash{
+  background:linear-gradient(165deg,var(--card),#0A1120);
+  border:1px solid var(--border2);border-radius:var(--r-lg);padding:14px;
+  box-shadow:0 24px 60px -22px rgba(0,0,0,.85)
+}
+.dash-top{display:flex;align-items:center;gap:8px;margin-bottom:13px}
+.dash-top .d{width:8px;height:8px;border-radius:50%;background:var(--mint);animation:ping 2s infinite}
+.dash-top b{font-size:12.5px;font-weight:700}
+.dash-top span{margin-left:auto;font-size:10.5px;color:var(--dim)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px}
+.kpi{background:rgba(255,255,255,.028);border:1px solid var(--border);border-radius:12px;padding:11px;position:relative;overflow:hidden}
+.kpi i{display:block;font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.kpi b{display:block;font:800 21px/1 'JetBrains Mono',monospace;letter-spacing:-.04em}
+.kpi u{display:block;text-decoration:none;font-size:10px;color:var(--muted);margin-top:5px}
+.kpi svg{position:absolute;right:0;bottom:0;left:0;height:26px;opacity:.5}
+.chart{background:rgba(255,255,255,.028);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:9px}
+.chart-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.chart-h b{font-size:12px;font-weight:700}
+.chart-h span{font-size:10px;color:var(--dim)}
+.bars{display:flex;align-items:flex-end;gap:5px;height:62px}
+.bars div{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(var(--mint),rgba(0,217,174,.25));transform-origin:bottom;animation:grow .9s var(--ease) backwards}
+@keyframes grow{from{transform:scaleY(.05)}}
+.tops{background:rgba(255,255,255,.028);border:1px solid var(--border);border-radius:12px;padding:12px}
+.tops>b{display:block;font-size:12px;margin-bottom:10px}
+.top-row{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.top-row:last-child{margin-bottom:0}
+.top-row i{font-style:normal;width:18px;height:18px;border-radius:6px;background:var(--card2);color:var(--dim);font:700 9.5px/18px 'JetBrains Mono',monospace;text-align:center;flex-shrink:0}
+.top-row:first-of-type i{background:var(--mint-dim);color:var(--mint)}
+.top-row span{flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top-row em{font-style:normal;font:700 11.5px/1 'JetBrains Mono',monospace;color:var(--muted)}
+.bar-line{height:3px;border-radius:2px;background:rgba(255,255,255,.07);margin-top:4px;overflow:hidden}
+.bar-line i{display:block;height:100%;background:linear-gradient(90deg,#00A882,var(--mint));border-radius:2px}
+
+/* ─── Список возможностей ────────────────────────────── */
+.feats{display:grid;gap:9px}
+.feat{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.feat .ck{width:22px;height:22px;border-radius:7px;background:var(--mint-dim);color:var(--mint);display:grid;place-items:center;flex-shrink:0;font-size:12px;font-weight:900}
+.feat b{display:block;font-size:14.5px;font-weight:700;margin-bottom:3px;letter-spacing:-.02em}
+.feat span{font-size:13px;line-height:1.5;color:var(--muted)}
+
+/* ─── Метрики-чипы ───────────────────────────────────── */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  display:flex;align-items:center;gap:7px;padding:10px 13px;border-radius:12px;
+  background:var(--card);border:1px solid var(--border);font-size:13px;font-weight:600
+}
+.chip s{text-decoration:none;color:var(--mint);font-size:14px}
+
+/* ─── Таблица сравнения ──────────────────────────────── */
+.cmp{display:grid;gap:8px}
+.cmp-row{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 15px}
+.cmp-row>b{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:9px}
+.cmp-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmp-two div{font-size:13px}
+.cmp-two i{display:block;font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+.cmp-two .bad{color:var(--muted)}
+.cmp-two .good{color:var(--mint);font-weight:700}
+
+/* ─── Для кого ───────────────────────────────────────── */
+.who{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.who div{
+  display:flex;align-items:center;gap:9px;padding:13px;border-radius:13px;
+  background:var(--card);border:1px solid var(--border);font-size:13px;font-weight:600
+}
+.who span{font-size:17px}
+
+
+/* ─── Тарифы ─────────────────────────────────────────── */
+.prices{display:grid;gap:11px;margin-bottom:22px}
+.price{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:19px;position:relative;overflow:hidden}
+.price.hi{border-color:rgba(0,217,174,.4);background:linear-gradient(160deg,rgba(0,217,174,.09),var(--card))}
+.price.hi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--mint2),transparent)}
+.price-top{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.price-top b{font-size:15px;font-weight:750;letter-spacing:-.02em}
+.price-sum{display:flex;align-items:baseline;gap:7px;margin-bottom:9px}
+.price-sum b{font:800 34px/1 'JetBrains Mono',monospace;letter-spacing:-.05em;word-spacing:-.3em;color:var(--mint)}
+.price-sum span{font-size:14px;color:var(--muted);font-weight:600}
+.price-note{font-size:13px;line-height:1.5;color:var(--muted)}
+.price-then{margin-top:13px;padding-top:13px;border-top:1px solid var(--border);font-size:13.5px;color:var(--muted)}
+.price-then b{font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:700;word-spacing:-.3em}
+.price-save{
+  margin-top:13px;padding:10px 12px;border-radius:11px;
+  background:var(--mint-dim);color:var(--mint);font-size:12.5px;font-weight:650;line-height:1.45
+}
+.incl{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:17px;margin-bottom:11px}
+.incl>b{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mint);margin-bottom:13px}
+.incl ul{list-style:none;display:grid;gap:11px}
+.incl li{position:relative;padding-left:23px;font-size:13.5px;line-height:1.6;color:var(--muted)}
+.incl li::before{
+  content:'✓';position:absolute;left:0;top:0;
+  color:var(--mint);font-weight:900;font-size:12.5px
+}
+.incl li b{color:var(--text);font-weight:650}
+.callout{
+  display:flex;align-items:flex-start;gap:11px;
+  padding:15px;border-radius:var(--r);font-size:13px;line-height:1.6;color:var(--muted)
+}
+.callout b{color:var(--text);font-weight:700}
+.callout>span{font-size:16px;flex-shrink:0;line-height:1.3}
+.callout--lock{background:var(--mint-dim);border:1px solid rgba(0,217,174,.28)}
+.callout--off{background:var(--orange-dim);border:1px solid rgba(255,107,53,.26)}
+.pz-final{text-align:center;font-size:13.5px;color:var(--muted);margin:20px 0 14px;line-height:1.55}
+@media (min-width:720px){ .prices{grid-template-columns:1fr 1fr;gap:14px} }
+
+/* ─── FAQ ────────────────────────────────────────────── */
+.faq{display:grid;gap:8px}
+details{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+details[open]{border-color:var(--border2)}
+summary{
+  list-style:none;cursor:pointer;padding:15px 46px 15px 16px;position:relative;
+  font-size:14.5px;font-weight:650;line-height:1.45;-webkit-tap-highlight-color:transparent
+}
+summary::-webkit-details-marker{display:none}
+summary::after{
+  content:'+';position:absolute;right:15px;top:50%;transform:translateY(-50%);
+  width:24px;height:24px;border-radius:8px;background:var(--card2);color:var(--mint);
+  display:grid;place-items:center;font-size:16px;font-weight:400;transition:.2s
+}
+details[open] summary::after{content:'−';background:var(--mint);color:#04121C}
+details p{padding:0 16px 16px;font-size:13.5px;line-height:1.6;color:var(--muted)}
+
+/* ─── Финал ──────────────────────────────────────────── */
+.final{
+  background:linear-gradient(160deg,rgba(0,217,174,.12),rgba(59,130,246,.07));
+  border:1px solid rgba(0,217,174,.25);border-radius:var(--r-lg);padding:26px 20px;text-align:center
+}
+.final h2{font-size:25px;margin-bottom:10px}
+.final p{color:var(--muted);font-size:14.5px;margin-bottom:22px}
+.contacts{display:grid;gap:9px;margin-top:20px}
+.person{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px}
+.p-head{display:flex;align-items:center;gap:12px;margin-bottom:13px}
+.p-av{
+  width:44px;height:44px;border-radius:14px;flex-shrink:0;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--mint2),#00A882);color:#04121C;
+  font:800 15px/1 'Inter',sans-serif;letter-spacing:-.02em
+}
+.p-av.b{background:linear-gradient(135deg,#60A5FA,var(--blue));color:#041024}
+.p-head b{display:block;font-size:15.5px;font-weight:700;letter-spacing:-.02em}
+.p-head span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
+.p-links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.p-links a{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 8px;border-radius:11px;text-decoration:none;
+  background:var(--card2);border:1px solid var(--border);color:var(--text);
+  font-size:12.5px;font-weight:650;transition:.18s var(--ease);
+  -webkit-tap-highlight-color:transparent;white-space:nowrap
+}
+.p-links a:active{transform:scale(.97)}
+.p-links a.tg{background:var(--mint-dim);border-color:rgba(0,217,174,.28);color:var(--mint)}
+.insta{
+  display:flex;align-items:center;gap:13px;padding:15px;border-radius:var(--r);
+  text-decoration:none;color:var(--text);
+  background:linear-gradient(135deg,rgba(225,48,108,.13),rgba(139,92,246,.10));
+  border:1px solid rgba(225,48,108,.28)
+}
+.insta .ci{width:42px;height:42px;border-radius:13px;background:rgba(225,48,108,.18);display:grid;place-items:center;font-size:19px;flex-shrink:0}
+.ct{
+  display:flex;align-items:center;gap:12px;padding:14px 15px;border-radius:14px;
+  background:var(--card);border:1px solid var(--border);text-decoration:none;color:var(--text);
+  transition:.2s var(--ease)
+}
+.ct:active{transform:scale(.98)}
+.ct .ci{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:17px;flex-shrink:0}
+.ct b{display:block;font-size:14px;font-weight:700}
+.ct span{font-size:11.5px;color:var(--muted)}
+.ct .arw{margin-left:auto;color:var(--dim);font-size:17px}
+
+footer{padding:28px 0 40px;text-align:center;border-top:1px solid var(--border);margin-top:36px}
+footer b{font-size:14px;font-weight:800}
+footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
+
+/* ─── Нижняя кнопка ──────────────────────────────────── */
+.sticky{
+  position:fixed;left:0;right:0;bottom:0;z-index:70;
+  padding:11px 18px calc(11px + env(safe-area-inset-bottom));
+  background:rgba(5,7,14,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--border);
+  transform:translateY(120%);transition:transform .3s var(--ease)
+}
+.sticky.show{transform:none}
+.sticky .btn{max-width:560px;margin:0 auto}
+
+/* ─── Появление при скролле ──────────────────────────── */
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+  .js .rv{opacity:1;transform:none}
+}
+
+/* ─── Планшет / десктоп ──────────────────────────────── */
+@media (min-width:720px){
+  .wrap{max-width:900px;padding:0 32px}
+  section{padding:76px 0}
+  h1{font-size:60px}
+  h2{font-size:36px}
+  .hero{padding:56px 0 64px}
+  .hero p{font-size:18px;max-width:520px}
+  .card-shot{max-width:340px}
+  .stats3{gap:14px;max-width:560px;margin:0 auto 28px}
+  .stat b{font-size:28px}
+  .stat span{font-size:12px}
+  .cta-row{flex-direction:row;justify-content:center}
+  .btn{padding:16px 30px}
+  .cards{grid-template-columns:1fr 1fr;gap:14px}
+  .bigstats{grid-template-columns:repeat(4,1fr);gap:14px}
+  .vs{grid-template-columns:1fr 1fr;gap:14px}
+  .feats{grid-template-columns:1fr 1fr}
+  .who{grid-template-columns:repeat(4,1fr)}
+  .kpis{grid-template-columns:repeat(4,1fr)}
+  .contacts{grid-template-columns:1fr 1fr}
+  .sticky{display:none}
+  body{padding-bottom:0}
+  .trust b{font-size:44px}
+}
+.lang button{display:inline-flex;align-items:center;gap:5px}
+.lang .fl{font-size:14px;line-height:1}
+</style>
+<style>
+/* Дополнения для страницы PDP School */
+.pdp{color:#FFC700}
+.brand-row{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 18px}
+.brand-row .x{color:var(--dim);font-weight:700}
+.pdp-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:12px;background:#1445C4;color:#fff;font-weight:800;font-size:13px;letter-spacing:-.01em}
+.pdp-badge b{display:inline-block;width:10px;height:10px;border-radius:50%;background:#FFC700}
+.quote{background:var(--card);border:1px solid var(--border);border-left:3px solid #FFC700;border-radius:14px;padding:16px 18px;margin-top:16px}
+.quote p{font-size:15px;line-height:1.5;font-weight:600;margin:0 0 6px}
+.quote span{font-size:12px;color:var(--muted)}
+.moments{display:grid;gap:9px}
+.moment{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px}
+.moment .ic{flex:0 0 auto;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:18px;background:var(--mint-dim)}
+.moment h3{font-size:14.5px;font-weight:700;margin:0 0 3px;letter-spacing:-.01em}
+.moment p{font-size:13px;color:var(--muted);line-height:1.5;margin:0}
+.need{display:grid;gap:8px}
+.need div{display:flex;gap:10px;align-items:center;background:rgba(255,255,255,.028);border:1px solid var(--border);border-radius:12px;padding:11px 13px;font-size:13.5px}
+.need div b{flex:0 0 auto;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--mint);color:#04121C;font-size:12px;font-weight:800}
+.stat.pdp b{color:#FFC700}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<!-- ═══ ШАПКА ═══ -->
+<header class="top">
+  <div class="wrap top-in">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="20" height="20" viewBox="0 0 512 512" fill="none" stroke="#04121C" stroke-width="46" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M166 214 L222 158 V378"/><path d="M280 172 a74 74 0 0 1 74 74"/><path d="M280 100 a146 146 0 0 1 146 146"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-name">Bir<em class="tap">Tap</em>Card</div>
+        <div class="logo-sub" data-i="brand.sub">для PDP School</div>
+      </div>
+    </div>
+    <div class="lang">
+      <button id="btn-ru" class="on" onclick="setLang('ru')"><span class="fl">🇷🇺</span>RU</button>
+      <button id="btn-uz" onclick="setLang('uz')"><span class="fl">🇺🇿</span>UZ</button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ ОБЛОЖКА ═══ -->
+<section class="hero">
+  <div class="wrap">
+    <div class="brand-row">
+      <span class="pdp-badge"><b></b>PDP School</span>
+      <span class="x">×</span>
+      <span class="wm" style="font-size:15px;font-weight:800">Bir<em class="tap">Tap</em>Card</span>
+    </div>
+    <div class="pill"><span class="dot"></span><span data-i="hero.pill">Предложение для школы</span></div>
+    <h1 data-i="hero.h1">Каждый довольный родитель — <em>новый отзыв о школе</em></h1>
+    <p data-i="hero.sub">Родители выбирают частную школу по отзывам в Google и на картах. Карточка на ресепшн превращает благодарность родителя в опубликованный отзыв — за одно касание телефоном.</p>
+
+    <div class="stats3">
+      <div class="stat pdp"><b>612</b><span data-i="hero.s1">мест на 2026–2027 — и они заполняются по отзывам</span></div>
+      <div class="stat"><b>15<small style="font-size:13px" data-i="hero.s2u">сек</small></b><span data-i="hero.s2">от касания до отзыва</span></div>
+      <div class="stat"><b>0</b><span data-i="hero.s3">приложений и регистраций для родителя</span></div>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-p" href="#how" data-i="cta.how">Как это работает</a>
+      <a class="btn btn-g" href="#price" data-i="cta.price0">Условия и цена</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ПРОБЛЕМА ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="pr.eye">Ситуация</span></div>
+    <h2 class="rv" data-i="pr.h">Результаты у школы сильные. <em>Отзывов — мало.</em></h2>
+    <p class="lead rv" data-i="pr.lead">100% выпускников на гранте, IELTS до 8.0, SAT до 1480 — но новый родитель этого не видит. Он открывает Google Maps и смотрит на звёзды и число отзывов. Довольные родители пишут редко: не потому что не хотят — потому что «потом».</p>
+
+    <div class="cards">
+      <div class="c rv"><div class="c-ico i-orange">🔍</div><h3 data-i="pr.1h">Родитель начинает с карт</h3><p data-i="pr.1p">Google, Яндекс, 2ГИС — первое, что открывают при выборе школы. Рейтинг и свежие отзывы решают, позвонят ли вообще.</p></div>
+      <div class="c rv"><div class="c-ico i-purple">⏳</div><h3 data-i="pr.2h">Благодарность не доходит до публикации</h3><p data-i="pr.2p">На собрании родитель говорит «спасибо», дома забывает. Пять шагов до кнопки «Отзыв» убивают намерение.</p></div>
+      <div class="c rv"><div class="c-ico i-blue">📣</div><h3 data-i="pr.3h">Канал @pdpschooll растёт медленнее, чем мог бы</h3><p data-i="pr.3p">Родители в школе каждый день — но подписаться им никто не предлагает в нужный момент.</p></div>
+    </div>
+
+    <div class="quote rv">
+      <p data-i="q.p">«Siz mijoz emassiz — hamkorsiz!»</p>
+      <span data-i="q.s">С сайта PDP School. Отзыв родителя — это и есть партнёрство: открытая, регулярная обратная связь, которую видят все.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ КАК ЭТО РАБОТАЕТ ═══ -->
+<section id="how">
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="how.eye">Решение</span></div>
+    <h2 class="rv" data-i="how.h">Карточка на ресепшн. <em>Одно касание</em> — и отзыв опубликован</h2>
+    <p class="lead rv" data-i="how.lead">Никаких приложений и объяснений. Родитель прикладывает телефон — открывается страница с логотипом PDP School и кнопками площадок.</p>
+
+    <div class="steps">
+      <div class="step rv"><div class="n">1</div><h3 data-i="how.1h">Родитель у ресепшн или на собрании</h3><p data-i="how.1p">Администратор: «Если вам всё понравилось — оставьте отзыв о школе, одно касание»</p></div>
+      <div class="step rv"><div class="n">2</div><h3 data-i="how.2h">Прикладывает телефон к карточке</h3><p data-i="how.2p">NFC — Android и iPhone открывают страницу сами. Запасной вариант — QR на той же карточке</p><div class="t" data-i="t.2">+2 сек</div></div>
+      <div class="step rv"><div class="n">3</div><h3 data-i="how.3h">Видит экран PDP School</h3><p data-i="how.3p">Google · Яндекс · 2ГИС · Telegram-канал · Instagram — выбирает удобное</p><div class="t" data-i="t.3">+3 сек</div></div>
+      <div class="step rv"><div class="n">4</div><h3 data-i="how.4h">Отзыв опубликован, рейтинг вырос</h3><p data-i="how.4p">Звёзды и пара слов — всё, что нужно. Школа видит это в кабинете в ту же минуту</p><div class="t" data-i="t.4">+10 сек</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ЭКРАН ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="sc.eye">Экран после касания</span></div>
+    <h2 class="rv" data-i="sc.h">Все площадки школы <em>на одном экране</em></h2>
+    <p class="lead rv" data-i="sc.lead">Родитель видит именно вашу школу — логотип и название. Оставил отзыв — кнопка гаснет, остальные ждут. Экран сам переключается на русский, узбекский или английский по языку телефона.</p>
+
+    <div class="phone rv">
+      <div class="phone-top"><span class="dot"></span><span data-i="sc.p1">Понравилось у нас?</span></div>
+      <div class="phone-name">PDP School</div>
+      <div class="pb pb-g" data-i="sc.b1">⭐ Оставить отзыв в Google</div>
+      <div class="pb pb-ya" data-i="sc.b2">📍 Отзыв на Яндекс Картах</div>
+      <div class="pb pb-gis" data-i="sc.b3">📍 Отзыв в 2ГИС</div>
+      <div class="phone-or" data-i="sc.or">и ещё</div>
+      <div class="pb pb-tg" data-i="sc.b5">✈️ Telegram-канал @pdpschooll</div>
+      <div class="pb pb-ig" style="margin-top:8px" data-i="sc.b4">📸 Подписаться в Instagram</div>
+    </div>
+
+    <div class="cards" style="margin-top:14px">
+      <div class="c rv"><div class="c-ico i-mint">🎛</div><h3 data-i="sc.1h">Школа решает, что показывать</h3><p data-i="sc.1p">Только Google и Telegram? Пожалуйста. Все пять? Тоже. Каждая кнопка включается отдельно — меняется из кабинета за минуту.</p></div>
+      <div class="c rv"><div class="c-ico i-purple">🌐</div><h3 data-i="sc.2h">Три языка автоматически</h3><p data-i="sc.2p">Родителю с узбекским телефоном — узбекский, с русским — русский, остальным — английский. Ничего выбирать не нужно.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ГДЕ СТАВИТЬ ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="mo.eye">Где это работает в школе</span></div>
+    <h2 class="rv" data-i="mo.h">Пять моментов, когда родитель <em>готов сказать спасибо</em></h2>
+
+    <div class="moments">
+      <div class="moment rv"><div class="ic">🏛</div><div><h3 data-i="mo.1h">Приёмная комиссия</h3><p data-i="mo.1p">Договор подписан, ребёнок зачислен — самый благодарный момент. Карточка лежит рядом с ручкой.</p></div></div>
+      <div class="moment rv"><div class="ic">👨‍👩‍👧</div><div><h3 data-i="mo.2h">Родительские собрания</h3><p data-i="mo.2p">Классный руководитель показывает результаты — и предлагает поделиться мнением о школе.</p></div></div>
+      <div class="moment rv"><div class="ic">🚪</div><div><h3 data-i="mo.3h">Дни открытых дверей</h3><p data-i="mo.3p">Гости уходят под впечатлением. Карточка у выхода ловит это впечатление, пока оно свежее.</p></div></div>
+      <div class="moment rv"><div class="ic">🎓</div><div><h3 data-i="mo.4h">Выпускной и грант</h3><p data-i="mo.4p">100% выпускников на гранте — это те самые истории, которые должны быть в отзывах.</p></div></div>
+      <div class="moment rv"><div class="ic">🛎</div><div><h3 data-i="mo.5h">Ресепшн — каждый день</h3><p data-i="mo.5p">Родители приходят за детьми, оплачивать, на встречи. Карточка работает всё время, пока открыта школа.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ЧТО ПОЛУЧАЕТ ШКОЛА ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="ow.eye">Что получает школа</span></div>
+    <h2 class="rv" data-i="ow.h">Не карточка, а <em>инструмент репутации</em> с кабинетом</h2>
+
+    <div class="dash rv">
+      <div class="dash-top"><span class="d"></span><b data-i="pl.dash">PDP School · кабинет</b><span data-i="pl.upd">обновлено сейчас</span></div>
+      <div class="kpis">
+        <div class="kpi"><i data-i="pl.k1">Касаний за неделю</i><b class="mono" data-count="184">0</b><u data-i="pl.k1s">родители и гости</u>
+          <svg viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0,24 L15,20 L30,22 L45,12 L60,15 L75,7 L100,4" fill="none" stroke="#00D9AE" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>
+        <div class="kpi"><i data-i="pl.k2">Новых отзывов Google</i><b class="mono" data-count="27" data-suffix="">0</b><u data-i="pl.k2s">считаем реальные, не переходы</u>
+          <svg viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0,20 L20,24 L40,14 L55,18 L75,10 L100,8" fill="none" stroke="#FF6B35" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>
+        <div class="kpi"><i data-i="pl.k3">Рейтинг Google</i><b class="mono">4.9</b><u data-i="pl.k3s">по всем отзывам</u></div>
+        <div class="kpi"><i data-i="pl.k4">Подписок на канал</i><b class="mono" data-count="61">0</b><u data-i="pl.k4s">@pdpschooll за неделю</u></div>
+      </div>
+      <div class="top-row"><i>1</i><span data-i="pl.r1">Приёмная комиссия</span><em>71</em></div>
+      <div class="top-row"><i>2</i><span data-i="pl.r2">Ресепшн, главный корпус</span><em>64</em></div>
+      <div class="top-row"><i>3</i><span data-i="pl.r3">День открытых дверей</span><em>49</em></div>
+    </div>
+    <p style="font-size:11.5px;color:var(--dim);margin:8px 0 22px;text-align:center" data-i="pl.note">Цифры в макете иллюстративные</p>
+
+    <div class="cards">
+      <div class="c rv"><div class="c-ico i-mint">📈</div><h3 data-i="ow.1h">Реальные отзывы, а не «переходы»</h3><p data-i="ow.1p">Кабинет раз в сутки сверяется с Google и показывает, сколько отзывов прибавилось и какой рейтинг. Честная цифра для отчёта директору.</p></div>
+      <div class="c rv"><div class="c-ico i-blue">📊</div><h3 data-i="ow.2h">Куда нажимают родители</h3><p data-i="ow.2p">Google, Яндекс, 2ГИС, Telegram, Instagram — по каждой кнопке отдельно. Видно, что реально работает.</p></div>
+      <div class="c rv"><div class="c-ico i-purple">🏢</div><h3 data-i="ow.3h">Несколько точек — одна картина</h3><p data-i="ow.3p">Ресепшн, приёмная комиссия, второй корпус, другие школы экосистемы PDP — каждая карточка считается отдельно и сравнивается в одном кабинете.</p></div>
+      <div class="c rv"><div class="c-ico i-orange">✈️</div><h3 data-i="ow.4h">Отчёт в Telegram каждое утро</h3><p data-i="ow.4p">Касания, новые отзывы, лучшая точка — в 8:00 в чат администрации. Ничего открывать не нужно.</p></div>
+      <div class="c rv"><div class="c-ico i-mint">📱</div><h3 data-i="ow.5h">Кабинет с телефона</h3><p data-i="ow.5p">Приложение для Android и веб-версия. Директор видит статистику в дороге.</p></div>
+      <div class="c rv"><div class="c-ico i-blue">🔄</div><h3 data-i="ow.6h">Обновления без доплат</h3><p data-i="ow.6p">Платформа развивается каждую неделю. Всё новое достаётся школе в рамках подписки.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ УСТРОЙСТВО ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="dev.eye">Устройство</span></div>
+    <h2 class="rv" data-i="dev.h">Аккуратная карточка, <em>которая не ломается</em></h2>
+    <div class="cards">
+      <div class="c rv"><div class="c-ico i-mint">📡</div><h3 data-i="dev.1h">NFC + QR в одном</h3><p data-i="dev.1p">Поднёс телефон — открылось. Нет NFC — навёл камеру на QR. Работает на любом телефоне.</p></div>
+      <div class="c rv"><div class="c-ico i-orange">🔋</div><h3 data-i="dev.2h">Без питания и интернета</h3><p data-i="dev.2p">Метка пассивная — ни батареек, ни зарядки, ни настроек. Стоит годами.</p></div>
+      <div class="c rv"><div class="c-ico i-purple">🎨</div><h3 data-i="dev.3h">В стиле школы</h3><p data-i="dev.3p">Дизайн карточки с логотипом PDP School, в цветах школы. На экране после касания — тоже ваш логотип.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ЦЕНА ═══ -->
+<section id="price">
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="pz.eye">Условия</span></div>
+    <h2 class="rv" data-i="pz.h">Сколько это стоит</h2>
+    <p class="lead rv" data-i="pz.lead">Цена за одну точку. В неё входит устройство, установка на месте и личный кабинет.</p>
+
+    <div class="prices">
+      <div class="price rv">
+        <div class="price-top"><b data-i="pz.m">Помесячно</b></div>
+        <div class="price-sum"><b>200&nbsp;000</b><span data-i="pz.sum">сум</span></div>
+        <div class="price-note" data-i="pz.mnote">Устройство, подключение, установка и первый месяц — всё включено</div>
+        <div class="price-then"><span data-i="pz.then">далее</span> <b>47&nbsp;000</b> <span data-i="pz.permonth">сум в месяц</span></div>
+      </div>
+      <div class="price hi rv">
+        <div class="price-top"><b data-i="pz.y">Год сразу</b><span class="vs-b" data-i="pz.ybadge">выгоднее</span></div>
+        <div class="price-sum"><b>620&nbsp;000</b><span data-i="pz.sum">сум</span></div>
+        <div class="price-note" data-i="pz.ynote">За 12 месяцев одной оплатой. Всё то же самое, что помесячно</div>
+        <div class="price-save" data-i="pz.save">Дешевле на 97&nbsp;000 сум — два месяца бесплатно</div>
+      </div>
+    </div>
+
+    <div class="callout rv" style="margin-bottom:18px">
+      <b data-i="pz.multi">Несколько точек в школе?</b>
+      <span data-i="pz.multip">Ресепшн + приёмная комиссия + корпус — считаем пакетом, каждая точка со своей статистикой в одном кабинете.</span>
+    </div>
+
+    <h3 class="rv" style="font-size:16px;margin:0 0 10px" data-i="pz.sub">Что входит в подписку</h3>
+    <div class="need" style="margin-bottom:22px">
+      <div class="rv"><b>✓</b><span data-i="pz.s1">Личный кабинет с реальными отзывами Google, переходами и сравнением точек</span></div>
+      <div class="rv"><b>✓</b><span data-i="pz.s2">Экран после касания на трёх языках с логотипом школы</span></div>
+      <div class="rv"><b>✓</b><span data-i="pz.s3">Ежедневный отчёт в Telegram администрации</span></div>
+      <div class="rv"><b>✓</b><span data-i="pz.s4">Замена устройства — 2 раза в год бесплатно</span></div>
+      <div class="rv"><b>✓</b><span data-i="pz.s5">Поддержка напрямую в Telegram — без тикетов</span></div>
+    </div>
+
+    <div class="callout rv">
+      <b data-i="pz.lockh">Цена фиксируется за школой.</b>
+      <span data-i="pz.lockp">Всё, что мы добавим дальше, PDP School получает без доплат. Для новых клиентов цена позже будет выше — но не для вас.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ЧТО НУЖНО ОТ ШКОЛЫ ═══ -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="nd.eye">Запуск</span></div>
+    <h2 class="rv" data-i="nd.h">От школы нужно <em>четыре вещи</em> — остальное делаем мы</h2>
+    <div class="need">
+      <div class="rv"><b>1</b><span data-i="nd.1">Ссылка на профиль школы в Google (и, если есть, Яндекс / 2ГИС)</span></div>
+      <div class="rv"><b>2</b><span data-i="nd.2">Telegram-канал и Instagram, куда вести родителей</span></div>
+      <div class="rv"><b>3</b><span data-i="nd.3">Логотип школы для карточки и экрана</span></div>
+      <div class="rv"><b>4</b><span data-i="nd.4">Где будут стоять карточки и кто из администрации получает отчёт</span></div>
+    </div>
+    <p class="pz-final rv" data-i="nd.term">Привозим, ставим и показываем администраторам, как предлагать родителям. Запуск — за 1–2 дня после подтверждения.</p>
+  </div>
+</section>
+
+<!-- ═══ ФИНАЛ ═══ -->
+<section>
+  <div class="wrap">
+    <div class="final rv">
+      <h2 data-i="fin.h">612 мест заполнятся быстрее, <em>когда за школу говорят родители</em></h2>
+      <p data-i="fin.p">Сильные результаты у вас уже есть. Мы сделаем так, чтобы о них рассказывали там, где новые родители ищут школу.</p>
+      <a class="btn btn-p" href="https://t.me/Jrkhnv777" data-i="cta.main2">Написать в Telegram</a>
+    </div>
+
+    <div class="contacts">
+      <div class="person">
+        <div class="p-head">
+          <div class="p-av b">МА</div>
+          <div>
+            <b data-i="ct.n2">Мухаммад Али</b>
+            <span data-i="ct.f2">Сооснователь · Ташкент · подключение и сопровождение PDP School</span>
+          </div>
+        </div>
+        <div class="p-links">
+          <a class="tg" href="https://t.me/Jrkhnv777">✈️ @Jrkhnv777</a>
+          <a href="tel:+998337573333">📞 +998 33 757 33 33</a>
+        </div>
+      </div>
+      <div class="person">
+        <div class="p-head">
+          <div class="p-av">АИ</div>
+          <div>
+            <b data-i="ct.n1">Алим Ибрагимов</b>
+            <span data-i="ct.f1">Основатель · Самарканд · устройства и установка</span>
+          </div>
+        </div>
+        <div class="p-links">
+          <a class="tg" href="https://t.me/Alimibragimov">✈️ @Alimibragimov</a>
+          <a href="tel:+998975791551">📞 +998 97 579 15 51</a>
+        </div>
+      </div>
+      <a class="insta" href="https://www.instagram.com/birtapcard_official">
+        <span class="ci">📸</span>
+        <div style="flex:1;min-width:0">
+          <b style="display:block;font-size:14.5px">@birtapcard_official</b>
+          <span style="font-size:12px;color:var(--muted);line-height:1.4" data-i="ct.insta">Заведения Самарканда и Ташкента, где уже стоит BirTapCard</span>
+        </div>
+        <span class="arw">→</span>
+      </a>
+      <a class="ct" href="https://birtapcard.vercel.app/info">
+        <span class="ci i-orange">🖥</span>
+        <div><b data-i="ct.site">Общая презентация</b><span>birtapcard.vercel.app/info</span></div>
+        <span class="arw">→</span>
+      </a>
+    </div>
+
+    <footer>
+      <div style="display:flex;justify-content:center;margin-bottom:10px"><div class="logo-mark"><svg width="20" height="20" viewBox="0 0 512 512" fill="none" stroke="#04121C" stroke-width="46" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M166 214 L222 158 V378"/><path d="M280 172 a74 74 0 0 1 74 74"/><path d="M280 100 a146 146 0 0 1 146 146"/>
+        </svg></div></div>
+      <b class="wm">Bir<em class="tap">Tap</em>Card</b>
+      <p data-i="foot">Предложение подготовлено для PDP School · Ташкент, Сергели</p>
+    </footer>
+  </div>
+</section>
+
+<div class="sticky" id="sticky">
+  <a class="btn btn-p" href="https://t.me/Jrkhnv777" data-i="cta.sticky">Обсудить запуск в PDP School →</a>
+</div>
+
+<script>
+/* ═══ O'zbekcha tarjima ═══ */
+const UZ = {
+'brand.sub':'PDP School uchun',
+'hero.pill':'Maktab uchun taklif',
+'hero.h1':'Har bir mamnun ota-ona — <em>maktab haqida yangi sharh</em>',
+'hero.sub':"Ota-onalar xususiy maktabni Google va xaritalardagi sharhlarga qarab tanlaydi. Resepshndagi kartochka ota-onaning minnatdorchiligini e'lon qilingan sharhga aylantiradi — telefonni bir tegizish bilan.",
+'hero.s1':"2026–2027 uchun o'rin — va ular sharhlar orqali to'ladi",
+'hero.s2u':'son',
+'hero.s2':'tegizishdan sharhgacha',
+'hero.s3':"ota-ona uchun ilova va ro'yxatdan o'tish",
+'cta.how':'Bu qanday ishlaydi',
+'cta.price0':'Shartlar va narx',
+
+'pr.eye':'Vaziyat',
+'pr.h':"Maktab natijalari kuchli. <em>Sharhlar — kam.</em>",
+'pr.lead':"Bitiruvchilarning 100%i grantda, IELTS 8.0 gacha, SAT 1480 gacha — lekin yangi ota-ona buni ko'rmaydi. U Google Maps'ni ochadi va yulduzlar hamda sharhlar soniga qaraydi. Mamnun ota-onalar kam yozadi: xohlamagani uchun emas — «keyin» deb qo'ygani uchun.",
+'pr.1h':'Ota-ona xaritadan boshlaydi',
+'pr.1p':"Google, Yandex, 2GIS — maktab tanlashda birinchi ochiladigan joy. Reyting va yangi sharhlar umuman qo'ng'iroq qilish-qilmaslikni hal qiladi.",
+'pr.2h':"Minnatdorchilik e'longa yetib bormaydi",
+'pr.2p':"Majlisda ota-ona «rahmat» deydi, uyda unutadi. «Sharh» tugmasigacha besh qadam niyatni o'ldiradi.",
+'pr.3h':"@pdpschooll kanali imkonidan sekinroq o'sadi",
+'pr.3p':"Ota-onalar har kuni maktabda — lekin kerakli paytda obuna bo'lishni hech kim taklif qilmaydi.",
+'q.p':'«Siz mijoz emassiz — hamkorsiz!»',
+'q.s':"PDP School saytidan. Ota-onaning sharhi — bu hamkorlikning o'zi: hamma ko'radigan ochiq, muntazam qaytish.",
+
+'how.eye':'Yechim',
+'how.h':"Resepshndagi kartochka. <em>Bir teginish</em> — va sharh e'lon qilindi",
+'how.lead':"Hech qanday ilova va tushuntirishsiz. Ota-ona telefonni tegizadi — PDP School logotipi va platforma tugmalari bo'lgan sahifa ochiladi.",
+'how.1h':'Ota-ona resepshnda yoki majlisda',
+'how.1p':"Administrator: «Agar sizga hammasi yoqqan bo'lsa — maktab haqida sharh qoldiring, bir teginish»",
+'how.2h':'Telefonni kartochkaga tegizadi',
+'how.2p':"NFC — Android va iPhone sahifani o'zi ochadi. Zaxira varianti — o'sha kartochkadagi QR",
+'how.3h':"PDP School ekranini ko'radi",
+'how.3p':"Google · Yandex · 2GIS · Telegram-kanal · Instagram — qulayini tanlaydi",
+'how.4h':"Sharh e'lon qilindi, reyting oshdi",
+'how.4p':"Yulduzlar va bir-ikki so'z — shu kifoya. Maktab buni o'sha daqiqada kabinetda ko'radi",
+'t.2':'+2 son','t.3':'+3 son','t.4':'+10 son',
+
+'sc.eye':'Teginishdan keyingi ekran',
+'sc.h':"Maktabning barcha platformalari <em>bitta ekranda</em>",
+'sc.lead':"Ota-ona aynan sizning maktabingizni ko'radi — logotip va nom. Sharh qoldirdi — tugma o'chadi, qolganlari kutadi. Ekran telefon tiliga qarab o'zi rus, o'zbek yoki ingliz tiliga o'tadi.",
+'sc.p1':'Bizda yoqdimi?',
+'sc.b1':"⭐ Google'da sharh qoldirish",
+'sc.b2':'📍 Yandex Xaritalarda sharh',
+'sc.b3':"📍 2GIS'da sharh",
+'sc.or':'va yana',
+'sc.b5':'✈️ Telegram-kanal @pdpschooll',
+'sc.b4':"📸 Instagram'ga obuna",
+'sc.1h':"Nimani ko'rsatishni maktab hal qiladi",
+'sc.1p':"Faqat Google va Telegram? Marhamat. Beshtasi ham? Mumkin. Har bir tugma alohida yoqiladi — kabinetdan bir daqiqada o'zgartiriladi.",
+'sc.2h':"Uch til avtomatik",
+'sc.2p':"O'zbek tilidagi telefonga — o'zbekcha, ruschaga — ruscha, qolganlarga — inglizcha. Hech narsa tanlash shart emas.",
+
+'mo.eye':'Maktabda bu qayerda ishlaydi',
+'mo.h':"Ota-ona <em>rahmat aytishga tayyor</em> bo'ladigan besh lahza",
+'mo.1h':'Qabul komissiyasi',
+'mo.1p':"Shartnoma imzolandi, bola qabul qilindi — eng minnatdor lahza. Kartochka ruchka yonida turadi.",
+'mo.2h':'Ota-onalar majlislari',
+'mo.2p':"Sinf rahbari natijalarni ko'rsatadi — va maktab haqida fikr bildirishni taklif qiladi.",
+'mo.3h':'Ochiq eshiklar kunlari',
+'mo.3p':"Mehmonlar taassurot bilan ketadi. Chiqishdagi kartochka bu taassurotni yangiligida ushlab qoladi.",
+'mo.4h':'Bitiruv va grant',
+'mo.4p':"Bitiruvchilarning 100%i grantda — aynan shu hikoyalar sharhlarda bo'lishi kerak.",
+'mo.5h':'Resepshn — har kuni',
+'mo.5p':"Ota-onalar bolalarni olib ketishga, to'lovga, uchrashuvga keladi. Kartochka maktab ochiq bo'lgan butun vaqt ishlaydi.",
+
+'ow.eye':'Maktab nima oladi',
+'ow.h':"Kartochka emas, kabinetli <em>reputatsiya vositasi</em>",
+'pl.dash':'PDP School · kabinet',
+'pl.upd':'hozirgina yangilandi',
+'pl.k1':'Haftalik teginishlar','pl.k1s':'ota-onalar va mehmonlar',
+'pl.k2':'Yangi Google sharhlari','pl.k2s':"haqiqiylarini sanaymiz, o'tishlarni emas",
+'pl.k3':'Google reytingi','pl.k3s':"barcha sharhlar bo'yicha",
+'pl.k4':'Kanalga obunalar','pl.k4s':'@pdpschooll bir haftada',
+'pl.r1':'Qabul komissiyasi','pl.r2':'Resepshn, asosiy bino','pl.r3':'Ochiq eshiklar kuni',
+'pl.note':'Maketdagi raqamlar namuna uchun',
+'ow.1h':"Haqiqiy sharhlar, «o'tishlar» emas",
+'ow.1p':"Kabinet sutkada bir marta Google bilan solishtiradi va nechta sharh qo'shilgani hamda reytingni ko'rsatadi. Direktorga hisobot uchun halol raqam.",
+'ow.2h':'Ota-onalar qayerga bosadi',
+'ow.2p':"Google, Yandex, 2GIS, Telegram, Instagram — har bir tugma alohida. Nima haqiqatan ishlashi ko'rinadi.",
+'ow.3h':'Bir nechta nuqta — bitta manzara',
+'ow.3p':"Resepshn, qabul komissiyasi, ikkinchi bino, PDP ekotizimidagi boshqa maktablar — har bir kartochka alohida hisoblanadi va bitta kabinetda taqqoslanadi.",
+'ow.4h':'Har tong Telegram hisoboti',
+'ow.4p':"Teginishlar, yangi sharhlar, eng yaxshi nuqta — soat 8:00 da ma'muriyat chatiga. Hech narsa ochish shart emas.",
+'ow.5h':'Kabinet telefondan',
+'ow.5p':"Android ilovasi va veb-versiya. Direktor statistikani yo'lda ko'radi.",
+'ow.6h':"Qo'shimcha to'lovsiz yangilanishlar",
+'ow.6p':"Platforma har hafta rivojlanadi. Barcha yangiliklar maktabga obuna doirasida tegadi.",
+
+'dev.eye':'Qurilma',
+'dev.h':"Ozoda kartochka, <em>buzilmaydigan</em>",
+'dev.1h':'NFC + QR bitta kartochkada',
+'dev.1p':"Telefonni tegizdi — ochildi. NFC yo'q — kamerani QR ga qaratdi. Har qanday telefonda ishlaydi.",
+'dev.2h':'Quvvat va internetsiz',
+'dev.2p':"Belgi passiv — batareya ham, zaryad ham, sozlash ham kerak emas. Yillab turadi.",
+'dev.3h':'Maktab uslubida',
+'dev.3p':"PDP School logotipi va maktab ranglarida kartochka dizayni. Teginishdan keyingi ekranda ham — sizning logotipingiz.",
+
+'pz.eye':'Shartlar',
+'pz.h':'Bu qancha turadi',
+'pz.lead':"Bir nuqta uchun narx. Unga qurilma, joyida o'rnatish va shaxsiy kabinet kiradi.",
+'pz.m':'Oylik','pz.sum':"so'm",
+'pz.mnote':"Qurilma, ulash, o'rnatish va birinchi oy — hammasi kiradi",
+'pz.then':"keyin",'pz.permonth':"so'm oyiga",
+'pz.y':'Yillik','pz.ybadge':'foydali',
+'pz.ynote':"12 oy uchun bitta to'lov. Oylik bilan bir xil hamma narsa",
+'pz.save':"97 000 so'm arzon — ikki oy bepul",
+'pz.multi':'Maktabda bir nechta nuqta?',
+'pz.multip':"Resepshn + qabul komissiyasi + bino — paket qilib hisoblaymiz, har nuqta bitta kabinetda o'z statistikasi bilan.",
+'pz.sub':'Obunaga nima kiradi',
+'pz.s1':"Haqiqiy Google sharhlari, o'tishlar va nuqtalar taqqoslanadigan shaxsiy kabinet",
+'pz.s2':'Maktab logotipi bilan uch tildagi teginish ekrani',
+'pz.s3':"Ma'muriyatga har kunlik Telegram hisoboti",
+'pz.s4':'Qurilma almashtirish — yiliga 2 marta bepul',
+'pz.s5':"Telegram orqali to'g'ridan-to'g'ri qo'llab-quvvatlash",
+'pz.lockh':'Narx maktab uchun qotiriladi.',
+'pz.lockp':"Keyin qo'shadigan hamma narsani PDP School qo'shimcha to'lovsiz oladi. Yangi mijozlar uchun narx keyinroq yuqori bo'ladi — lekin siz uchun emas.",
+
+'nd.eye':'Ishga tushirish',
+'nd.h':"Maktabdan <em>to'rtta narsa</em> kerak — qolganini biz qilamiz",
+'nd.1':"Maktabning Google profiliga havola (bor bo'lsa, Yandex / 2GIS ham)",
+'nd.2':"Ota-onalarni yo'naltiradigan Telegram-kanal va Instagram",
+'nd.3':'Kartochka va ekran uchun maktab logotipi',
+'nd.4':"Kartochkalar qayerda turadi va ma'muriyatdan kim hisobot oladi",
+'nd.term':"Olib kelamiz, o'rnatamiz va administratorlarga ota-onalarga qanday taklif qilishni ko'rsatamiz. Tasdiqdan keyin 1–2 kunda ishga tushadi.",
+
+'fin.h':"612 o'rin tezroq to'ladi, <em>maktab haqida ota-onalar gapirganda</em>",
+'fin.p':"Kuchli natijalar sizda allaqachon bor. Biz ular haqida yangi ota-onalar maktab qidiradigan joyda gapirilishini ta'minlaymiz.",
+'cta.main2':"Telegram'da yozish",
+'cta.sticky':"PDP School'da ishga tushirishni muhokama qilish →",
+'ct.n2':'Muhammad Ali',
+'ct.f2':"Hammuassis · Toshkent · PDP School ulash va kuzatib borish",
+'ct.n1':'Alim Ibragimov',
+'ct.f1':"Asoschi · Samarqand · qurilmalar va o'rnatish",
+'ct.insta':"BirTapCard allaqachon turgan Samarqand va Toshkent muassasalari",
+'ct.site':'Umumiy taqdimot',
+'foot':'Taklif PDP School uchun tayyorlandi · Toshkent, Sergeli',
+};
+
+/* ─── Переключение языка ─────────────────────────────── */
+const nodes = document.querySelectorAll('[data-i]');
+nodes.forEach(el => el.dataset.ruHtml = el.innerHTML);
+function setLang(l){
+  const D = l === 'uz' ? UZ : null;
+  nodes.forEach(el => { const k = el.dataset.i; el.innerHTML = (D && D[k]) ? D[k] : el.dataset.ruHtml; });
+  document.documentElement.lang = l;
+  ['ru','uz'].forEach(x => document.getElementById('btn-' + x).classList.toggle('on', l === x));
+  try { localStorage.setItem('btc-lang-pdp', l) } catch(e){}
+}
+(function initLang(){
+  let l = null;
+  try { l = localStorage.getItem('btc-lang-pdp') } catch(e){}
+  if (!['ru','uz'].includes(l)) l = 'ru';
+  if (l !== 'ru') setLang(l);
+})();
+
+/* ─── Появление блоков при прокрутке ─────────────────── */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target) } });
+}, { rootMargin: '0px 0px -8% 0px', threshold: .08 });
+document.querySelectorAll('.rv').forEach((el,i) => { el.style.transitionDelay = (i % 4) * 55 + 'ms'; io.observe(el); });
+setTimeout(() => document.querySelectorAll('.rv:not(.in)').forEach(el => { if (el.getBoundingClientRect().top < innerHeight) el.classList.add('in'); }), 2500);
+
+/* ─── Счётчики ───────────────────────────────────────── */
+const counters = document.querySelectorAll('[data-count]');
+const cio = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target, to = +el.dataset.count, sfx = el.dataset.suffix || '';
+    const final = () => { el.textContent = to.toLocaleString('ru-RU') + sfx };
+    cio.unobserve(el);
+    if (document.hidden) { final(); return }
+    const t0 = performance.now(), dur = 1100;
+    (function tick(now){
+      const p = Math.min(1, (now - t0) / dur), v = Math.round(to * (1 - Math.pow(1 - p, 3)));
+      el.textContent = v.toLocaleString('ru-RU') + sfx;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+    setTimeout(final, dur + 500);
+  });
+}, { threshold: .5 });
+counters.forEach(el => cio.observe(el));
+
+/* ─── Нижняя кнопка ──────────────────────────────────── */
+const sticky = document.getElementById('sticky');
+addEventListener('scroll', () => { sticky.classList.toggle('show', scrollY > innerHeight * .75); }, { passive: true });
+</script>
+</body>
+</html>

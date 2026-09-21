@@ -4,7 +4,11 @@ const nextConfig: NextConfig = {
   async rewrites() {
     // Презентация для клиентов лежит в public/info.html,
     // но открывается по короткому адресу /info
-    return [{ source: "/info", destination: "/info.html" }];
+    return [
+      { source: "/info", destination: "/info.html" },
+      // Персональное предложение для PDP School
+      { source: "/pdp", destination: "/pdp.html" },
+    ];
   },
 };
 
