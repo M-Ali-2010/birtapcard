@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>BirTapCard — отзывы в Google становятся проще</title>
-<meta name="description" content="NFC + QR карточка на кассе. 15 секунд — и довольный гость оставляет отзыв в Google. Плюс личный кабинет с аналитикой по филиалам.">
+<title>BirTapCard — отзывы, подписчики и клиенты за одно касание</title>
+<meta name="description" content="NFC + QR карточка у кассы: отзывы в Google, Яндекс, 2ГИС и подписчики в Instagram и Telegram за одно касание. Кабинет со статистикой, три тарифа.">
 <meta name="theme-color" content="#05070E">
 
 <!-- Превью для Telegram/WhatsApp. После деплоя замените домен на свой -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="BirTapCard — отзывы в Google становятся проще">
-<meta property="og:description" content="Одно касание телефоном — и гость оставляет отзыв. NFC + QR карточка на кассу и аналитика по филиалам.">
+<meta property="og:title" content="BirTapCard — отзывы и клиенты за одно касание">
+<meta property="og:description" content="Карточка NFC + QR у кассы. Отзывы в Google, Яндекс, 2ГИС, подписчики в Instagram и Telegram. Кабинет со статистикой. Три тарифа.">
 <meta property="og:url" content="https://birtapcard.vercel.app/info">
 <meta property="og:image" content="https://birtapcard.vercel.app/card.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -484,6 +484,32 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
   body{padding-bottom:0}
   .trust b{font-size:44px}
 }
+
+/* ─── Вкладки ────────────────────────────────────────── */
+.tabs{position:sticky;top:58px;z-index:55;background:rgba(5,7,14,.86);backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);border-bottom:1px solid var(--border)}
+.tabs-in{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px 12px}
+.tabs button{appearance:none;border:0;background:transparent;color:var(--muted);font:700 13px/1 inherit;font-family:inherit;padding:10px 4px;border-radius:10px;cursor:pointer;letter-spacing:-.01em;transition:.18s var(--ease);-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.tabs button.on{background:var(--mint);color:#04121C}
+.tabs button:not(.on):hover{color:var(--text);background:rgba(255,255,255,.05)}
+.panel{display:none}
+.panel.on{display:block}
+.site-foot{padding:34px 0 40px;text-align:center}
+.site-foot .wm{display:block;font-size:16px;font-weight:800;margin-bottom:6px}
+.site-foot p{font-size:12px;color:var(--dim)}
+/* ─── Заказать ───────────────────────────────────────── */
+.contact-big{display:grid;gap:10px}
+.cb{display:flex;align-items:center;gap:14px;padding:16px 16px;border-radius:var(--r-lg);text-decoration:none;color:var(--text);background:var(--card);border:1px solid var(--border);transition:.2s var(--ease)}
+.cb:active{transform:scale(.985)}
+.cb.tg{background:linear-gradient(160deg,rgba(0,217,174,.14),var(--card));border-color:rgba(0,217,174,.4)}
+.cb.ph{background:linear-gradient(160deg,rgba(59,130,246,.12),var(--card));border-color:rgba(59,130,246,.35)}
+.cb-ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:21px;flex-shrink:0;background:rgba(255,255,255,.06)}
+.cb>div{flex:1;min-width:0}
+.cb i{display:block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.cb b{display:block;font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.cb.tg b{color:var(--mint)} .cb.ph b{color:#7CB4FF;font-family:'JetBrains Mono',monospace;font-size:17px;word-spacing:-.25em}
+.cb .cb-s{display:block;font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
+.cb .arw{display:block;font-size:18px;color:var(--muted);margin-top:0}
+@media (min-width:720px){ .contact-big{grid-template-columns:1fr 1fr} .tabs-in{padding:10px 18px} .tabs button{font-size:14px;padding:11px 8px} }
 .lang button{display:inline-flex;align-items:center;gap:5px}
 .lang .fl{font-size:14px;line-height:1}
 </style>
@@ -513,12 +539,24 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
   </div>
 </header>
 
-<!-- ═══ ОБЛОЖКА ═══ -->
+<!-- ═══ ПАНЕЛИ ═══ -->
+<nav class="tabs" id="tabs">
+  <div class="wrap tabs-in">
+    <button data-tab="product" class="on" data-i="tab.product">Продукт</button>
+    <button data-tab="price" data-i="tab.price">Тарифы</button>
+    <button data-tab="order" data-i="tab.order">Заказать</button>
+    <button data-tab="support" data-i="tab.support">Поддержка</button>
+  </div>
+</nav>
+
+<!-- ════════════════════════ 1 · ПРОДУКТ ════════════════════════ -->
+<div class="panel on" id="p-product">
+
 <section class="hero">
   <div class="wrap">
-    <div class="pill"><span class="dot"></span><span data-i="hero.pill">Одно касание — один отзыв</span></div>
-    <h1 data-i="hero.h1">Отзывы в Google становятся <em>проще</em></h1>
-    <p data-i="hero.sub">15 секунд — и довольный гость оставляет отзыв. Без приложений, без объяснений. Одно касание телефоном.</p>
+    <div class="pill"><span class="dot"></span><span data-i="h2.pill">Одно касание — отзыв, подписчик, клиент</span></div>
+    <h1 data-i="h2.h1">Отзывы в Google, Яндекс и 2ГИС — <em>за одно касание</em></h1>
+    <p data-i="h2.sub">Карточка NFC + QR у кассы. Гость приложил телефон — оставил отзыв, подписался на Instagram или Telegram. Вы видите каждое касание в кабинете.</p>
 
     <div class="card-shot crop">
       <img src="card.jpg" alt="BirTapCard NFC карточка" width="506" height="900">
@@ -528,94 +566,50 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
     <div class="stats3">
       <div class="stat"><b>15<small style="font-size:13px" data-i="hero.s1u">сек</small></b><span data-i="hero.s1">от касания до отзыва</span></div>
       <div class="stat"><b>0</b><span data-i="hero.s2">приложений ставить</span></div>
-      <div class="stat"><b>24/7</b><span data-i="hero.s3">аналитика в кабинете</span></div>
+      <div class="stat"><b>35+</b><span data-i="h2.s3">заведений уже работают</span></div>
     </div>
 
     <div class="cta-row">
-      <a class="btn btn-p" href="https://t.me/Jrkhnv777" data-i="cta.main">Подключить заведение</a>
-      <a class="btn btn-g" href="#how" data-i="cta.how">Как это работает</a>
+      <a class="btn btn-p" href="#price" data-tab-link="price" data-i="tab.price">Тарифы</a>
+      <a class="btn btn-g" href="#order" data-tab-link="order" data-i="cta.order">Заказать</a>
     </div>
   </div>
 </section>
 
-<!-- ═══ ДОВЕРИЕ ═══ -->
-<div class="trust">
-  <div class="wrap trust-in">
-    <b>35+</b>
-    <span data-i="trust.t">заведений в Самарканде уже работают с BirTapCard
-      <small data-i="trust.s">и первые рестораны Ташкента уже на подключении</small></span>
-  </div>
-</div>
-
-<!-- ═══ ПРОБЛЕМА ═══ -->
+<!-- ЗАЧЕМ -->
 <section>
   <div class="wrap">
-    <div class="eyebrow rv"><i></i><span data-i="pr.eye">Проблема</span></div>
-    <h2 class="rv" data-i="pr.h">Довольные гости <em>не оставляют отзывов</em>. И дело не в том, что не хотят.</h2>
-    <p class="lead rv" data-i="pr.lead">Между «всё понравилось» и реальным отзывом в Google стоят четыре барьера. Каждый стоит вам репутации.</p>
-    <div class="cards">
-      <div class="c rv"><div class="c-ico i-orange">⏳</div><h3 data-i="pr.1h">Забывают сразу</h3><p data-i="pr.1p">Гость вышел за дверь — и мысль об отзыве ушла вместе с ним. Намерение живёт секунды.</p></div>
-      <div class="c rv"><div class="c-ico i-blue">🔀</div><h3 data-i="pr.2h">Слишком много шагов</h3><p data-i="pr.2p">Открыть карты, найти заведение, найти кнопку «отзывы» — пять-шесть действий убивают желание.</p></div>
-      <div class="c rv"><div class="c-ico i-purple">🤐</div><h3 data-i="pr.3h">Никто не попросил</h3><p data-i="pr.3p">Без понятного и своевременного напоминания отзыв просто не появится.</p></div>
-      <div class="c rv"><div class="c-ico i-mint">📵</div><h3 data-i="pr.4h">Технические барьеры</h3><p data-i="pr.4p">Севший телефон, плохой свет для QR, неудобная камера — и гость откладывает «на потом».</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ ЦЕНА МОЛЧАНИЯ ═══ -->
-<section>
-  <div class="wrap">
-    <div class="eyebrow rv"><i></i><span data-i="ps.eye">Цена молчания</span></div>
-    <h2 class="rv" data-i="ps.h">Сколько стоит бизнесу <em>отсутствие отзывов</em></h2>
-    <p class="lead rv" data-i="ps.lead">Рейтинг в Google — первое, что видит новый гость. Разрыв в отзывах превращается в разрыв в выручке.</p>
+    <div class="eyebrow rv"><i></i><span data-i="w.eye">Зачем</span></div>
+    <h2 class="rv" data-i="w.h">Довольные гости молчат. <em>Недовольные — пишут.</em></h2>
+    <p class="lead rv" data-i="w.lead">До отзыва — пять шагов и слово «потом». Карточка убирает и то, и другое: гость оставляет отзыв, пока он ещё за столом.</p>
     <div class="bigstats">
       <div class="bs rv"><b>93%</b><span data-i="ps.1">людей читают отзывы перед выбором заведения</span></div>
       <div class="bs o rv"><b>+5–9%</b><span data-i="ps.2">к выручке даёт рост рейтинга на одну звезду</span></div>
       <div class="bs b rv"><b>94%</b><span data-i="ps.3">избегают бизнес с плохими или устаревшими отзывами</span></div>
       <div class="bs p rv"><b>1 : 10</b><span data-i="ps.4">довольные пишут отзывы в разы реже недовольных</span></div>
     </div>
-    <p class="note rv" data-i="ps.note">По обобщённым данным открытых маркетинговых исследований поведения потребителей и репутации локального бизнеса.</p>
   </div>
 </section>
 
-<!-- ═══ РЕШЕНИЕ ═══ -->
+<!-- КАК РАБОТАЕТ -->
 <section id="how">
   <div class="wrap">
-    <div class="eyebrow rv"><i></i><span data-i="sol.eye">Решение</span></div>
-    <h2 class="rv" data-i="sol.h">BirTapCard убирает самое дорогое слово в бизнесе — <em>«потом»</em></h2>
-    <p class="lead rv" data-i="sol.lead">Карточка стоит у кассы. Гость оставляет отзыв за секунды — пока эмоция ещё свежая.</p>
+    <div class="eyebrow rv"><i></i><span data-i="hw.eye">Как работает</span></div>
+    <h2 class="rv" data-i="hw.h">Четыре шага. <em>15 секунд.</em></h2>
     <div class="steps rv">
       <div class="step"><div class="n">01</div><h3 data-i="sol.1h">Гость оплатил заказ</h3><p data-i="sol.1p">Кассир: «Если всё понравилось — оставьте нам отзыв»</p></div>
       <div class="step"><div class="n">02</div><h3 data-i="sol.2h">Поднёс телефон к NFC или отсканировал QR</h3><p data-i="sol.2p">Без приложений и регистрации</p><span class="t" data-i="t.2">+2 сек</span></div>
-      <div class="step"><div class="n">03</div><h3 data-i="sol.3h">Открылась страница отзывов Google</h3><p data-i="sol.3p">Ровно на нужном заведении и филиале</p><span class="t" data-i="t.3">+3 сек</span></div>
-      <div class="step"><div class="n">04</div><h3 data-i="sol.4h">Отзыв опубликован, рейтинг вырос</h3><p data-i="sol.4p">Звёзды и пара слов — всё, что нужно</p><span class="t" data-i="t.4">+10 сек</span></div>
+      <div class="step"><div class="n">03</div><h3 data-i="hw.3h">Открылся экран вашего заведения</h3><p data-i="hw.3p">Google · Яндекс · 2ГИС · Instagram · Telegram — гость выбирает</p><span class="t" data-i="t.3">+3 сек</span></div>
+      <div class="step"><div class="n">04</div><h3 data-i="hw.4h">Отзыв опубликован</h3><p data-i="hw.4p">Касание уже видно в вашем кабинете</p><span class="t" data-i="t.4">+10 сек</span></div>
     </div>
   </div>
 </section>
 
-<!-- ═══ УСТРОЙСТВО ═══ -->
-<section>
-  <div class="wrap">
-    <div class="eyebrow rv"><i></i><span data-i="dev.eye">Устройство</span></div>
-    <h2 class="rv" data-i="dev.h">Один предмет у кассы. <em>Два способа</em>. Ноль трения.</h2>
-    <div class="card-shot rv" style="max-width:100%;margin-bottom:18px">
-      <img src="card-wide.jpg" alt="BirTapCard — NFC и QR на одной карточке" width="700" height="661">
-    </div>
-    <div class="cards">
-      <div class="c rv"><div class="c-ico i-mint">📶</div><h3 data-i="dev.1h">NFC-метка</h3><p data-i="dev.1p">Достаточно поднести телефон — Android и iPhone открывают страницу отзыва сами, без сканирования.</p></div>
-      <div class="c rv"><div class="c-ico i-blue">▦</div><h3 data-i="dev.2h">QR-код</h3><p data-i="dev.2p">Запасной способ для любого телефона — навёл камеру и готово, если NFC выключен.</p></div>
-      <div class="c rv"><div class="c-ico i-orange">🛡</div><h3 data-i="dev.3h">Прочный корпус</h3><p data-i="dev.3p">Компактная настольная карточка — не боится воды, солнца и ежедневного использования.</p></div>
-      <div class="c rv"><div class="c-ico i-purple">🔋</div><h3 data-i="dev.4h">Не требует питания</h3><p data-i="dev.4p">Ни батареек, ни интернета, ни зарядки. Метка пассивная — работает годами.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ ОДИН ЭКРАН — ВСЕ ПЛОЩАДКИ ═══ -->
+<!-- ЭКРАН -->
 <section>
   <div class="wrap">
     <div class="eyebrow rv"><i></i><span data-i="sc.eye">Экран после скана</span></div>
     <h2 class="rv" data-i="sc.h">Одна карточка — <em>все площадки</em>, где вас ищут</h2>
-    <p class="lead rv" data-i="sc.lead">Гость приложил телефон и видит сразу всё: отзыв в Google, на Яндекс Картах, в 2ГИС — и подписку на ваш Instagram и Telegram. Оставил отзыв — кнопка гаснет, остальные ждут.</p>
 
     <div class="phone rv">
       <div class="phone-top"><span class="dot"></span><span data-i="sc.p1">Понравилось у нас?</span></div>
@@ -628,59 +622,49 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
       <div class="pb pb-tg" data-i="sc.b5">✈️ Наш Telegram-канал</div>
     </div>
 
-    <div class="cards" style="margin-top:14px">
-      <div class="c rv"><div class="c-ico i-mint">🎛</div><h3 data-i="sc.1h">Вы выбираете, что показывать</h3><p data-i="sc.1p">Только Google? Пожалуйста. Все шесть? Тоже. Каждая кнопка включается отдельно для каждого филиала.</p></div>
-      <div class="c rv"><div class="c-ico i-purple">🏷</div><h3 data-i="sc.2h">Ваш логотип на экране</h3><p data-i="sc.2p">Гость видит логотип и название именно вашего заведения — не безликую страницу.</p></div>
+    <div class="feats" style="margin-top:14px">
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="sc2.1h">Кнопки выбираете вы</b><span data-i="sc2.1p">Google, Яндекс, 2ГИС, Instagram, Telegram, бот, сайт, меню, Wi-Fi — отдельно для каждого филиала, меняется из кабинета за минуту</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="sc.2h">Ваш логотип на экране</b><span data-i="sc2.2p">Гость видит ваше заведение, а не чужой бренд</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="sc2.3h">Три языка автоматически</b><span data-i="sc2.3p">Узбекский, русский, английский — по языку телефона гостя</span></div></div>
     </div>
   </div>
 </section>
 
-<!-- ═══ NFC vs QR ═══ -->
+<!-- УСТРОЙСТВО -->
 <section>
   <div class="wrap">
-    <div class="eyebrow rv"><i></i><span data-i="vs.eye">Технология</span></div>
-    <h2 class="rv" data-i="vs.h">Почему NFC быстрее обычного QR</h2>
-    <p class="lead rv" data-i="vs.lead">BirTapCard поддерживает оба способа — но именно NFC даёт то самое ощущение «мгновенно».</p>
-    <div class="vs">
-      <div class="vs-col hi rv">
-        <div class="vs-h"><b>NFC</b><span class="vs-b" data-i="vs.badge">Быстрее</span></div>
-        <ul>
-          <li data-i="vs.n1">Одно касание — не нужно наводить камеру и ловить фокус</li>
-          <li data-i="vs.n2">Страница отзыва открывается за 1–2 секунды</li>
-          <li data-i="vs.n3">Ощущается как премиальный, «умный» жест</li>
-        </ul>
-      </div>
-      <div class="vs-col rv">
-        <div class="vs-h"><b>QR</b></div>
-        <ul>
-          <li data-i="vs.q1">Работает на любом телефоне, даже без NFC-чипа</li>
-          <li data-i="vs.q2">Нужны камера, свет и наведение — дольше на 3–5 секунд</li>
-          <li data-i="vs.q3">Привычный и понятный всем способ</li>
-        </ul>
-      </div>
+    <div class="eyebrow rv"><i></i><span data-i="dev.eye">Устройство</span></div>
+    <h2 class="rv" data-i="dv.h">NFC + QR в одной карточке. <em>Без питания, без интернета.</em></h2>
+    <div class="card-shot rv" style="max-width:100%;margin-bottom:18px">
+      <img src="card-wide.jpg" alt="BirTapCard — NFC и QR на одной карточке" width="700" height="661">
+    </div>
+    <div class="cmp">
+      <div class="cmp-row rv"><b data-i="cm.r1">Способ считывания</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r1a">только QR</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r1b">NFC + QR</span></div></div></div>
+      <div class="cmp-row rv"><b data-i="cm.r2">Скорость</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r2a">4–6 сек</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r2b">1–2 сек</span></div></div></div>
+      <div class="cmp-row rv"><b data-i="cm2.r3">Данные</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm2.r3a">ноль</span></div><div><i>BirTapCard</i><span class="good" data-i="cm2.r3b">каждое касание в кабинете</span></div></div></div>
+      <div class="cmp-row rv"><b data-i="cm.r6">Долговечность</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r6a">выцветает, рвётся</span></div><div><i>BirTapCard</i><span class="good" data-i="cm2.r6b">пластик, дизайн в цветах заведения</span></div></div></div>
     </div>
   </div>
 </section>
 
-<!-- ═══ ПЛАТФОРМА ═══ -->
+<!-- КАБИНЕТ -->
 <section>
   <div class="wrap">
     <div class="eyebrow rv"><i></i><span data-i="pl.eye">Личный кабинет</span></div>
-    <h2 class="rv" data-i="pl.h">Карточка — это только начало. Главный продукт — <em>платформа</em>.</h2>
-    <p class="lead rv" data-i="pl.lead">Владелец получает кабинет: сканирования, конверсия, филиалы — в реальном времени, с телефона.</p>
+    <h2 class="rv" data-i="pl2.h">Каждое касание — <em>цифра в кабинете</em></h2>
 
     <div class="dash rv">
       <div class="dash-top"><span class="d"></span><b data-i="pl.dash">Аналитика · все филиалы</b><span data-i="pl.upd">обновлено сейчас</span></div>
       <div class="kpis">
-        <div class="kpi"><i data-i="pl.k1">NFC сканы</i><b style="color:var(--mint)" data-count="4812">0</b><u>↑ 12% <span data-i="pl.week">за неделю</span></u>
+        <div class="kpi"><i data-i="pl2.k1">Касаний</i><b style="color:var(--mint)" data-count="4812">0</b><u>↑ 12% <span data-i="pl.week">за неделю</span></u>
           <svg viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0,24 L15,20 L30,22 L45,12 L60,15 L75,7 L100,4" fill="none" stroke="#00D9AE" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>
-        <div class="kpi"><i data-i="pl.k2">QR сканы</i><b style="color:var(--orange)" data-count="2260">0</b><u>↑ 8% <span data-i="pl.week">за неделю</span></u>
+        <div class="kpi"><i data-i="pl2.k2">Переходов в Google</i><b style="color:var(--orange)" data-count="2260">0</b><u>↑ 8% <span data-i="pl.week">за неделю</span></u>
           <svg viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0,20 L20,24 L40,14 L55,18 L75,10 L100,8" fill="none" stroke="#FF6B35" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>
-        <div class="kpi"><i data-i="pl.k3">Уникальных</i><b style="color:var(--blue)" data-count="3940">0</b><u data-i="pl.k3s">живых гостей</u></div>
-        <div class="kpi"><i data-i="pl.k4">Конверсия</i><b style="color:var(--purple)" data-count="82" data-suffix="%">0</b><u data-i="pl.k4s">дошли до Google</u></div>
+        <div class="kpi"><i data-i="pl2.k3">Новых отзывов Google</i><b style="color:var(--blue)" data-count="137">0</b><u data-i="pl2.k3s">реальные, не клики</u></div>
+        <div class="kpi"><i data-i="pl2.k4">Подписок</i><b style="color:var(--purple)" data-count="412">0</b><u data-i="pl2.k4s">Instagram + Telegram</u></div>
       </div>
       <div class="chart">
-        <div class="chart-h"><b data-i="pl.ch">Сканирования по дням</b><span data-i="pl.ch7">7 дней</span></div>
+        <div class="chart-h"><b data-i="pl2.ch">Касания по дням</b><span data-i="pl.ch7">7 дней</span></div>
         <div class="bars">
           <div style="height:38%;animation-delay:.05s"></div><div style="height:55%;animation-delay:.1s"></div>
           <div style="height:44%;animation-delay:.15s"></div><div style="height:72%;animation-delay:.2s"></div>
@@ -695,85 +679,44 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
         <div style="margin-top:9px"><div class="top-row"><i>3</i><span>Nova Aesthetic</span><em>730</em></div><div class="bar-line"><i style="width:59%"></i></div></div>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- ═══ ЧТО ПОЛУЧАЕТ ВЛАДЕЛЕЦ ═══ -->
-<section>
-  <div class="wrap">
-    <div class="eyebrow rv"><i></i><span data-i="ow.eye">Что получает владелец</span></div>
-    <h2 class="rv" data-i="ow.h">Инструмент роста репутации, а не просто <em>кусок пластика</em></h2>
-    <div class="feats">
-      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.1h">Статистика в реальном времени</b><span data-i="ow.1p">Каждое касание и скан видны в кабинете сразу же</span></div></div>
-      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.2h">Аналитика по периодам</b><span data-i="ow.2p">День, неделя, месяц или любой выбранный диапазон</span></div></div>
-      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.3h">Сравнение филиалов</b><span data-i="ow.3p">Видно, какая точка приносит больше отзывов</span></div></div>
-      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.4h">Отчёт в Telegram каждое утро</b><span data-i="ow.4p">Сканы, уникальные гости, конверсия и лучший филиал — в 8:00</span></div></div>
-      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.5h">Куда переходят гости</b><span data-i="ow.5p">Сколько нажали Google, сколько Яндекс, сколько подписалось в Instagram — по каждой кнопке</span></div></div>
-      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.6h">Приложение для Android</b><span data-i="ow.6p">Кабинет в кармане — иконка на экране, вход сохраняется, всё как в приложении</span></div></div>
-      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.7h">Разделение NFC и QR</b><span data-i="ow.7p">Понятно, каким способом гости пользуются чаще</span></div></div>
-      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.8h">Постоянные обновления</b><span data-i="ow.8p">Платформа растёт — новые функции без доплат за карточку</span></div></div>
+    <div class="feats" style="margin-top:14px">
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.1h">Статистика в реальном времени</b><span data-i="ow2.1p">Касания, переходы по каждой кнопке, NFC отдельно от QR</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow2.2h">Реальные отзывы Google</b><span data-i="ow2.2p">Кабинет сверяется с Google и считает опубликованные отзывы и рейтинг — не переходы</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow2.3h">Любой период и все филиалы</b><span data-i="ow2.3p">День, неделя, месяц, свой диапазон. Точки сравниваются между собой в одном кабинете</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.4h">Отчёт в Telegram каждое утро</b><span data-i="ow2.4p">Касания, отзывы, лучший филиал — в чат владельца</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow2.5h">Приложение для Android и веб</b><span data-i="ow2.5p">Кабинет в телефоне. Выгрузка в CSV / Excel</span></div></div>
+      <div class="feat rv"><span class="ck">✓</span><div><b data-i="ow.8h">Постоянные обновления</b><span data-i="ow2.8p">Меню, чаевые, Wi-Fi, ответы на отзывы — новое входит в подписку</span></div></div>
     </div>
   </div>
 </section>
 
-<!-- ═══ МЕТРИКИ ═══ -->
-<section>
-  <div class="wrap">
-    <div class="eyebrow rv"><i></i><span data-i="mt.eye">Метрики</span></div>
-    <h2 class="rv" data-i="mt.h">Что можно отслеживать</h2>
-    <div class="chips rv">
-      <div class="chip"><s>📊</s><span data-i="mt.1">Сканирования</span></div>
-      <div class="chip"><s>🎯</s><span data-i="mt.2">Конверсия</span></div>
-      <div class="chip"><s>👥</s><span data-i="mt.3">Уникальные гости</span></div>
-      <div class="chip"><s>🕒</s><span data-i="mt.4">Популярные часы</span></div>
-      <div class="chip"><s>📅</s><span data-i="mt.5">Дни недели</span></div>
-      <div class="chip"><s>🏆</s><span data-i="mt.6">Лучший филиал</span></div>
-      <div class="chip"><s>📱</s><span data-i="mt.7">Устройства гостей</span></div>
-      <div class="chip"><s>🌐</s><span data-i="mt.8">Языки</span></div>
-      <div class="chip"><s>📈</s><span data-i="mt.9">Динамика по дням</span></div>
-      <div class="chip"><s>👆</s><span data-i="mt.11">Переходы по кнопкам</span></div>
-      <div class="chip"><s>📂</s><span data-i="mt.10">Выгрузка в CSV</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ СРАВНЕНИЕ ═══ -->
-<section>
-  <div class="wrap">
-    <div class="eyebrow rv"><i></i><span data-i="cm.eye">Сравнение</span></div>
-    <h2 class="rv" data-i="cm.h">Чем это лучше обычного <em>QR-стикера</em></h2>
-    <div class="cmp">
-      <div class="cmp-row rv"><b data-i="cm.r1">Способ считывания</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r1a">только QR</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r1b">NFC + QR</span></div></div></div>
-      <div class="cmp-row rv"><b data-i="cm.r2">Скорость</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r2a">4–6 сек</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r2b">1–2 сек</span></div></div></div>
-      <div class="cmp-row rv"><b data-i="cm.r3">Аналитика сканирований</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.no">нет</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r3b">да, в реальном времени</span></div></div></div>
-      <div class="cmp-row rv"><b data-i="cm.r4">Сравнение филиалов</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.no">нет</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.yes">да</span></div></div></div>
-      <div class="cmp-row rv"><b data-i="cm.r5">Вид на кассе</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r5a">бумажный стикер</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r5b">премиальная карточка</span></div></div></div>
-      <div class="cmp-row rv"><b data-i="cm.r6">Долговечность</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r6a">выцветает, рвётся</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r6b">прочный корпус</span></div></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ ДЛЯ КОГО ═══ -->
+<!-- ДЛЯ КОГО -->
 <section>
   <div class="wrap">
     <div class="eyebrow rv"><i></i><span data-i="wh.eye">Для кого</span></div>
-    <h2 class="rv" data-i="wh.h">Подходит любому бизнесу, где есть касса и довольные гости</h2>
+    <h2 class="rv" data-i="wh2.h">Везде, где есть клиент и <em>довольное «спасибо»</em></h2>
     <div class="who rv">
       <div><span>🍽</span><em style="font-style:normal" data-i="wh.1">Рестораны</em></div>
       <div><span>☕</span><em style="font-style:normal" data-i="wh.2">Кофейни</em></div>
-      <div><span>💨</span><em style="font-style:normal" data-i="wh.3">Кальянные</em></div>
+      <div><span>🏫</span><em style="font-style:normal" data-i="wh2.3">Частные школы</em></div>
+      <div><span>🏥</span><em style="font-style:normal" data-i="wh2.4">Клиники</em></div>
+      <div><span>🎓</span><em style="font-style:normal" data-i="wh2.5">Университеты</em></div>
       <div><span>🏨</span><em style="font-style:normal" data-i="wh.4">Гостиницы</em></div>
       <div><span>💇</span><em style="font-style:normal" data-i="wh.5">Салоны красоты</em></div>
-      <div><span>🚗</span><em style="font-style:normal" data-i="wh.6">Автосервисы</em></div>
-      <div><span>🛍</span><em style="font-style:normal" data-i="wh.7">Магазины</em></div>
       <div><span>🏪</span><em style="font-style:normal" data-i="wh.8">Сети и франшизы</em></div>
+    </div>
+    <div class="cta-row rv" style="margin-top:26px">
+      <a class="btn btn-p" href="#price" data-tab-link="price" data-i="cta.seeprice">Смотреть тарифы</a>
     </div>
   </div>
 </section>
 
+</div><!-- /product -->
 
-<!-- ═══ ТАРИФЫ ═══ -->
-<section id="price">
+<!-- ════════════════════════ 2 · ТАРИФЫ ════════════════════════ -->
+<div class="panel" id="p-price">
+<section>
   <div class="wrap">
     <div class="eyebrow rv"><i></i><span data-i="pz.eye">Тарифы</span></div>
     <h2 class="rv" data-i="pz.h">Три тарифа. <em>Один год.</em> Без скрытых платежей</h2>
@@ -896,551 +839,522 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
     </div>
 
     <p class="pz-final rv" data-i="pz.term">Подключаем в течение 1–2 дней после подтверждения</p>
-    <a class="btn btn-p rv" href="https://t.me/Jrkhnv777" data-i="cta.price">Подключить заведение</a>
+    <a class="btn btn-p rv" href="#order" data-tab-link="order" data-i="cta.price">Подключить заведение</a>
   </div>
 </section>
 
-<!-- ═══ FAQ ═══ -->
+
+</div><!-- /price -->
+
+<!-- ════════════════════════ 3 · ЗАКАЗАТЬ ════════════════════════ -->
+<div class="panel" id="p-order">
 <section>
   <div class="wrap">
-    <div class="eyebrow rv"><i></i><span data-i="fq.eye">Частые вопросы</span></div>
-    <h2 class="rv" data-i="fq.h">Коротко о главном</h2>
-    <div class="faq rv">
-      <details><summary data-i="fq.1q">Нужно ли гостю приложение или интернет?</summary><p data-i="fq.1a">Приложение — нет. Нужен только телефон с NFC или камерой. Интернет нужен, чтобы открылась страница Google — он есть у всех.</p></details>
-      <details><summary data-i="fq.2q">А если у меня несколько филиалов?</summary><p data-i="fq.2a">Каждый филиал получает свою карточку и свою ссылку. В кабинете вы видите и общую картину, и сравнение точек между собой.</p></details>
-      <details><summary data-i="fq.3q">Нужно ли устройству питание или зарядка?</summary><p data-i="fq.3a">Нет. NFC-метка полностью пассивная — питание ей не нужно, работает сколько угодно долго.</p></details>
-      <details><summary data-i="fq.4q">Как быстро всё запускается?</summary><p data-i="fq.4a">Обычно за один день: привязываем карточку к вашему профилю Google Business, настраиваем кабинет и передаём вам доступ.</p></details>
-      <details><summary data-i="fq.5q">Что если гость хочет оставить плохой отзыв?</summary><p data-i="fq.5a">Карточку показывают гостю, который остался доволен — это работа кассира или официанта. Инструмент усиливает то, что уже есть: довольных гостей.</p></details>
-      <details><summary data-i="fq.6q">Кто устанавливает карточку?</summary><p data-i="fq.6a">Мы. Привозим, ставим у кассы, подключаем кабинет и показываем персоналу, как предлагать её гостям.</p></details>
-    </div>
-  </div>
-</section>
+    <div class="eyebrow rv"><i></i><span data-i="tab.order">Заказать</span></div>
+    <h2 class="rv" data-i="or.h">Подключить заведение</h2>
+    <p class="lead rv" data-i="or.lead">Напишите или позвоните. Подтверждаем тариф — и через 1–2 дня привозим, ставим карточку и настраиваем кабинет.</p>
 
-<!-- ═══ ФИНАЛ ═══ -->
-<section>
-  <div class="wrap">
-    <div class="final rv">
-      <h2 data-i="fin.h">Каждый довольный гость может стать <em>новым отзывом</em></h2>
-      <p data-i="fin.p">Нужно лишь сделать этот шаг максимально простым. Мы уже это сделали — осталось поставить карточку к вам на кассу.</p>
-      <a class="btn btn-p" href="https://t.me/Jrkhnv777" data-i="cta.main2">Написать в Telegram</a>
-    </div>
-
-    <div class="contacts">
-
-      <div class="person">
-        <div class="p-head">
-          <div class="p-av">АИ</div>
-          <div>
-            <b data-i="ct.n1">Алим Ибрагимов</b>
-            <span data-i="ct.f1">Основатель · Самарканд · привозит и устанавливает устройства</span>
-          </div>
-        </div>
-        <div class="p-links">
-          <a class="tg" href="https://t.me/Alimibragimov">✈️ @Alimibragimov</a>
-          <a href="tel:+998975791551">📞 +998 97 579 15 51</a>
-        </div>
-      </div>
-
-      <div class="person">
-        <div class="p-head">
-          <div class="p-av b">ТШ</div>
-          <div>
-            <b data-i="ct.f2n">Сооснователь</b>
-            <span data-i="ct.f2">Ташкент · подключение заведений и работа с сетями</span>
-          </div>
-        </div>
-        <div class="p-links">
-          <a class="tg" href="https://t.me/Jrkhnv777">✈️ @Jrkhnv777</a>
-          <a href="tel:+998337573333">📞 +998 33 757 33 33</a>
-        </div>
-      </div>
-
-      <a class="insta" href="https://www.instagram.com/birtapcard_official">
-        <span class="ci">📸</span>
-        <div style="flex:1;min-width:0">
-          <b style="display:block;font-size:14.5px">@birtapcard_official</b>
-          <span style="font-size:12px;color:var(--muted);line-height:1.4" data-i="ct.insta">Официальный Instagram проекта — каждый день показываем, в какие заведения ставим устройства</span>
-        </div>
+    <div class="contact-big rv">
+      <a class="cb tg" href="https://t.me/birtapcard">
+        <span class="cb-ic">✈️</span>
+        <div><i data-i="or.tg">Telegram</i><b>@birtapcard</b><span class="cb-s" data-i="or.tgs">Отвечаем быстро, обычно в течение часа</span></div>
         <span class="arw">→</span>
       </a>
+      <a class="cb ph" href="tel:+998957313041">
+        <span class="cb-ic">📞</span>
+        <div><i data-i="or.ph">Телефон</i><b>+998 95 731 30 41</b><span class="cb-s" data-i="or.phs">Звонок или сообщение в Telegram по этому номеру</span></div>
+        <span class="arw">→</span>
+      </a>
+    </div>
 
-      <a class="ct" href="https://birtapcard.vercel.app">
+    <div class="steps rv" style="margin-top:28px">
+      <div class="step"><div class="n">01</div><h3 data-i="or.1h">Напишите нам</h3><p data-i="or.1p">Название заведения, город, сколько точек, какой тариф</p></div>
+      <div class="step"><div class="n">02</div><h3 data-i="or.2h">Пришлите три вещи</h3><p data-i="or.2p">Ссылку на профиль в Google (и Яндекс / 2ГИС), логотип, Instagram и Telegram</p></div>
+      <div class="step"><div class="n">03</div><h3 data-i="or.3h">Привозим и ставим</h3><p data-i="or.3p">Настраиваем кабинет, передаём доступ, показываем персоналу, как предлагать карточку</p><span class="t" data-i="or.3t">1–2 дня</span></div>
+    </div>
+
+    <div class="callout callout--lock rv" style="margin-top:24px">
+      <span>💳</span>
+      <div><b data-i="or.payh">Оплата за год.</b>
+        <span data-i="or.payp"> Старт можно оплатить в два платежа. Цена фиксируется за вами, тариф можно повысить в любой момент с доплатой разницы.</span></div>
+    </div>
+  </div>
+</section>
+</div><!-- /order -->
+
+<!-- ════════════════════════ 4 · ПОДДЕРЖКА ════════════════════════ -->
+<div class="panel" id="p-support">
+<section>
+  <div class="wrap">
+    <div class="eyebrow rv"><i></i><span data-i="tab.support">Поддержка</span></div>
+    <h2 class="rv" data-i="su.h">Мы на связи</h2>
+    <p class="lead rv" data-i="su.lead">Вопросы по кабинету, карточке или статистике — пишите напрямую. Без тикетов и колл-центров.</p>
+
+    <div class="contacts" style="margin-top:0">
+      <a class="ct rv" href="https://t.me/birtapcard">
+        <span class="ci" style="background:var(--mint-dim)">✈️</span>
+        <div><b>Telegram</b><span>@birtapcard</span></div>
+        <span class="arw">→</span>
+      </a>
+      <a class="ct rv" href="mailto:birtapcard@gmail.com">
+        <span class="ci i-blue">✉️</span>
+        <div><b data-i="su.mail">Почта</b><span>birtapcard@gmail.com</span></div>
+        <span class="arw">→</span>
+      </a>
+      <a class="ct rv" href="https://birtapcard.vercel.app">
         <span class="ci i-orange">🖥</span>
         <div><b data-i="ct.site">Личный кабинет</b><span>birtapcard.vercel.app</span></div>
         <span class="arw">→</span>
       </a>
+      <a class="insta rv" href="https://www.instagram.com/birtapcard_official">
+        <span class="ci">📸</span>
+        <div style="flex:1;min-width:0">
+          <b style="display:block;font-size:14.5px">@birtapcard_official</b>
+          <span style="font-size:12px;color:var(--muted);line-height:1.4" data-i="su.insta">Заведения, где уже стоит BirTapCard</span>
+        </div>
+        <span class="arw">→</span>
+      </a>
     </div>
 
-    <footer>
-      <div style="display:flex;justify-content:center;margin-bottom:10px"><div class="logo-mark"><svg width="20" height="20" viewBox="0 0 512 512" fill="none" stroke="#04121C" stroke-width="46" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M166 214 L222 158 V378"/><path d="M280 172 a74 74 0 0 1 74 74"/><path d="M280 100 a146 146 0 0 1 146 146"/>
-        </svg></div></div>
-      <b class="wm">Bir<em class="tap">Tap</em>Card</b>
-      <p data-i="foot">NFC + QR для роста репутации · Самарканд · Ташкент</p>
-    </footer>
+    <div class="eyebrow rv" style="margin-top:36px"><i></i><span data-i="fq.eye">Частые вопросы</span></div>
+    <div class="faq rv">
+      <details><summary data-i="fq.1q">Нужно ли гостю приложение или интернет?</summary><p data-i="fq.1a">Приложение — нет. Нужен только телефон с NFC или камерой. Интернет нужен, чтобы открылась страница Google — он есть у всех.</p></details>
+      <details><summary data-i="fq.2q">А если у меня несколько филиалов?</summary><p data-i="fq.2a">Каждый филиал получает свою карточку и свою ссылку. В кабинете вы видите и общую картину, и сравнение точек между собой.</p></details>
+      <details><summary data-i="fq.3q">Нужно ли устройству питание или зарядка?</summary><p data-i="fq.3a">Нет. NFC-метка полностью пассивная — питание ей не нужно, работает сколько угодно долго.</p></details>
+      <details><summary data-i="fq.5q">Что если гость хочет оставить плохой отзыв?</summary><p data-i="fq.5a">Карточку показывают гостю, который остался доволен — это работа кассира или официанта. Инструмент усиливает то, что уже есть: довольных гостей.</p></details>
+      <details><summary data-i="fq.6q">Кто устанавливает карточку?</summary><p data-i="fq.6a">Мы. Привозим, ставим у кассы, подключаем кабинет и показываем персоналу, как предлагать её гостям.</p></details>
+      <details><summary data-i="fq2.7q">Карточка сломалась или пропала</summary><p data-i="fq2.7a">Напишите в Telegram — заменим. В Старте 1 раз в год бесплатно, в Бизнесе 2 раза, в Pro без ограничений.</p></details>
+      <details><summary data-i="fq2.8q">Как поменять кнопки на экране или логотип?</summary><p data-i="fq2.8a">В кабинете: раздел «Филиалы» → нужная точка → включите кнопки и загрузите логотип. Меняется мгновенно, карточку перепечатывать не нужно.</p></details>
+    </div>
   </div>
 </section>
+</div><!-- /support -->
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div style="display:flex;justify-content:center;margin-bottom:10px"><div class="logo-mark"><svg width="20" height="20" viewBox="0 0 512 512" fill="none" stroke="#04121C" stroke-width="46" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M166 214 L222 158 V378"/><path d="M280 172 a74 74 0 0 1 74 74"/><path d="M280 100 a146 146 0 0 1 146 146"/>
+      </svg></div></div>
+    <b class="wm">Bir<em class="tap">Tap</em>Card</b>
+    <p data-i="foot">NFC + QR для роста репутации · Самарканд · Ташкент</p>
+  </div>
+</footer>
 
 <div class="sticky" id="sticky">
-  <a class="btn btn-p" href="https://t.me/Jrkhnv777" data-i="cta.sticky">Подключить заведение →</a>
+  <a class="btn btn-p" href="#order" data-tab-link="order" data-i="cta.sticky2">Заказать →</a>
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════
-   Узбекский перевод. Русский текст лежит прямо в разметке,
-   здесь только UZ — так его удобно править одним блоком.
-   ═══════════════════════════════════════════════════════ */
+/* ═══ Словари: UZ и EN. Русский текст лежит в разметке. ═══ */
 const UZ = {
-'brand.sub':'Reputatsiya qurilmasi',
-
-'hero.pill':'Bir teginish — bir sharh',
-'hero.h1':'Google\'da sharh qoldirish endi <em>oson</em>',
-'hero.sub':'15 soniya — va mamnun mehmon sharh qoldiradi. Ilovasiz, ortiqcha tushuntirishsiz. Telefonning bir teginishi.',
-'hero.tag':'Kassada turadi',
-'hero.s1':'teginishdan sharhgacha',
-'hero.s2':'o\'rnatiladigan ilova',
-'hero.s3':'kabinetdagi tahlil',
-'cta.main':'Muassasani ulash',
-'cta.how':'Bu qanday ishlaydi',
-'trust.t':'Samarqanddagi 35 muassasa allaqachon BirTapCard bilan ishlaydi',
-'trust.s':'Toshkentning birinchi restoranlari ham ulanish arafasida',
-
-'pr.eye':'Muammo',
-'pr.h':'Mamnun mehmonlar <em>sharh qoldirmaydi</em>. Sababi — xohlamagani emas.',
-'pr.lead':'«Hammasi yoqdi» degan his bilan Google\'dagi haqiqiy sharh o\'rtasida to\'rtta to\'siq turadi. Har biri obro\'ingizga zarar keltiradi.',
-'pr.1h':'Darrov unutadi',
-'pr.1p':'Mehmon eshikdan chiqdi — sharh haqidagi fikr ham u bilan birga yo\'qoladi. Niyat bir necha soniya yashaydi.',
-'pr.2h':'Qadamlar juda ko\'p',
-'pr.2p':'Xaritani ochish, muassasani topish, «sharhlar» tugmasini qidirish — besh-olti harakat istakni o\'ldiradi.',
-'pr.3h':'Hech kim so\'ramadi',
-'pr.3p':'Aniq va o\'z vaqtida aytilgan eslatmasiz sharh shunchaki paydo bo\'lmaydi.',
-'pr.4h':'Texnik to\'siqlar',
-'pr.4p':'Quvvati tugagan telefon, QR uchun yorug\'lik yetishmasligi, noqulay kamera — mehmon «keyinroq»ga qoldiradi.',
-
-'ps.eye':'Sukutning narxi',
-'ps.h':'Sharhlarning yo\'qligi biznesga <em>qanchaga tushadi</em>',
-'ps.lead':'Google\'dagi reyting — yangi mehmon ko\'radigan birinchi narsa. Sharhlardagi farq daromaddagi farqqa aylanadi.',
-'ps.1':'odam muassasa tanlashdan oldin sharhlarni o\'qiydi',
-'ps.2':'reyting bir yulduzga oshsa, daromad shuncha ortadi',
-'ps.3':'yomon yoki eskirgan sharhli bizneslardan chetlanadi',
-'ps.4':'mamnun mijozlar norozilarga qaraganda ancha kam yozadi',
-'ps.note':'Iste\'molchilar xulqi va mahalliy biznes obro\'si bo\'yicha ochiq marketing tadqiqotlarining umumlashtirilgan ma\'lumotlari asosida.',
-
-'sol.eye':'Yechim',
-'sol.h':'BirTapCard biznesdagi eng qimmat so\'zni yo\'q qiladi — <em>«keyinroq»</em>',
-'sol.lead':'Kartochka kassada turadi. Mehmon his-tuyg\'usi yangiligida, bir necha soniyada sharh qoldiradi.',
-'sol.1h':'Mehmon buyurtmani to\'ladi',
-'sol.1p':'Kassir: «Agar hammasi yoqqan bo\'lsa — bizga sharh qoldiring»',
-'sol.2h':'Telefonni NFC\'ga tegizadi yoki QR\'ni skanerlaydi',
-'sol.2p':'Ilova ham, ro\'yxatdan o\'tish ham kerak emas',
-'sol.3h':'Google sharhlar sahifasi ochiladi',
-'sol.3p':'Aynan kerakli muassasa va filial ustida',
-'sol.4h':'Sharh chop etildi, reyting o\'sdi',
-'sol.4p':'Yulduzlar va bir-ikki og\'iz so\'z — hammasi shu',
-'t.2':'+2 soniya','t.3':'+3 soniya','t.4':'+10 soniya',
-
-'dev.eye':'Qurilma',
-'dev.h':'Kassada bitta buyum. <em>Ikki usul</em>. Nol qarshilik.',
-'dev.1h':'NFC-yorliq',
-'dev.1p':'Telefonni yaqinlashtirish kifoya — Android ham, iPhone ham sharh sahifasini o\'zi ochadi, skanerlash shart emas.',
-'dev.2h':'QR-kod',
-'dev.2p':'Har qanday telefon uchun zaxira usul — NFC o\'chiq bo\'lsa, kamerani qaratish yetarli.',
-'dev.3h':'Mustahkam korpus',
-'dev.3p':'Ixcham stol kartochkasi — suvdan, quyoshdan va kundalik ishlatishdan qo\'rqmaydi.',
-'dev.4h':'Quvvat talab qilmaydi',
-'dev.4p':'Na batareya, na internet, na quvvatlash. Yorliq passiv — yillar davomida ishlaydi.',
-
-'sc.eye':'Skandan keyingi ekran',
-'sc.h':'Bitta kartochka — sizni qidiradigan <em>barcha maydonchalar</em>',
-'sc.lead':'Mehmon telefonni tegizadi va darhol hammasini ko\'radi: Google\'da, Yandex Xaritalarda, 2GIS\'da sharh — va Instagram hamda Telegram\'ingizga obuna. Sharh qoldirdi — tugma o\'chadi, qolganlari kutadi.',
-'sc.p1':'Bizda yoqdimi?','sc.p2':'Muassasa nomi',
-'sc.b1':'⭐ Google\'da sharh qoldirish','sc.b2':'📍 Yandex Xaritalarda sharh','sc.b3':'📍 2GIS\'da sharh',
-'sc.or':'va yana','sc.b4':'📸 Instagram\'da obuna','sc.b5':'✈️ Telegram kanalimiz',
-'sc.1h':'Nimani ko\'rsatishni siz tanlaysiz','sc.1p':'Faqat Google? Marhamat. Barcha oltitasi? Ham mumkin. Har bir tugma har bir filial uchun alohida yoqiladi.',
-'sc.2h':'Ekranda sizning logotipingiz','sc.2p':'Mehmon aynan sizning muassasangiz logotipi va nomini ko\'radi — nomsiz sahifani emas.',
-'vs.eye':'Texnologiya',
-'vs.h':'Nega NFC oddiy QR\'dan tezroq',
-'vs.lead':'BirTapCard ikkala usulni ham qo\'llab-quvvatlaydi — lekin «bir zumda» degan tuyg\'uni aynan NFC beradi.',
-'vs.badge':'Tezroq',
-'vs.n1':'Bir teginish — kamerani qaratish va fokus tutish shart emas',
-'vs.n2':'Sharh sahifasi 1–2 soniyada ochiladi',
-'vs.n3':'Premium, «aqlli» harakat sifatida his qilinadi',
-'vs.q1':'NFC chipisiz telefonda ham ishlaydi',
-'vs.q2':'Kamera, yorug\'lik va qaratish kerak — 3–5 soniya ko\'proq vaqt oladi',
-'vs.q3':'Hammaga tanish va tushunarli usul',
-
-'pl.eye':'Shaxsiy kabinet',
-'pl.h':'Kartochka — bu faqat boshlanishi. Asosiy mahsulot — <em>platforma</em>.',
-'pl.lead':'Biznes egasi kabinet oladi: skanerlashlar, konversiya, filiallar — real vaqtda, telefondan.',
-'pl.dash':'Tahlil · barcha filiallar',
-'pl.upd':'hozir yangilandi',
-'pl.k1':'NFC skanlar','pl.k2':'QR skanlar','pl.k3':'Noyob mehmon','pl.k3s':'jonli mehmonlar',
-'pl.k4':'Konversiya','pl.k4s':'Google\'ga o\'tdi','pl.week':'hafta ichida',
-'pl.ch':'Kunlar bo\'yicha skanerlashlar','pl.ch7':'7 kun','pl.top':'Filiallar yetakchilari',
-
-'ow.eye':'Biznes egasi nima oladi',
-'ow.h':'Oddiy plastik emas, <em>obro\' o\'stirish quroli</em>',
-'ow.1h':'Real vaqtdagi statistika','ow.1p':'Har bir teginish va skan kabinetda darhol ko\'rinadi',
-'ow.2h':'Davrlar bo\'yicha tahlil','ow.2p':'Kun, hafta, oy yoki o\'zingiz tanlagan istalgan oraliq',
-'ow.3h':'Filiallarni taqqoslash','ow.3p':'Qaysi nuqta ko\'proq sharh keltirishi ko\'rinib turadi',
-'ow.4h':'Har kuni ertalab Telegram hisoboti','ow.4p':'Skanlar, noyob mehmonlar, konversiya va eng yaxshi filial — soat 8:00 da',
-'ow.5h':'Mehmonlar qayerga o\'tadi','ow.5p':'Nechta Google\'ni, nechta Yandex\'ni bosdi, nechtasi Instagram\'ga obuna bo\'ldi — har bir tugma bo\'yicha',
-'ow.6h':'Android uchun ilova','ow.6p':'Kabinet cho\'ntagingizda — ekranda ikonka, kirish saqlanadi, hammasi ilovadagidek',
-'ow.7h':'NFC va QR alohida','ow.7p':'Mehmonlar qaysi usuldan ko\'proq foydalanishi aniq ko\'rinadi',
-'ow.8h':'Doimiy yangilanishlar','ow.8p':'Platforma o\'sadi — yangi imkoniyatlar uchun qo\'shimcha to\'lov yo\'q',
-
-'mt.eye':'Ko\'rsatkichlar','mt.h':'Nimalarni kuzatish mumkin',
-'mt.1':'Skanerlashlar','mt.2':'Konversiya','mt.3':'Noyob mehmonlar','mt.4':'Faol soatlar',
-'mt.5':'Hafta kunlari','mt.6':'Eng yaxshi filial','mt.7':'Mehmon qurilmalari','mt.8':'Tillar',
-'mt.9':'Kunlik dinamika','mt.10':'CSV\'ga yuklash','mt.11':'Tugmalar bo\'yicha o\'tishlar',
-
-'cm.eye':'Taqqoslash','cm.h':'Oddiy <em>QR-stikerdan</em> nimasi bilan ustun','cm.old':'Oddiy QR',
-'cm.r1':'O\'qish usuli','cm.r1a':'faqat QR','cm.r1b':'NFC + QR',
-'cm.r2':'Tezlik','cm.r3':'Skanerlash tahlili','cm.r3b':'bor, real vaqtda',
-'cm.no':'yo\'q','cm.yes':'bor','cm.r4':'Filiallarni taqqoslash',
-'cm.r5':'Kassadagi ko\'rinishi','cm.r5a':'qog\'oz stiker','cm.r5b':'premium kartochka',
-'cm.r6':'Chidamlilik','cm.r6a':'rangi o\'chadi, yirtiladi','cm.r6b':'mustahkam korpus',
-
-'wh.eye':'Kimlar uchun','wh.h':'Kassasi va mamnun mehmonlari bor har qanday biznesga mos keladi',
-'wh.1':'Restoranlar','wh.2':'Kofexonalar','wh.3':'Kalyanxonalar','wh.4':'Mehmonxonalar',
-'wh.5':'Go\'zallik salonlari','wh.6':'Avtoservislar','wh.7':'Do\'konlar','wh.8':'Tarmoq va franshizalar',
-
-'pz.eye':'Tariflar',
-'pz.h':'Uchta tarif. <em>Bir yil.</em> Yashirin to\'lovlarsiz',
-'pz.lead':'Har bir tarifda — NFC + QR kartochka, joyida o\'rnatish, uch tilda logotipingiz bilan ekran va shaxsiy kabinet. Farq — nechta aloqa nuqtasi olishingizda va nima bo\'layotganini qanchalik chuqur ko\'rishingizda.',
-'pz.peryear':'so\'m / yil',
-'t1.name':'Start',
-'t1.for':'Bitta nuqta. Sharh yig\'ishni shu haftadayoq boshlash',
-'t1.mo':'≈ oyiga 50 000 so\'m — kuniga 1 650 so\'m',
-'t1.1':'<b>1 ta kartochka</b> NFC + QR, joyida o\'rnatish',
-'t1.2':'<b>Tanlov uchun 3 ta tugma</b> — masalan Google, Instagram, Telegram',
-'t1.3':'<b>Logotipingiz bilan ekran</b>, o\'zbek / rus / ingliz',
-'t1.4':'<b>Kabinet</b>: oxirgi 30 kundagi tegizishlar va har bir tugma bo\'yicha bosishlar, real vaqtda',
-'t1.5':'Kartochkani almashtirish — yiliga 1 marta bepul',
-'t1.6':'Telegram\'da qo\'llab-quvvatlash, bir sutka ichida javob',
-'t1.foot':'Ikki to\'lovga bo\'lish mumkin: hozir 300 000 + 6 oydan keyin 300 000',
-'t2.badge':'Eng ko\'p tanlanadi',
-'t2.name':'Biznes',
-'t2.for':'Obro\'siga umid qilmay, uni boshqaradigan muassasa',
-'t2.mo':'≈ oyiga 75 000 so\'m — bitta o\'rtacha chek',
-'t2.plus':'«Start»dagi hamma narsa, qo\'shimcha:',
-'t2.1':'<b>2 ta kartochka</b> — kassa + stollar, resepshn + bar. Ikkinchi aloqa nuqtasi 1,5–2 barobar ko\'p tegizish beradi',
-'t2.2':'<b>Barcha tugmalar cheklovsiz</b>: Google, Yandex, 2GIS, Instagram, Telegram, bot, sayt, menyu, Wi-Fi',
-'t2.3':'<b>To\'liq analitika</b>: istalgan davr, kun va soatlar bo\'yicha, kartochkalarni taqqoslash, Excel\'ga yuklash',
-'t2.4':'Kabinetda <b>haqiqiy Google sharhlari va reytingi</b> — o\'tishlar emas, e\'lon qilingan sharhlar',
-'t2.5':'Har kuni ertalab 9:00 da <b>Telegram\'da hisobot</b>',
-'t2.6':'Muassasa ranglarida, logotipingiz bilan kartochka',
-'t2.7':'Kartochkani almashtirish — yiliga 2 marta bepul',
-'t2.8':'Ustuvor qo\'llab-quvvatlash — ish vaqtida 2 soat ichida javob',
-'t3.badge':'Maksimum',
-'t3.name':'Pro',
-'t3.for':'Bir nechta filiali bor muassasalar va mijoz kanallarini ma\'lumotlar asosida boshqarmoqchi bo\'lgan biznes uchun',
-'t3.mo':'≈ oyiga 100 000 so\'m — bitta qaytgan mehmon qoplaydi',
-'t3.plus':'«Biznes»dagi hamma narsa, qo\'shimcha:',
-'t3.1':'<b>4 tagacha kartochka</b> — bir nechta nuqta yoki ikkita filial bitta kabinetda',
-'t3.3':'Firma uslubingizda kartochka va ekranning <b>individual dizayni</b>',
-'t3.4':'<b>Har bir yangi Google sharhi</b> va reyting tushishi haqida Telegram\'da xabar',
-'t3.5':'<b>«Egasiga yozish» tugmasi</b> — norozi mehmon to\'g\'ridan-to\'g\'ri sizga yozadi, u ketmasdan masalani hal qilasiz',
-'t3.6':'Kabinetda <b>5 tagacha xodim</b>: direktor, boshqaruvchi, marketolog',
-'t3.7':'Biz bilan birga <b>har chorakda statistika tahlili</b>: nima ishlayapti, nimani o\'zgartirish kerak',
-'t3.8':'Kartochkalarni almashtirish — cheklovsiz. Yangi funksiyalar — birinchi bo\'lib',
-'t3.9':'Telegram\'da shaxsiy menejer, bir soat ichida javob',
-'t3.foot':'3 va undan ko\'p filialli tarmoq — birinchisiga Pro, har keyingisiga −20%',
-'yb.h':'Pro uchun qo\'shimcha',
-'yb.price':'+ $50 bir martalik — Yandex Biznesni sozlash',
-'yb.lead':'Biz yordam beramiz:',
-'yb.1':'tashkilot kartochkasini yaratish / sozlash;',
-'yb.2':'muassasa haqidagi ma\'lumotni to\'g\'ri to\'ldirish;',
-'yb.3':'xizmatlar, kontaktlar va fotolarni qo\'shish;',
-'yb.4':'asosiy mavjudlik elementlarini sozlash;',
-'yb.5':'qo\'shimcha organik trafik jalb qilish uchun profilni tartibga keltirish.',
-'yb.note':'Yandex Biznes tarif narxiga kirmaydi va alohida to\'lanadi.',
-'ad.h':'Istalgan tarifga qo\'shimcha',
-'ad.2':'Google Business profilini optimallashtirish: kategoriyalar, foto, tavsif, postlar',
-'ad.3':'Tarifdan tashqari qo\'shimcha kartochka',
-'ad.3p':'150 000 so\'m / yil',
-'pz.lockh':'Narx siz uchun qat\'iy qoladi.',
-'pz.lockp':' Platforma o\'sadi, imkoniyatlar ko\'payadi — lekin hozir ulanganlar uchun obuna narxi na bir yildan keyin, na uch yildan keyin o\'zgaradi. Keyin qo\'shadigan hamma narsani qo\'shimcha to\'lovsiz olasiz. Yangi muassasalar uchun narx keyinroq yuqori bo\'ladi — lekin siz uchun emas.',
-'pz.uph':'Yuqori tarifga o\'tish — istalgan paytda.',
-'pz.upp':' «Start»dan boshladingiz, ikki oydan keyin Yandex va 2GIS kerakligini tushundingiz — faqat qolgan oylar uchun farqni to\'laysiz. Hech narsa kuymaydi.',
-'pz.grh':'Tekshirish uchun 14 kun.',
-'pz.grp':' Agar ikki hafta ichida kartochka birorta ham tegizish keltirmasa — uni olib ketamiz va pulni qaytaramiz. Bir yil davomida bunday bo\'lmagan.',
-'pz.offh':'Agar obuna uzaytirilmasa.',
-'pz.offp':' Yo\'naltirish va kabinet ishlamay qoladi, kartochka sizda qoladi. Istalgan paytda qayta tiklash mumkin — sizning qat\'iylashtirilgan narxingizda.',
-'pz.term':'Tasdiqlangandan keyin 1–2 kun ichida ulaymiz',
-'cta.price':'Muassasani ulash',
-'fq.eye':'Ko\'p beriladigan savollar','fq.h':'Eng muhimi haqida qisqacha',
-'fq.1q':'Mehmonga ilova yoki internet kerakmi?',
-'fq.1a':'Ilova — yo\'q. Faqat NFC yoki kamerasi bor telefon kerak. Google sahifasi ochilishi uchun internet kerak — u hammada bor.',
-'fq.2q':'Bir nechta filialim bo\'lsa-chi?',
-'fq.2a':'Har bir filial o\'z kartochkasi va o\'z havolasini oladi. Kabinetda umumiy manzara ham, nuqtalarni taqqoslash ham ko\'rinadi.',
-'fq.3q':'Qurilmaga quvvat yoki zaryad kerakmi?',
-'fq.3a':'Yo\'q. NFC-yorliq to\'liq passiv — unga quvvat kerak emas, xohlagancha uzoq ishlaydi.',
-'fq.4q':'Hammasi qancha vaqtda ishga tushadi?',
-'fq.4a':'Odatda bir kunda: kartochkani Google Business profilingizga bog\'laymiz, kabinetni sozlaymiz va sizga kirish huquqini beramiz.',
-'fq.5q':'Mehmon yomon sharh qoldirmoqchi bo\'lsa-chi?',
-'fq.5a':'Kartochka mamnun bo\'lgan mehmonga ko\'rsatiladi — bu kassir yoki ofitsiantning ishi. Vosita mavjud narsani kuchaytiradi: mamnun mehmonlarni.',
-'fq.6q':'Kartochkani kim o\'rnatadi?',
-'fq.6a':'Biz. Olib kelamiz, kassaga o\'rnatamiz, kabinetni ulaymiz va xodimlarga uni mehmonlarga qanday taklif qilishni ko\'rsatamiz.',
-
-'fin.h':'Har bir mamnun mehmon <em>yangi sharhga</em> aylanishi mumkin',
-'fin.p':'Faqat bu qadamni imkon qadar oson qilish kerak. Biz buni allaqachon qildik — endi kartochkani sizning kassangizga qo\'yish qoldi.',
-'cta.main2':'Telegram\'ga yozish','cta.sticky':'Muassasani ulash →',
-'ct.phone':'Telefon','ct.site':'Shaxsiy kabinet','ct.n1':'Alim Ibragimov','hero.s1u':'son','cm.r2a':'4–6 son','cm.r2b':'1–2 son',
-'ct.f1':'Asoschi · Samarqand · qurilmalarni olib kelib o\'rnatadi',
-'ct.f2n':'Hammuassis',
-'ct.f2':'Toshkent · muassasalarni ulash va tarmoqlar bilan ishlash',
-'ct.insta':'Loyihaning rasmiy Instagram\'i — har kuni qurilma qaysi muassasalarga o\'rnatilishini ko\'rsatamiz',
-'foot':'Obro\' o\'sishi uchun NFC + QR · Samarqand · Toshkent'
+"brand.sub": "Reputatsiya qurilmasi",
+"tab.product": "Mahsulot",
+"tab.price": "Tariflar",
+"tab.order": "Buyurtma",
+"tab.support": "Qo'llab-quvvatlash",
+"h2.pill": "Bir tegizish — sharh, obunachi, mijoz",
+"h2.h1": "Google, Yandex va 2GIS'da sharhlar — <em>bir tegizishda</em>",
+"h2.sub": "Kassada NFC + QR kartochka. Mehmon telefonini tegizdi — sharh qoldirdi, Instagram yoki Telegram'ga obuna bo'ldi. Har bir tegizishni kabinetda ko'rasiz.",
+"hero.tag": "Kassada turadi",
+"hero.s1u": "son",
+"hero.s1": "teginishdan sharhgacha",
+"hero.s2": "o'rnatiladigan ilova",
+"h2.s3": "muassasa allaqachon ishlayapti",
+"cta.order": "Buyurtma berish",
+"w.eye": "Nima uchun",
+"w.h": "Mamnun mehmonlar jim turadi. <em>Norozilar — yozadi.</em>",
+"w.lead": "Sharhgacha — besh qadam va «keyin» so'zi. Kartochka ikkalasini ham olib tashlaydi: mehmon hali stolda ekan, sharh qoldiradi.",
+"ps.1": "odam muassasa tanlashdan oldin sharhlarni o'qiydi",
+"ps.2": "reyting bir yulduzga oshsa, daromad shuncha ortadi",
+"ps.3": "yomon yoki eskirgan sharhli bizneslardan chetlanadi",
+"ps.4": "mamnun mijozlar norozilarga qaraganda ancha kam yozadi",
+"hw.eye": "Qanday ishlaydi",
+"hw.h": "To'rt qadam. <em>15 soniya.</em>",
+"sol.1h": "Mehmon buyurtmani to'ladi",
+"sol.1p": "Kassir: «Agar hammasi yoqqan bo'lsa — bizga sharh qoldiring»",
+"sol.2h": "Telefonni NFC'ga tegizadi yoki QR'ni skanerlaydi",
+"sol.2p": "Ilova ham, ro'yxatdan o'tish ham kerak emas",
+"t.2": "+2 soniya",
+"hw.3h": "Muassasangiz ekrani ochildi",
+"hw.3p": "Google · Yandex · 2GIS · Instagram · Telegram — mehmon tanlaydi",
+"t.3": "+3 soniya",
+"hw.4h": "Sharh e'lon qilindi",
+"hw.4p": "Tegizish allaqachon kabinetingizda ko'rinadi",
+"t.4": "+10 soniya",
+"sc.eye": "Skandan keyingi ekran",
+"sc.h": "Bitta kartochka — sizni qidiradigan <em>barcha maydonchalar</em>",
+"sc.p1": "Bizda yoqdimi?",
+"sc.p2": "Muassasa nomi",
+"sc.b1": "⭐ Google'da sharh qoldirish",
+"sc.b2": "📍 Yandex Xaritalarda sharh",
+"sc.b3": "📍 2GIS'da sharh",
+"sc.or": "va yana",
+"sc.b4": "📸 Instagram'da obuna",
+"sc.b5": "✈️ Telegram kanalimiz",
+"sc2.1h": "Tugmalarni siz tanlaysiz",
+"sc2.1p": "Google, Yandex, 2GIS, Instagram, Telegram, bot, sayt, menyu, Wi-Fi — har bir filial uchun alohida, kabinetdan bir daqiqada o'zgaradi",
+"sc.2h": "Ekranda sizning logotipingiz",
+"sc2.2p": "Mehmon begona brendni emas, sizning muassasangizni ko'radi",
+"sc2.3h": "Uch til avtomatik",
+"sc2.3p": "O'zbek, rus, ingliz — mehmon telefonining tiliga qarab",
+"dev.eye": "Qurilma",
+"dv.h": "NFC + QR bitta kartochkada. <em>Quvvatsiz, internetsiz.</em>",
+"cm.r1": "O'qish usuli",
+"cm.old": "Oddiy QR",
+"cm.r1a": "faqat QR",
+"cm.r1b": "NFC + QR",
+"cm.r2": "Tezlik",
+"cm.r2a": "4–6 son",
+"cm.r2b": "1–2 son",
+"cm2.r3": "Ma'lumotlar",
+"cm2.r3a": "nol",
+"cm2.r3b": "har bir tegizish kabinetda",
+"cm.r6": "Chidamlilik",
+"cm.r6a": "rangi o'chadi, yirtiladi",
+"cm2.r6b": "plastik, muassasa ranglarida dizayn",
+"pl.eye": "Shaxsiy kabinet",
+"pl2.h": "Har bir tegizish — <em>kabinetdagi raqam</em>",
+"pl.dash": "Tahlil · barcha filiallar",
+"pl.upd": "hozir yangilandi",
+"pl2.k1": "Tegizishlar",
+"pl.week": "hafta ichida",
+"pl2.k2": "Google'ga o'tishlar",
+"pl2.k3": "Yangi Google sharhlari",
+"pl2.k3s": "haqiqiy, klik emas",
+"pl2.k4": "Obunalar",
+"pl2.k4s": "Instagram + Telegram",
+"pl2.ch": "Kunlar bo'yicha tegizishlar",
+"pl.ch7": "7 kun",
+"pl.top": "Filiallar yetakchilari",
+"ow.1h": "Real vaqtdagi statistika",
+"ow2.1p": "Tegizishlar, har bir tugma bo'yicha o'tishlar, NFC QR'dan alohida",
+"ow2.2h": "Haqiqiy Google sharhlari",
+"ow2.2p": "Kabinet Google bilan solishtiradi va e'lon qilingan sharhlar hamda reytingni sanaydi — o'tishlarni emas",
+"ow2.3h": "Istalgan davr va barcha filiallar",
+"ow2.3p": "Kun, hafta, oy, o'z oralig'ingiz. Nuqtalar bitta kabinetda o'zaro taqqoslanadi",
+"ow.4h": "Har kuni ertalab Telegram hisoboti",
+"ow2.4p": "Tegizishlar, sharhlar, eng yaxshi filial — egasining chatiga",
+"ow2.5h": "Android ilovasi va veb",
+"ow2.5p": "Kabinet telefonda. CSV / Excel'ga yuklash",
+"ow.8h": "Doimiy yangilanishlar",
+"ow2.8p": "Menyu, choychaqa, Wi-Fi, sharhlarga javoblar — yangilari obunaga kiradi",
+"wh.eye": "Kimlar uchun",
+"wh2.h": "Mijoz va mamnun <em>«rahmat»</em> bor har bir joyda",
+"wh.1": "Restoranlar",
+"wh.2": "Kofexonalar",
+"wh2.3": "Xususiy maktablar",
+"wh2.4": "Klinikalar",
+"wh2.5": "Universitetlar",
+"wh.4": "Mehmonxonalar",
+"wh.5": "Go'zallik salonlari",
+"wh.8": "Tarmoq va franshizalar",
+"cta.seeprice": "Tariflarni ko'rish",
+"pz.eye": "Tariflar",
+"pz.h": "Uchta tarif. <em>Bir yil.</em> Yashirin to'lovlarsiz",
+"pz.lead": "Har bir tarifda — NFC + QR kartochka, joyida o'rnatish, uch tilda logotipingiz bilan ekran va shaxsiy kabinet. Farq — nechta aloqa nuqtasi olishingizda va nima bo'layotganini qanchalik chuqur ko'rishingizda.",
+"t1.name": "Start",
+"t1.for": "Bitta nuqta. Sharh yig'ishni shu haftadayoq boshlash",
+"pz.peryear": "so'm / yil",
+"t1.mo": "≈ oyiga 50 000 so'm — kuniga 1 650 so'm",
+"t1.1": "<b>1 ta kartochka</b> NFC + QR, joyida o'rnatish",
+"t1.2": "<b>Tanlov uchun 3 ta tugma</b> — masalan Google, Instagram, Telegram",
+"t1.3": "<b>Logotipingiz bilan ekran</b>, o'zbek / rus / ingliz",
+"t1.4": "<b>Kabinet</b>: oxirgi 30 kundagi tegizishlar va har bir tugma bo'yicha bosishlar, real vaqtda",
+"t1.5": "Kartochkani almashtirish — yiliga 1 marta bepul",
+"t1.6": "Telegram'da qo'llab-quvvatlash, bir sutka ichida javob",
+"t1.foot": "Ikki to'lovga bo'lish mumkin: hozir 300 000 + 6 oydan keyin 300 000",
+"t2.badge": "Eng ko'p tanlanadi",
+"t2.name": "Biznes",
+"t2.for": "Obro'siga umid qilmay, uni boshqaradigan muassasa",
+"t2.mo": "≈ oyiga 75 000 so'm — bitta o'rtacha chek",
+"t2.plus": "«Start»dagi hamma narsa, qo'shimcha:",
+"t2.1": "<b>2 ta kartochka</b> — kassa + stollar, resepshn + bar. Ikkinchi aloqa nuqtasi 1,5–2 barobar ko'p tegizish beradi",
+"t2.2": "<b>Barcha tugmalar cheklovsiz</b>: Google, Yandex, 2GIS, Instagram, Telegram, bot, sayt, menyu, Wi-Fi",
+"t2.3": "<b>To'liq analitika</b>: istalgan davr, kun va soatlar bo'yicha, kartochkalarni taqqoslash, Excel'ga yuklash",
+"t2.4": "Kabinetda <b>haqiqiy Google sharhlari va reytingi</b> — o'tishlar emas, e'lon qilingan sharhlar",
+"t2.5": "Har kuni ertalab 9:00 da <b>Telegram'da hisobot</b>",
+"t2.6": "Muassasa ranglarida, logotipingiz bilan kartochka",
+"t2.7": "Kartochkani almashtirish — yiliga 2 marta bepul",
+"t2.8": "Ustuvor qo'llab-quvvatlash — ish vaqtida 2 soat ichida javob",
+"t3.badge": "Maksimum",
+"t3.name": "Pro",
+"t3.for": "Bir nechta filiali bor muassasalar va mijoz kanallarini ma'lumotlar asosida boshqarmoqchi bo'lgan biznes uchun",
+"t3.mo": "≈ oyiga 100 000 so'm — bitta qaytgan mehmon qoplaydi",
+"t3.plus": "«Biznes»dagi hamma narsa, qo'shimcha:",
+"t3.1": "<b>4 tagacha kartochka</b> — bir nechta nuqta yoki ikkita filial bitta kabinetda",
+"t3.3": "Firma uslubingizda kartochka va ekranning <b>individual dizayni</b>",
+"t3.4": "<b>Har bir yangi Google sharhi</b> va reyting tushishi haqida Telegram'da xabar",
+"t3.5": "<b>«Egasiga yozish» tugmasi</b> — norozi mehmon to'g'ridan-to'g'ri sizga yozadi, u ketmasdan masalani hal qilasiz",
+"t3.6": "Kabinetda <b>5 tagacha xodim</b>: direktor, boshqaruvchi, marketolog",
+"t3.7": "Biz bilan birga <b>har chorakda statistika tahlili</b>: nima ishlayapti, nimani o'zgartirish kerak",
+"t3.8": "Kartochkalarni almashtirish — cheklovsiz. Yangi funksiyalar — birinchi bo'lib",
+"t3.9": "Telegram'da shaxsiy menejer, bir soat ichida javob",
+"t3.foot": "3 va undan ko'p filialli tarmoq — birinchisiga Pro, har keyingisiga −20%",
+"yb.h": "Pro uchun qo'shimcha",
+"yb.price": "+ $50 bir martalik — Yandex Biznesni sozlash",
+"yb.lead": "Biz yordam beramiz:",
+"yb.1": "tashkilot kartochkasini yaratish / sozlash;",
+"yb.2": "muassasa haqidagi ma'lumotni to'g'ri to'ldirish;",
+"yb.3": "xizmatlar, kontaktlar va fotolarni qo'shish;",
+"yb.4": "asosiy mavjudlik elementlarini sozlash;",
+"yb.5": "qo'shimcha organik trafik jalb qilish uchun profilni tartibga keltirish.",
+"yb.note": "Yandex Biznes tarif narxiga kirmaydi va alohida to'lanadi.",
+"ad.h": "Istalgan tarifga qo'shimcha",
+"ad.2": "Google Business profilini optimallashtirish: kategoriyalar, foto, tavsif, postlar",
+"ad.3": "Tarifdan tashqari qo'shimcha kartochka",
+"ad.3p": "150 000 so'm / yil",
+"pz.lockh": "Narx siz uchun qat'iy qoladi.",
+"pz.lockp": " Platforma o'sadi, imkoniyatlar ko'payadi — lekin hozir ulanganlar uchun obuna narxi na bir yildan keyin, na uch yildan keyin o'zgaradi. Keyin qo'shadigan hamma narsani qo'shimcha to'lovsiz olasiz. Yangi muassasalar uchun narx keyinroq yuqori bo'ladi — lekin siz uchun emas.",
+"pz.uph": "Yuqori tarifga o'tish — istalgan paytda.",
+"pz.upp": " «Start»dan boshladingiz, ikki oydan keyin Yandex va 2GIS kerakligini tushundingiz — faqat qolgan oylar uchun farqni to'laysiz. Hech narsa kuymaydi.",
+"pz.grh": "Tekshirish uchun 14 kun.",
+"pz.grp": " Agar ikki hafta ichida kartochka birorta ham tegizish keltirmasa — uni olib ketamiz va pulni qaytaramiz. Bir yil davomida bunday bo'lmagan.",
+"pz.offh": "Agar obuna uzaytirilmasa.",
+"pz.offp": " Yo'naltirish va kabinet ishlamay qoladi, kartochka sizda qoladi. Istalgan paytda qayta tiklash mumkin — sizning qat'iylashtirilgan narxingizda.",
+"pz.term": "Tasdiqlangandan keyin 1–2 kun ichida ulaymiz",
+"cta.price": "Muassasani ulash",
+"or.h": "Muassasani ulash",
+"or.lead": "Yozing yoki qo'ng'iroq qiling. Tarifni tasdiqlaymiz — va 1–2 kun ichida olib kelamiz, kartochkani o'rnatamiz va kabinetni sozlaymiz.",
+"or.tg": "Telegram",
+"or.tgs": "Tez javob beramiz, odatda bir soat ichida",
+"or.ph": "Telefon",
+"or.phs": "Qo'ng'iroq yoki shu raqamga Telegram'da xabar",
+"or.1h": "Bizga yozing",
+"or.1p": "Muassasa nomi, shahar, nechta nuqta, qaysi tarif",
+"or.2h": "Uchta narsani yuboring",
+"or.2p": "Google'dagi profil havolasi (va Yandex / 2GIS), logotip, Instagram va Telegram",
+"or.3h": "Olib kelamiz va o'rnatamiz",
+"or.3p": "Kabinetni sozlaymiz, kirishni beramiz, xodimlarga kartochkani qanday taklif qilishni ko'rsatamiz",
+"or.3t": "1–2 kun",
+"or.payh": "To'lov bir yilga.",
+"or.payp": " Start'ni ikki to'lovga bo'lish mumkin. Narx siz uchun qat'iy qoladi, tarifni istalgan paytda farqni to'lab oshirish mumkin.",
+"su.h": "Biz aloqadamiz",
+"su.lead": "Kabinet, kartochka yoki statistika bo'yicha savollar — to'g'ridan-to'g'ri yozing. Tiketlar va kol-markazlarsiz.",
+"su.mail": "Pochta",
+"ct.site": "Shaxsiy kabinet",
+"su.insta": "BirTapCard allaqachon turgan muassasalar",
+"fq.eye": "Ko'p beriladigan savollar",
+"fq.1q": "Mehmonga ilova yoki internet kerakmi?",
+"fq.1a": "Ilova — yo'q. Faqat NFC yoki kamerasi bor telefon kerak. Google sahifasi ochilishi uchun internet kerak — u hammada bor.",
+"fq.2q": "Bir nechta filialim bo'lsa-chi?",
+"fq.2a": "Har bir filial o'z kartochkasi va o'z havolasini oladi. Kabinetda umumiy manzara ham, nuqtalarni taqqoslash ham ko'rinadi.",
+"fq.3q": "Qurilmaga quvvat yoki zaryad kerakmi?",
+"fq.3a": "Yo'q. NFC-yorliq to'liq passiv — unga quvvat kerak emas, xohlagancha uzoq ishlaydi.",
+"fq.5q": "Mehmon yomon sharh qoldirmoqchi bo'lsa-chi?",
+"fq.5a": "Kartochka mamnun bo'lgan mehmonga ko'rsatiladi — bu kassir yoki ofitsiantning ishi. Vosita mavjud narsani kuchaytiradi: mamnun mehmonlarni.",
+"fq.6q": "Kartochkani kim o'rnatadi?",
+"fq.6a": "Biz. Olib kelamiz, kassaga o'rnatamiz, kabinetni ulaymiz va xodimlarga uni mehmonlarga qanday taklif qilishni ko'rsatamiz.",
+"fq2.7q": "Kartochka buzildi yoki yo'qoldi",
+"fq2.7a": "Telegram'ga yozing — almashtiramiz. Start'da yiliga 1 marta bepul, Biznes'da 2 marta, Pro'da cheklovsiz.",
+"fq2.8q": "Ekrandagi tugmalar yoki logotipni qanday o'zgartirish mumkin?",
+"fq2.8a": "Kabinetda: «Filiallar» bo'limi → kerakli nuqta → tugmalarni yoqing va logotipni yuklang. Darhol o'zgaradi, kartochkani qayta chop etish shart emas.",
+"foot": "Obro' o'sishi uchun NFC + QR · Samarqand · Toshkent",
+"cta.sticky2": "Buyurtma berish →"
 };
 const EN = {
-  "brand.sub": "Reputation device",
-  "hero.pill": "One tap — one review",
-  "hero.h1": "Google reviews just got <em>easier</em>",
-  "hero.sub": "15 seconds — and a happy guest leaves a review. No apps, no explaining. One tap of the phone.",
-  "hero.tag": "Sits at the counter",
-  "hero.s1": "from tap to review",
-  "hero.s2": "apps to install",
-  "hero.s3": "analytics in your dashboard",
-  "cta.main": "Get BirTapCard",
-  "cta.how": "How it works",
-  "trust.t": "venues in Samarkand already run BirTapCard <small data-i=\"trust.s\">and the first restaurants in Tashkent are being connected</small>",
-  "trust.s": "and the first restaurants in Tashkent are being connected",
-  "pr.eye": "The problem",
-  "pr.h": "Happy guests <em>don't leave reviews</em>. Not because they don't want to.",
-  "pr.lead": "Between “loved it” and an actual Google review stand four barriers. Each one costs you reputation.",
-  "pr.1h": "They forget instantly",
-  "pr.1p": "The guest walks out the door — and the thought of a review leaves with them. Intent lives for seconds.",
-  "pr.2h": "Too many steps",
-  "pr.2p": "Open Maps, find the venue, find the “reviews” button — five or six actions kill the desire.",
-  "pr.3h": "Nobody asked",
-  "pr.3p": "Without a clear, well-timed nudge the review simply never happens.",
-  "pr.4h": "Technical friction",
-  "pr.4p": "A dead battery, bad light for a QR code, an awkward camera — and the guest puts it off “for later”.",
-  "ps.eye": "The cost of silence",
-  "ps.h": "What missing reviews <em>cost a business</em>",
-  "ps.lead": "Your Google rating is the first thing a new guest sees. A gap in reviews becomes a gap in revenue.",
-  "ps.1": "of people read reviews before choosing a venue",
-  "ps.2": "more revenue from a one-star rating increase",
-  "ps.3": "avoid businesses with poor or outdated reviews",
-  "ps.4": "happy guests write reviews far less often than unhappy ones",
-  "ps.note": "Based on aggregated public marketing research on consumer behaviour and local business reputation.",
-  "sol.eye": "The solution",
-  "sol.h": "BirTapCard removes the most expensive word in business — <em>“later”</em>",
-  "sol.lead": "The card sits at the counter. The guest leaves a review in seconds — while the emotion is still fresh.",
-  "sol.1h": "The guest pays the bill",
-  "sol.1p": "Cashier: “If you enjoyed it — leave us a review”",
-  "sol.2h": "Taps the phone on NFC or scans the QR",
-  "sol.2p": "No apps, no sign-up",
-  "sol.3h": "The Google review page opens",
-  "sol.3p": "For exactly the right venue and branch",
-  "sol.4h": "Review published, rating goes up",
-  "sol.4p": "Stars and a couple of words — that's all it takes",
-  "t.2": "+2 sec",
-  "t.3": "+3 sec",
-  "t.4": "+10 sec",
-  "dev.eye": "The device",
-  "dev.h": "One object at the counter. <em>Two ways in</em>. Zero friction.",
-  "dev.1h": "NFC tag",
-  "dev.1p": "Just bring the phone close — Android and iPhone open the review page on their own, no scanning.",
-  "dev.2h": "QR code",
-  "dev.2p": "The fallback for any phone — point the camera and you're there, even if NFC is off.",
-  "dev.3h": "Durable body",
-  "dev.3p": "A compact table card — not afraid of water, sun or daily use.",
-  "dev.4h": "No power needed",
-  "dev.4p": "No batteries, no internet, no charging. The tag is passive — it works for years.",
-  "sc.eye": "The screen after the scan",
-  "sc.h": "One card — <em>every platform</em> where guests look for you",
-  "sc.lead": "The guest taps the phone and sees everything at once: a review on Google, Yandex Maps, 2GIS — and a follow on your Instagram and Telegram. Once a review is left, that button dims and the others wait.",
-  "sc.p1": "Enjoyed your visit?",
-  "sc.p2": "Venue name",
-  "sc.b1": "⭐ Review on Google",
-  "sc.b2": "📍 Review on Yandex Maps",
-  "sc.b3": "📍 Review on 2GIS",
-  "sc.or": "and also",
-  "sc.b4": "📸 Follow on Instagram",
-  "sc.b5": "✈️ Our Telegram channel",
-  "sc.1h": "You choose what to show",
-  "sc.1p": "Only Google? Sure. All six? Also fine. Every button is switched on separately for every branch.",
-  "sc.2h": "Your logo on the screen",
-  "sc.2p": "The guest sees the logo and name of your venue — not a faceless page.",
-  "vs.eye": "Technology",
-  "vs.h": "Why NFC beats a plain QR code",
-  "vs.lead": "BirTapCard supports both — but NFC is what creates that “instant” feeling.",
-  "vs.badge": "Faster",
-  "vs.n1": "One tap — no aiming the camera, no waiting for focus",
-  "vs.n2": "The review page opens in 1–2 seconds",
-  "vs.n3": "Feels like a premium, “smart” gesture",
-  "vs.q1": "Works on any phone, even without an NFC chip",
-  "vs.q2": "Needs a camera, light and aiming — 3–5 seconds slower",
-  "vs.q3": "Familiar and understood by everyone",
-  "pl.eye": "Owner dashboard",
-  "pl.h": "The card is only the beginning. The real product is <em>the platform</em>.",
-  "pl.lead": "The owner gets a dashboard: scans, conversion, branches — in real time, from the phone.",
-  "pl.dash": "Analytics · all branches",
-  "pl.upd": "updated just now",
-  "pl.k1": "NFC scans",
-  "pl.week": "this week",
-  "pl.k2": "QR scans",
-  "pl.k3": "Unique",
-  "pl.k3s": "real guests",
-  "pl.k4": "Conversion",
-  "pl.k4s": "reached Google",
-  "pl.ch": "Scans by day",
-  "pl.ch7": "7 days",
-  "pl.top": "Top branches",
-  "ow.eye": "What the owner gets",
-  "ow.h": "A reputation-growth tool, not just <em>a piece of plastic</em>",
-  "ow.1h": "Real-time statistics",
-  "ow.1p": "Every tap and scan shows up in the dashboard immediately",
-  "ow.2h": "Analytics by period",
-  "ow.2p": "Day, week, month or any custom range",
-  "ow.3h": "Branch comparison",
-  "ow.3p": "See which location brings in more reviews",
-  "ow.4h": "Telegram report every morning",
-  "ow.4p": "Scans, unique guests, conversion and the best branch — at 8:00",
-  "ow.5h": "Where guests go",
-  "ow.5p": "How many tapped Google, how many Yandex, how many followed on Instagram — per button",
-  "ow.6h": "Android app",
-  "ow.6p": "The dashboard in your pocket — an icon on the home screen, you stay signed in, works like a native app",
-  "ow.7h": "NFC vs QR split",
-  "ow.7p": "See which method guests use more often",
-  "ow.8h": "Constant updates",
-  "ow.8p": "The platform keeps growing — new features at no extra cost for the card",
-  "mt.eye": "Metrics",
-  "mt.h": "What you can track",
-  "mt.1": "Scans",
-  "mt.2": "Conversion",
-  "mt.3": "Unique guests",
-  "mt.4": "Peak hours",
-  "mt.5": "Days of the week",
-  "mt.6": "Best branch",
-  "mt.7": "Guest devices",
-  "mt.8": "Languages",
-  "mt.9": "Daily trend",
-  "mt.10": "CSV export",
-  "mt.11": "Button clicks",
-  "cm.eye": "Comparison",
-  "cm.h": "How it beats a plain <em>QR sticker</em>",
-  "cm.old": "Plain QR",
-  "cm.r1": "How it's read",
-  "cm.r1a": "QR only",
-  "cm.r1b": "NFC + QR",
-  "cm.r2": "Speed",
-  "cm.r3": "Scan analytics",
-  "cm.r3b": "yes, in real time",
-  "cm.no": "no",
-  "cm.yes": "yes",
-  "cm.r4": "Branch comparison",
-  "cm.r5": "Look at the counter",
-  "cm.r5a": "paper sticker",
-  "cm.r5b": "premium card",
-  "cm.r6": "Durability",
-  "cm.r6a": "fades, tears",
-  "cm.r6b": "durable body",
-  "wh.eye": "Who it's for",
-  "wh.h": "Any business with a counter and happy guests",
-  "wh.1": "Restaurants",
-  "wh.2": "Coffee shops",
-  "wh.3": "Hookah lounges",
-  "wh.4": "Hotels",
-  "wh.5": "Beauty salons",
-  "wh.6": "Car services",
-  "wh.7": "Shops",
-  "wh.8": "Chains & franchises",
-    "pz.eye": "Pricing",
-  "pz.h": "Three plans. <em>One year.</em> No hidden fees",
-  "pz.lead": "Every plan includes the NFC + QR card, on-site installation, a three-language screen with your logo and the owner dashboard. The difference is how many touchpoints you get and how deeply you see what's going on.",
-  "pz.peryear": "UZS / year",
-  "t1.name": "Start",
-  "t1.for": "One location. Start collecting reviews this week",
-  "t1.mo": "≈ 50,000 UZS a month — 1,650 UZS a day",
-  "t1.1": "<b>1 card</b> NFC + QR, installed on site",
-  "t1.2": "<b>3 buttons of your choice</b> — e.g. Google, Instagram, Telegram",
-  "t1.3": "<b>Screen with your logo</b>, Uzbek / Russian / English",
-  "t1.4": "<b>Dashboard</b>: taps and clicks per button for the last 30 days, in real time",
-  "t1.5": "Card replacement — once a year, free",
-  "t1.6": "Telegram support, reply within 24 hours",
-  "t1.foot": "Can be split in two: 300,000 now + 300,000 in 6 months",
-  "t2.badge": "Most popular",
-  "t2.name": "Business",
-  "t2.for": "A venue that manages its reputation instead of hoping for it",
-  "t2.mo": "≈ 75,000 UZS a month — one average bill",
-  "t2.plus": "Everything in Start, plus:",
-  "t2.1": "<b>2 cards</b> — till + tables, reception + bar. A second touchpoint brings 1.5–2× more taps",
-  "t2.2": "<b>All buttons, no limits</b>: Google, Yandex, 2GIS, Instagram, Telegram, bot, website, menu, Wi-Fi",
-  "t2.3": "<b>Full analytics</b>: any period, by day and hour, card comparison, Excel export",
-  "t2.4": "<b>Real Google reviews and rating</b> in the dashboard — published reviews, not clicks",
-  "t2.5": "<b>Telegram report</b> every morning at 9:00",
-  "t2.6": "Card in your venue's colours with your logo",
-  "t2.7": "Card replacement — twice a year, free",
-  "t2.8": "Priority support — reply within 2 hours in working time",
-  "t3.badge": "Everything",
-  "t3.name": "Pro",
-  "t3.for": "For venues with several branches and businesses that want to manage customer channels based on data",
-  "t3.mo": "≈ 100,000 UZS a month — one returning guest pays for it",
-  "t3.plus": "Everything in Business, plus:",
-  "t3.1": "<b>Up to 4 cards</b> — several spots or two branches in one dashboard",
-  "t3.3": "<b>Custom design</b> of the card and the screen in your brand style",
-  "t3.4": "<b>Alert for every new Google review</b> and for rating drops — in Telegram",
-  "t3.5": "<b>“Message the owner” button</b> — an unhappy guest writes to you directly, and you fix it before they leave",
-  "t3.6": "<b>Up to 5 team members</b> in the dashboard: director, manager, marketer",
-  "t3.7": "<b>Quarterly stats review</b> with us: what works, what to change",
-  "t3.8": "Card replacement — unlimited. New features — first",
-  "t3.9": "Personal manager in Telegram, reply within an hour",
-  "t3.foot": "Chains of 3+ branches — Pro for the first, −20% for each next one",
-  "yb.h": "Add-on for Pro",
-  "yb.price": "+ $50 one-time — Yandex Business setup",
-  "yb.lead": "We help you:",
-  "yb.1": "create / set up the company profile;",
-  "yb.2": "fill in the venue information correctly;",
-  "yb.3": "add services, contacts and photos;",
-  "yb.4": "set up the core presence elements;",
-  "yb.5": "get the profile in order to attract extra organic traffic.",
-  "yb.note": "Yandex Business is not included in the plan price and is paid separately.",
-  "ad.h": "Add-ons for any plan",
-  "ad.2": "Google Business Profile optimisation: categories, photos, description, posts",
-  "ad.3": "Extra card beyond the plan",
-  "ad.3p": "150,000 UZS / year",
-  "pz.lockh": "Your price is locked in.",
-  "pz.lockp": " The platform grows and gains features — but for those who join now the subscription price won't change in a year or in three. Everything we add later, you get at no extra cost. New venues will pay more later — you won't.",
-  "pz.uph": "Upgrade any time.",
-  "pz.upp": " Started on Start, realised two months later you need Yandex and 2GIS — you pay only the difference for the remaining months. Nothing is lost.",
-  "pz.grh": "14 days to check.",
-  "pz.grp": " If in two weeks the card hasn't brought a single tap — we take it back and refund you. In a year it hasn't happened once.",
-  "pz.offh": "If the subscription isn't renewed.",
-  "pz.offp": " The redirect and the dashboard stop working; the card stays with you. You can resume at any time — at your locked-in price.",
-  "pz.term": "Connected within 1–2 days after confirmation",
+"brand.sub": "Reputation device",
+"tab.product": "Product",
+"tab.price": "Pricing",
+"tab.order": "Order",
+"tab.support": "Support",
+"h2.pill": "One tap — a review, a follower, a customer",
+"h2.h1": "Reviews on Google, Yandex and 2GIS — <em>in one tap</em>",
+"h2.sub": "An NFC + QR card at the till. A guest taps their phone — leaves a review, follows you on Instagram or Telegram. You see every tap in your dashboard.",
+"hero.tag": "Sits at the counter",
+"hero.s1u": "sec",
+"hero.s1": "from tap to review",
+"hero.s2": "apps to install",
+"h2.s3": "venues already running",
+"cta.order": "Order",
+"w.eye": "Why",
+"w.h": "Happy guests stay silent. <em>Unhappy ones write.</em>",
+"w.lead": "Between “loved it” and a review there are five steps and the word “later”. The card removes both: the guest reviews you while still at the table.",
+"ps.1": "of people read reviews before choosing a venue",
+"ps.2": "more revenue from a one-star rating increase",
+"ps.3": "avoid businesses with poor or outdated reviews",
+"ps.4": "happy guests write reviews far less often than unhappy ones",
+"hw.eye": "How it works",
+"hw.h": "Four steps. <em>15 seconds.</em>",
+"sol.1h": "The guest pays the bill",
+"sol.1p": "Cashier: “If you enjoyed it — leave us a review”",
+"sol.2h": "Taps the phone on NFC or scans the QR",
+"sol.2p": "No apps, no sign-up",
+"t.2": "+2 sec",
+"hw.3h": "Your venue's screen opens",
+"hw.3p": "Google · Yandex · 2GIS · Instagram · Telegram — the guest picks",
+"t.3": "+3 sec",
+"hw.4h": "Review published",
+"hw.4p": "The tap is already visible in your dashboard",
+"t.4": "+10 sec",
+"sc.eye": "The screen after the scan",
+"sc.h": "One card — <em>every platform</em> where guests look for you",
+"sc.p1": "Enjoyed your visit?",
+"sc.p2": "Venue name",
+"sc.b1": "⭐ Review on Google",
+"sc.b2": "📍 Review on Yandex Maps",
+"sc.b3": "📍 Review on 2GIS",
+"sc.or": "and also",
+"sc.b4": "📸 Follow on Instagram",
+"sc.b5": "✈️ Our Telegram channel",
+"sc2.1h": "You choose the buttons",
+"sc2.1p": "Google, Yandex, 2GIS, Instagram, Telegram, bot, website, menu, Wi-Fi — per branch, changed from the dashboard in a minute",
+"sc.2h": "Your logo on the screen",
+"sc2.2p": "The guest sees your venue, not someone else's brand",
+"sc2.3h": "Three languages, automatically",
+"sc2.3p": "Uzbek, Russian, English — by the guest's phone language",
+"dev.eye": "The device",
+"dv.h": "NFC + QR in one card. <em>No power, no internet.</em>",
+"cm.r1": "How it's read",
+"cm.old": "Plain QR",
+"cm.r1a": "QR only",
+"cm.r1b": "NFC + QR",
+"cm.r2": "Speed",
+"cm.r2a": "4–6 sec",
+"cm.r2b": "1–2 sec",
+"cm2.r3": "Data",
+"cm2.r3a": "none",
+"cm2.r3b": "every tap in the dashboard",
+"cm.r6": "Durability",
+"cm.r6a": "fades, tears",
+"cm2.r6b": "plastic, designed in your colours",
+"pl.eye": "Owner dashboard",
+"pl2.h": "Every tap is <em>a number in the dashboard</em>",
+"pl.dash": "Analytics · all branches",
+"pl.upd": "updated just now",
+"pl2.k1": "Taps",
+"pl.week": "this week",
+"pl2.k2": "Google clicks",
+"pl2.k3": "New Google reviews",
+"pl2.k3s": "real ones, not clicks",
+"pl2.k4": "Follows",
+"pl2.k4s": "Instagram + Telegram",
+"pl2.ch": "Taps by day",
+"pl.ch7": "7 days",
+"pl.top": "Top branches",
+"ow.1h": "Real-time statistics",
+"ow2.1p": "Taps, clicks per button, NFC separate from QR",
+"ow2.2h": "Real Google reviews",
+"ow2.2p": "The dashboard checks with Google and counts published reviews and the rating — not clicks",
+"ow2.3h": "Any period, all branches",
+"ow2.3p": "Day, week, month, custom range. Locations are compared side by side in one dashboard",
+"ow.4h": "Telegram report every morning",
+"ow2.4p": "Taps, reviews, best branch — in the owner's chat",
+"ow2.5h": "Android app and web",
+"ow2.5p": "The dashboard in your pocket. CSV / Excel export",
+"ow.8h": "Constant updates",
+"ow2.8p": "Menu, tips, Wi-Fi, review replies — new features are part of the subscription",
+"wh.eye": "Who it's for",
+"wh2.h": "Wherever there's a customer and a <em>happy “thank you”</em>",
+"wh.1": "Restaurants",
+"wh.2": "Coffee shops",
+"wh2.3": "Private schools",
+"wh2.4": "Clinics",
+"wh2.5": "Universities",
+"wh.4": "Hotels",
+"wh.5": "Beauty salons",
+"wh.8": "Chains & franchises",
+"cta.seeprice": "See pricing",
+"pz.eye": "Pricing",
+"pz.h": "Three plans. <em>One year.</em> No hidden fees",
+"pz.lead": "Every plan includes the NFC + QR card, on-site installation, a three-language screen with your logo and the owner dashboard. The difference is how many touchpoints you get and how deeply you see what's going on.",
+"t1.name": "Start",
+"t1.for": "One location. Start collecting reviews this week",
+"pz.peryear": "UZS / year",
+"t1.mo": "≈ 50,000 UZS a month — 1,650 UZS a day",
+"t1.1": "<b>1 card</b> NFC + QR, installed on site",
+"t1.2": "<b>3 buttons of your choice</b> — e.g. Google, Instagram, Telegram",
+"t1.3": "<b>Screen with your logo</b>, Uzbek / Russian / English",
+"t1.4": "<b>Dashboard</b>: taps and clicks per button for the last 30 days, in real time",
+"t1.5": "Card replacement — once a year, free",
+"t1.6": "Telegram support, reply within 24 hours",
+"t1.foot": "Can be split in two: 300,000 now + 300,000 in 6 months",
+"t2.badge": "Most popular",
+"t2.name": "Business",
+"t2.for": "A venue that manages its reputation instead of hoping for it",
+"t2.mo": "≈ 75,000 UZS a month — one average bill",
+"t2.plus": "Everything in Start, plus:",
+"t2.1": "<b>2 cards</b> — till + tables, reception + bar. A second touchpoint brings 1.5–2× more taps",
+"t2.2": "<b>All buttons, no limits</b>: Google, Yandex, 2GIS, Instagram, Telegram, bot, website, menu, Wi-Fi",
+"t2.3": "<b>Full analytics</b>: any period, by day and hour, card comparison, Excel export",
+"t2.4": "<b>Real Google reviews and rating</b> in the dashboard — published reviews, not clicks",
+"t2.5": "<b>Telegram report</b> every morning at 9:00",
+"t2.6": "Card in your venue's colours with your logo",
+"t2.7": "Card replacement — twice a year, free",
+"t2.8": "Priority support — reply within 2 hours in working time",
+"t3.badge": "Everything",
+"t3.name": "Pro",
+"t3.for": "For venues with several branches and businesses that want to manage customer channels based on data",
+"t3.mo": "≈ 100,000 UZS a month — one returning guest pays for it",
+"t3.plus": "Everything in Business, plus:",
+"t3.1": "<b>Up to 4 cards</b> — several spots or two branches in one dashboard",
+"t3.3": "<b>Custom design</b> of the card and the screen in your brand style",
+"t3.4": "<b>Alert for every new Google review</b> and for rating drops — in Telegram",
+"t3.5": "<b>“Message the owner” button</b> — an unhappy guest writes to you directly, and you fix it before they leave",
+"t3.6": "<b>Up to 5 team members</b> in the dashboard: director, manager, marketer",
+"t3.7": "<b>Quarterly stats review</b> with us: what works, what to change",
+"t3.8": "Card replacement — unlimited. New features — first",
+"t3.9": "Personal manager in Telegram, reply within an hour",
+"t3.foot": "Chains of 3+ branches — Pro for the first, −20% for each next one",
+"yb.h": "Add-on for Pro",
+"yb.price": "+ $50 one-time — Yandex Business setup",
+"yb.lead": "We help you:",
+"yb.1": "create / set up the company profile;",
+"yb.2": "fill in the venue information correctly;",
+"yb.3": "add services, contacts and photos;",
+"yb.4": "set up the core presence elements;",
+"yb.5": "get the profile in order to attract extra organic traffic.",
+"yb.note": "Yandex Business is not included in the plan price and is paid separately.",
+"ad.h": "Add-ons for any plan",
+"ad.2": "Google Business Profile optimisation: categories, photos, description, posts",
+"ad.3": "Extra card beyond the plan",
+"ad.3p": "150,000 UZS / year",
+"pz.lockh": "Your price is locked in.",
+"pz.lockp": " The platform grows and gains features — but for those who join now the subscription price won't change in a year or in three. Everything we add later, you get at no extra cost. New venues will pay more later — you won't.",
+"pz.uph": "Upgrade any time.",
+"pz.upp": " Started on Start, realised two months later you need Yandex and 2GIS — you pay only the difference for the remaining months. Nothing is lost.",
+"pz.grh": "14 days to check.",
+"pz.grp": " If in two weeks the card hasn't brought a single tap — we take it back and refund you. In a year it hasn't happened once.",
+"pz.offh": "If the subscription isn't renewed.",
+"pz.offp": " The redirect and the dashboard stop working; the card stays with you. You can resume at any time — at your locked-in price.",
+"pz.term": "Connected within 1–2 days after confirmation",
 "cta.price": "Get BirTapCard",
-  "fq.eye": "FAQ",
-  "fq.h": "The essentials, briefly",
-  "fq.1q": "Does the guest need an app or internet?",
-  "fq.1a": "No app. Just a phone with NFC or a camera. Internet is needed to open the Google page — everyone has it.",
-  "fq.2q": "What if I have several branches?",
-  "fq.2a": "Each branch gets its own card and its own link. In the dashboard you see both the big picture and a branch-by-branch comparison.",
-  "fq.3q": "Does the device need power or charging?",
-  "fq.3a": "No. The NFC tag is fully passive — it needs no power and works indefinitely.",
-  "fq.4q": "How fast is the setup?",
-  "fq.4a": "Usually within a day: we link the card to your Google Business profile, set up the dashboard and hand you the access.",
-  "fq.5q": "What if a guest wants to leave a bad review?",
-  "fq.5a": "The card is shown to guests who are happy — that's the cashier's or waiter's job. The tool amplifies what you already have: satisfied guests.",
-  "fq.6q": "Who installs the card?",
-  "fq.6a": "We do. We bring it, place it at the counter, connect the dashboard and show the staff how to offer it to guests.",
-  "fin.h": "Every happy guest can become <em>a new review</em>",
-  "fin.p": "All it takes is making that step effortless. We've already done it — what's left is putting the card on your counter.",
-  "cta.main2": "Message on Telegram",
-  "cta.sticky": "Get BirTapCard →",
-  "ct.phone": "Phone",
-  "ct.site": "Owner dashboard",
-  "ct.f1": "Founder · Samarkand · delivers and installs the devices",
-  "ct.f2n": "Co-founder",
-  "ct.f2": "Tashkent · onboarding venues and working with chains",
-  "ct.insta": "The project's official Instagram — every day we show which venues get the device",
-  "foot": "NFC + QR for reputation growth · Samarkand · Tashkent",
-  "ct.n1": "Alim Ibragimov",
-  "hero.s1u": "sec",
-  "cm.r2a": "4–6 sec",
-  "cm.r2b": "1–2 sec"
+"or.h": "Get BirTapCard for your venue",
+"or.lead": "Message or call us. We confirm the plan — and within 1–2 days we deliver, install the card and set up your dashboard.",
+"or.tg": "Telegram",
+"or.tgs": "Fast replies, usually within an hour",
+"or.ph": "Phone",
+"or.phs": "Call, or message this number on Telegram",
+"or.1h": "Message us",
+"or.1p": "Venue name, city, number of locations, which plan",
+"or.2h": "Send three things",
+"or.2p": "Your Google profile link (and Yandex / 2GIS), logo, Instagram and Telegram",
+"or.3h": "We deliver and install",
+"or.3p": "We set up the dashboard, hand over access and show your staff how to offer the card",
+"or.3t": "1–2 days",
+"or.payh": "Paid yearly.",
+"or.payp": " Start can be split in two payments. Your price is locked in; you can upgrade any time by paying the difference.",
+"su.h": "We're here",
+"su.lead": "Questions about the dashboard, the card or your stats — message us directly. No tickets, no call centres.",
+"su.mail": "Email",
+"ct.site": "Owner dashboard",
+"su.insta": "Venues that already use BirTapCard",
+"fq.eye": "FAQ",
+"fq.1q": "Does the guest need an app or internet?",
+"fq.1a": "No app. Just a phone with NFC or a camera. Internet is needed to open the Google page — everyone has it.",
+"fq.2q": "What if I have several branches?",
+"fq.2a": "Each branch gets its own card and its own link. In the dashboard you see both the big picture and a branch-by-branch comparison.",
+"fq.3q": "Does the device need power or charging?",
+"fq.3a": "No. The NFC tag is fully passive — it needs no power and works indefinitely.",
+"fq.5q": "What if a guest wants to leave a bad review?",
+"fq.5a": "The card is shown to guests who are happy — that's the cashier's or waiter's job. The tool amplifies what you already have: satisfied guests.",
+"fq.6q": "Who installs the card?",
+"fq.6a": "We do. We bring it, place it at the counter, connect the dashboard and show the staff how to offer it to guests.",
+"fq2.7q": "The card broke or went missing",
+"fq2.7a": "Message us on Telegram — we replace it. Once a year free on Start, twice on Business, unlimited on Pro.",
+"fq2.8q": "How do I change the buttons on the screen or the logo?",
+"fq2.8a": "In the dashboard: Branches → the location → toggle the buttons and upload the logo. Changes apply instantly, no reprint needed.",
+"foot": "NFC + QR for reputation growth · Samarkand · Tashkent",
+"cta.sticky2": "Order →"
 };
 
 /* ─── Переключение языка ─────────────────────────────── */
@@ -1507,6 +1421,33 @@ const sticky = document.getElementById('sticky');
 addEventListener('scroll', () => {
   sticky.classList.toggle('show', scrollY > innerHeight * .75);
 }, { passive: true });
+
+/* ─── Вкладки ────────────────────────────────────────── */
+const TABS = ['product','price','order','support'];
+function showTab(id, scroll){
+  if (!TABS.includes(id)) id = 'product';
+  TABS.forEach(t => {
+    document.getElementById('p-' + t).classList.toggle('on', t === id);
+  });
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === id));
+  const p = document.getElementById('p-' + id);
+  p.querySelectorAll('.rv').forEach(el => el.classList.add('in'));
+  p.querySelectorAll('[data-count]').forEach(el => cio.observe(el));
+  if (history.replaceState) history.replaceState(null, '', '#' + id);
+  if (scroll !== false) {
+    const top = document.getElementById('tabs').getBoundingClientRect().bottom + scrollY - 58;
+    scrollTo({ top: Math.max(0, top - 8), behavior: 'smooth' });
+  }
+}
+document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+document.querySelectorAll('[data-tab-link]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); showTab(a.dataset.tabLink); }));
+(function initTab(){
+  const h = (location.hash || '').replace('#','');
+  const map = { how: 'product', tariffs: 'price', pricing: 'price', contacts: 'order' };
+  const id = TABS.includes(h) ? h : (map[h] || 'product');
+  if (id !== 'product') showTab(id, false);
+})();
+addEventListener('hashchange', () => { const h = location.hash.replace('#',''); if (TABS.includes(h)) showTab(h); });
 </script>
 </body>
 </html>
