@@ -360,7 +360,16 @@ h1 em{font-style:normal;background:linear-gradient(120deg,var(--mint2),var(--min
 .addon{display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(255,255,255,.028);border:1px solid var(--border);border-radius:12px;padding:11px 13px;font-size:13px;line-height:1.45;color:var(--muted)}
 .addon small{color:var(--dim);font-size:11.5px}
 .addon b{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--mint);white-space:nowrap}
-@media (min-width:860px){ .tiers{grid-template-columns:1fr 1fr 1fr;gap:14px} }
+.yb{background:linear-gradient(160deg,rgba(255,214,102,.08),var(--card));border:1px solid rgba(255,214,102,.34);border-radius:var(--r);padding:17px;margin-bottom:11px}
+.yb-head{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.yb-tag{align-self:flex-start;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:99px;background:#FFD666;color:#2A1F00}
+.yb-head b{font-size:15.5px;font-weight:750;letter-spacing:-.01em;color:var(--text);line-height:1.35}
+.yb-lead{font-size:13px;color:var(--muted);margin:0 0 8px}
+.yb ul{list-style:none;display:grid;gap:7px;margin:0;padding:0}
+.yb li{position:relative;padding-left:20px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.yb li::before{content:'✓';position:absolute;left:0;top:0;color:#FFD666;font-weight:900;font-size:12px}
+.yb-note{margin:12px 0 0;padding-top:11px;border-top:1px dashed rgba(255,214,102,.3);font-size:12.5px;color:var(--dim);line-height:1.5}
+@media (min-width:860px){ .tiers{grid-template-columns:1fr 1fr 1fr;gap:14px} .yb-head{flex-direction:row;align-items:center;gap:12px} }
 
 
 /* ─── FAQ ────────────────────────────────────────────── */
@@ -812,13 +821,12 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
       <div class="tier top rv">
         <span class="tier-badge gold" data-i="t3.badge">Максимум</span>
         <div class="tier-name gold" data-i="t3.name">Pro</div>
-        <div class="tier-for" data-i="t3.for">Сети, несколько точек и те, кто хочет, чтобы новые клиенты приходили сами</div>
+        <div class="tier-for" data-i="t3.for">Для заведений с несколькими филиалами и бизнеса, который хочет управлять клиентскими каналами на основе данных</div>
         <div class="tier-sum"><b>1&nbsp;200&nbsp;000</b><span data-i="pz.peryear">сум / год</span></div>
         <div class="tier-mo" data-i="t3.mo">≈ 100 000 сум в месяц — один вернувшийся гость окупает</div>
         <ul>
           <li class="plus" data-i="t3.plus">Всё из «Бизнес», плюс:</li>
           <li data-i="t3.1"><b>До 4 карточек</b> — несколько точек или два филиала в одном кабинете</li>
-          <li data-i="t3.2"><b>Яндекс Бизнес под ключ — включено</b> (отдельно $50): карточка организации, фото, услуги, часы, ответы на отзывы. Приводит клиентов, которые платят</li>
           <li data-i="t3.3"><b>Индивидуальный дизайн</b> карточки и экрана в вашем фирменном стиле</li>
           <li data-i="t3.4"><b>Уведомление о каждом новом отзыве Google</b> и падении рейтинга — в Telegram</li>
           <li data-i="t3.5"><b>Кнопка «Написать владельцу»</b> — недовольный гость пишет вам напрямую, вы решаете вопрос до того, как он ушёл</li>
@@ -831,10 +839,25 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
       </div>
     </div>
 
+    <div class="yb rv">
+      <div class="yb-head">
+        <span class="yb-tag" data-i="yb.h">Дополнительно для Pro</span>
+        <b data-i="yb.price">+ $50 единоразово — настройка Яндекс Бизнес</b>
+      </div>
+      <p class="yb-lead" data-i="yb.lead">Мы помогаем:</p>
+      <ul>
+        <li data-i="yb.1">создать / настроить карточку организации;</li>
+        <li data-i="yb.2">правильно заполнить информацию о заведении;</li>
+        <li data-i="yb.3">добавить услуги, контакты и фотографии;</li>
+        <li data-i="yb.4">настроить основные элементы присутствия;</li>
+        <li data-i="yb.5">привести профиль в порядок для привлечения дополнительного органического трафика.</li>
+      </ul>
+      <p class="yb-note" data-i="yb.note">Яндекс Бизнес не входит в стоимость тарифа и оплачивается отдельно.</p>
+    </div>
+
     <div class="incl rv">
       <b data-i="ad.h">Дополнительно к любому тарифу</b>
       <div class="addons">
-        <div class="addon"><span data-i="ad.1">Настройка Яндекс Бизнес под ключ <small>(в Pro включена)</small></span><b>$50</b></div>
         <div class="addon"><span data-i="ad.2">Оптимизация профиля Google Business: категории, фото, описание, посты</span><b>$30</b></div>
         <div class="addon"><span data-i="ad.3">Дополнительная карточка сверх тарифа</span><b data-i="ad.3p">150 000 сум / год</b></div>
       </div>
@@ -1111,11 +1134,10 @@ const UZ = {
 't2.8':'Ustuvor qo\'llab-quvvatlash — ish vaqtida 2 soat ichida javob',
 't3.badge':'Maksimum',
 't3.name':'Pro',
-'t3.for':'Tarmoqlar, bir nechta nuqta va yangi mijozlar o\'zi kelishini xohlaydiganlar',
+'t3.for':'Bir nechta filiali bor muassasalar va mijoz kanallarini ma\'lumotlar asosida boshqarmoqchi bo\'lgan biznes uchun',
 't3.mo':'≈ oyiga 100 000 so\'m — bitta qaytgan mehmon qoplaydi',
 't3.plus':'«Biznes»dagi hamma narsa, qo\'shimcha:',
 't3.1':'<b>4 tagacha kartochka</b> — bir nechta nuqta yoki ikkita filial bitta kabinetda',
-'t3.2':'<b>Yandex Biznes kalit topshirish — kiritilgan</b> (alohida $50): tashkilot kartochkasi, foto, xizmatlar, ish vaqti, sharhlarga javoblar. To\'laydigan mijozlarni olib keladi',
 't3.3':'Firma uslubingizda kartochka va ekranning <b>individual dizayni</b>',
 't3.4':'<b>Har bir yangi Google sharhi</b> va reyting tushishi haqida Telegram\'da xabar',
 't3.5':'<b>«Egasiga yozish» tugmasi</b> — norozi mehmon to\'g\'ridan-to\'g\'ri sizga yozadi, u ketmasdan masalani hal qilasiz',
@@ -1124,8 +1146,16 @@ const UZ = {
 't3.8':'Kartochkalarni almashtirish — cheklovsiz. Yangi funksiyalar — birinchi bo\'lib',
 't3.9':'Telegram\'da shaxsiy menejer, bir soat ichida javob',
 't3.foot':'3 va undan ko\'p filialli tarmoq — birinchisiga Pro, har keyingisiga −20%',
+'yb.h':'Pro uchun qo\'shimcha',
+'yb.price':'+ $50 bir martalik — Yandex Biznesni sozlash',
+'yb.lead':'Biz yordam beramiz:',
+'yb.1':'tashkilot kartochkasini yaratish / sozlash;',
+'yb.2':'muassasa haqidagi ma\'lumotni to\'g\'ri to\'ldirish;',
+'yb.3':'xizmatlar, kontaktlar va fotolarni qo\'shish;',
+'yb.4':'asosiy mavjudlik elementlarini sozlash;',
+'yb.5':'qo\'shimcha organik trafik jalb qilish uchun profilni tartibga keltirish.',
+'yb.note':'Yandex Biznes tarif narxiga kirmaydi va alohida to\'lanadi.',
 'ad.h':'Istalgan tarifga qo\'shimcha',
-'ad.1':'Yandex Biznesni kalit topshirish sozlash <small>(Pro\'da kiritilgan)</small>',
 'ad.2':'Google Business profilini optimallashtirish: kategoriyalar, foto, tavsif, postlar',
 'ad.3':'Tarifdan tashqari qo\'shimcha kartochka',
 'ad.3p':'150 000 so\'m / yil',
@@ -1347,11 +1377,10 @@ const EN = {
   "t2.8": "Priority support — reply within 2 hours in working time",
   "t3.badge": "Everything",
   "t3.name": "Pro",
-  "t3.for": "Chains, several locations, and those who want new customers to come on their own",
+  "t3.for": "For venues with several branches and businesses that want to manage customer channels based on data",
   "t3.mo": "≈ 100,000 UZS a month — one returning guest pays for it",
   "t3.plus": "Everything in Business, plus:",
   "t3.1": "<b>Up to 4 cards</b> — several spots or two branches in one dashboard",
-  "t3.2": "<b>Yandex Business set up for you — included</b> ($50 separately): company profile, photos, services, hours, review replies. Brings customers who pay",
   "t3.3": "<b>Custom design</b> of the card and the screen in your brand style",
   "t3.4": "<b>Alert for every new Google review</b> and for rating drops — in Telegram",
   "t3.5": "<b>“Message the owner” button</b> — an unhappy guest writes to you directly, and you fix it before they leave",
@@ -1360,8 +1389,16 @@ const EN = {
   "t3.8": "Card replacement — unlimited. New features — first",
   "t3.9": "Personal manager in Telegram, reply within an hour",
   "t3.foot": "Chains of 3+ branches — Pro for the first, −20% for each next one",
+  "yb.h": "Add-on for Pro",
+  "yb.price": "+ $50 one-time — Yandex Business setup",
+  "yb.lead": "We help you:",
+  "yb.1": "create / set up the company profile;",
+  "yb.2": "fill in the venue information correctly;",
+  "yb.3": "add services, contacts and photos;",
+  "yb.4": "set up the core presence elements;",
+  "yb.5": "get the profile in order to attract extra organic traffic.",
+  "yb.note": "Yandex Business is not included in the plan price and is paid separately.",
   "ad.h": "Add-ons for any plan",
-  "ad.1": "Yandex Business setup, done for you <small>(included in Pro)</small>",
   "ad.2": "Google Business Profile optimisation: categories, photos, description, posts",
   "ad.3": "Extra card beyond the plan",
   "ad.3p": "150,000 UZS / year",
