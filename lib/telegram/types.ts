@@ -9,6 +9,7 @@ export interface TgUser {
   id: number
   username?: string
   first_name?: string
+  last_name?: string
 }
 
 export interface TgMessage {
@@ -18,6 +19,8 @@ export interface TgMessage {
   text?: string
   photo?: { file_id: string }[]
   document?: { file_id: string; mime_type?: string }
+  /** Присылается, когда пользователь жмёт кнопку request_contact (форма заявки) */
+  contact?: { phone_number: string; first_name?: string; user_id?: number }
 }
 
 export interface TgCallbackQuery {

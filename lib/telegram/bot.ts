@@ -23,6 +23,8 @@ export interface InlineButton {
 
 export interface ReplyKeyboardButton {
   text: string
+  /** Кнопка «поделиться номером» — Telegram пришлёт msg.contact */
+  request_contact?: boolean
 }
 
 export interface ReplyMarkup {
@@ -32,6 +34,15 @@ export interface ReplyMarkup {
   persistent?: boolean
   remove_keyboard?: boolean
   one_time_keyboard?: boolean
+}
+
+/**
+ * Экранирование текста, пришедшего от пользователя (название заведения,
+ * город, username). Незакрытая * или _ в чужом тексте роняет разбор Markdown,
+ * и Telegram отклоняет всё сообщение целиком — заявка просто не дойдёт.
+ */
+export function escapeMd(text: string): string {
+  return text.replace(/([_*`\[\]])/g, '\\$1')
 }
 
 export interface SendMessageOptions {
@@ -59,7 +70,25 @@ export async function sendMessage(
       }),
     })
     const json = await res.json()
-    if (!json.ok) return { ok: false, error: json.description }
+    if (!json.ok) {
+      // Последняя линия обороны: если разметка всё же не разобралась,
+      // отправляем тем же текстом, но без parse_mode — сообщение важнее вёрстки.
+      if (typeof json.description === 'string' && json.description.includes('parse entities')) {
+        const plain = await fetch(botUrl('sendMessage'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text,
+            reply_markup: options.reply_markup,
+            disable_web_page_preview: options.disable_web_page_preview ?? true,
+          }),
+        })
+        const retry = await plain.json()
+        if (retry.ok) return { ok: true, result: retry.result }
+      }
+      return { ok: false, error: json.description }
+    }
     return { ok: true, result: json.result }
   } catch (err) {
     return { ok: false, error: String(err) }

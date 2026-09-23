@@ -22,6 +22,14 @@ import {
 import { handleAdminApprove, handleAdminReject } from '@/lib/telegram/handlers/admin'
 import { handleBranchRanking } from '@/lib/telegram/handlers/branches'
 import { handleExportReport } from '@/lib/telegram/handlers/export'
+import { handleLeadsList, handleLeadStatus } from '@/lib/telegram/handlers/leads'
+import {
+  handleSalesWhat,
+  handleSalesPlans,
+  handleSalesPlan,
+  handleSalesContacts,
+  handleLeadStart,
+} from '@/lib/telegram/handlers/sales'
 
 /**
  * Точные совпадения callback_data → обработчик.
@@ -38,6 +46,22 @@ const EXACT_ROUTES: Record<string, (chatId: number, telegramId: number, cbId: st
   pay_history: async (chatId, telegramId, cbId) => {
     await answerCallback(cbId)
     await handlePayHistory(chatId, telegramId)
+  },
+  'sales:what': async (chatId, _telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleSalesWhat(chatId)
+  },
+  'sales:plans': async (chatId, _telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleSalesPlans(chatId)
+  },
+  'sales:contacts': async (chatId, _telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleSalesContacts(chatId)
+  },
+  'lead:start': async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleLeadStart(chatId, telegramId)
   },
   main_menu: async (chatId, telegramId, cbId) => {
     await answerCallback(cbId)
@@ -65,6 +89,21 @@ const PREFIX_ROUTES: Record<string, (chatId: number, telegramId: number, arg: st
   'export:': async (chatId, telegramId, arg, cbId) => {
     await answerCallback(cbId)
     await handleExportReport(chatId, telegramId, arg)
+  },
+  'sales:plan:': async (chatId, _telegramId, arg, cbId) => {
+    await answerCallback(cbId)
+    await handleSalesPlan(chatId, arg)
+  },
+  'lead:start:': async (chatId, telegramId, arg, cbId) => {
+    await answerCallback(cbId)
+    await handleLeadStart(chatId, telegramId, arg)
+  },
+  'leads:': async (chatId, telegramId, arg, cbId) => {
+    await answerCallback(cbId)
+    await handleLeadsList(chatId, telegramId, arg)
+  },
+  'lead_set:': async (chatId, telegramId, arg, cbId) => {
+    await handleLeadStatus(cbId, chatId, telegramId, arg)
   },
   'pay_plan:': async (chatId, telegramId, arg, cbId) => {
     await answerCallback(cbId)

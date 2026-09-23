@@ -26,6 +26,17 @@ import { handleSettings, handleHelp } from '@/lib/telegram/handlers/settings'
 import { comingSoon } from '@/lib/telegram/handlers/comingSoon'
 import { handleMyBranches, handleBranchRankingMenu } from '@/lib/telegram/handlers/branches'
 import { handleExportMenu } from '@/lib/telegram/handlers/export'
+import { handleLeadsList } from '@/lib/telegram/handlers/leads'
+import {
+  salesMenu,
+  handleSalesStart,
+  handleSalesWhat,
+  handleSalesPlans,
+  handleSalesContacts,
+  handleLeadStart,
+  handleLeadInput,
+  isFillingLead,
+} from '@/lib/telegram/handlers/sales'
 
 const COMMAND_MAP: Record<string, string> = {
   '/today': 'today',
@@ -44,6 +55,30 @@ async function sendPeriodPicker(chatId: number) {
       [{ text: '🗓 Свой период', callback_data: 'report:custom' }],
     ]),
   })
+}
+
+/**
+ * Текстовая навигация для того, кто ещё не клиент: витрина и заявка.
+ * Возвращает true, если сообщение было обработано.
+ */
+async function dispatchSalesText(chatId: number, telegramId: number, text: string): Promise<boolean> {
+  if (text === '🚀 Что это' || text === '/about') {
+    await handleSalesWhat(chatId)
+    return true
+  }
+  if (text === '💳 Тарифы' || text === '/price' || text === '/plans') {
+    await handleSalesPlans(chatId)
+    return true
+  }
+  if (text === '📝 Оставить заявку' || text === '/order') {
+    await handleLeadStart(chatId, telegramId)
+    return true
+  }
+  if (text === '🆘 Связаться с нами' || text === '/contacts' || text === '/help') {
+    await handleSalesContacts(chatId)
+    return true
+  }
+  return false
 }
 
 /**
@@ -118,13 +153,22 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
     return true
   }
 
+  if (text === '🔥 Заявки' || text === '/leads') {
+    if (profile.role === 'super_admin') {
+      await handleLeadsList(chatId, telegramId)
+    } else {
+      await comingSoon(chatId, 'Заявки', 'Фазе 4')
+    }
+    return true
+  }
+
   if (text === '🔔 Уведомления') {
     await comingSoon(chatId, 'Настройка уведомлений', 'Фазе 5')
     return true
   }
 
-  if (text === '🆘 Поддержка') {
-    await comingSoon(chatId, 'Поддержка', 'Фазе 6')
+  if (text === '🆘 Поддержка' || text === '🆘 Связаться с нами') {
+    await handleSalesContacts(chatId)
     return true
   }
 
@@ -162,6 +206,14 @@ export async function handleMessage(msg: TgMessage) {
 
   const text = (msg.text ?? '').trim()
 
+  // Форма заявки: любой ввод (включая контакт) идёт в неё, пока она открыта.
+  // Команды — кроме /cancel — из формы выпускаем, иначе «/start» станет
+  // названием заведения и человек застрянет.
+  const isCommand = text.startsWith('/') && text !== '/cancel'
+  if (!isCommand && (await isFillingLead(telegramId))) {
+    if (await handleLeadInput(chatId, telegramId, msg)) return
+  }
+
   // Свой период: ждём от пользователя текст с датами (Фаза 2)
   if (text && !text.startsWith('/')) {
     const state = await getState(telegramId)
@@ -177,20 +229,17 @@ export async function handleMessage(msg: TgMessage) {
     if (token) {
       await handleLinkToken(chatId, telegramId, msg.from!, token)
     } else {
-      await handleStart(chatId, telegramId)
+      await handleStart(chatId, telegramId, msg.from?.first_name)
     }
     return
   }
 
   const profile = await findProfile(telegramId)
 
-  // ─── Не привязан ─────────────────────────────────────────────────────────
+  // ─── Не привязан: воронка вместо тупика ──────────────────────────────────
   if (!profile) {
-    await sendMessage(chatId,
-      '👋 Привет! Я *BirTapCard Statistics Bot*.\n\n' +
-      'Чтобы начать, привяжите свой Telegram-аккаунт в разделе *Telegram* на сайте birtapcard.vercel.app',
-      { reply_markup: { inline_keyboard: [[{ text: '🔗 Перейти на сайт', url: 'https://birtapcard.vercel.app/telegram' }]] } }
-    )
+    if (await dispatchSalesText(chatId, telegramId, text)) return
+    await sendMessage(chatId, 'Выберите, что показать 👇', { reply_markup: salesMenu() })
     return
   }
 

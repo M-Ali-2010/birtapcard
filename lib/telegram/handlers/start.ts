@@ -1,13 +1,16 @@
 /**
  * lib/telegram/handlers/start.ts
  *
- * /start без токена — приветствие/онбординг.
+ * /start без токена — воронка для гостя или меню для клиента.
  * /start TOKEN — привязка Telegram-аккаунта к пользователю BirTap.
+ * /start ЛЮБОЕ_СЛОВО — метка источника (карточка, презентация, /pdp):
+ *   токен не найден, значит это не привязка, а переход по ссылке.
  */
 
 import { sendMessage } from '@/lib/telegram/bot'
 import { db, findProfile } from '@/lib/telegram/db'
 import { menuForRole } from '@/lib/telegram/keyboards/menus'
+import { handleSalesStart, handleLeadStart } from '@/lib/telegram/handlers/sales'
 import type { TgUser } from '@/lib/telegram/types'
 
 const ROLE_LABEL: Record<string, string> = {
@@ -16,20 +19,12 @@ const ROLE_LABEL: Record<string, string> = {
   branch_manager: '📍 Управляющий филиалом',
 }
 
-export async function handleStart(chatId: number, telegramId: number) {
+export async function handleStart(chatId: number, telegramId: number, firstName?: string) {
   const profile = await findProfile(telegramId)
 
+  // Не клиент — показываем витрину, а не тупик «привяжите аккаунт»
   if (!profile) {
-    await sendMessage(chatId,
-      '👋 Добро пожаловать в *BirTapCard Statistics Bot*!\n\n' +
-      'Этот бот отправляет вам ежедневную статистику по вашим ресторанам и управляет подпиской.\n\n' +
-      '🔗 Чтобы начать, привяжите Telegram-аккаунт в личном кабинете.',
-      {
-        reply_markup: {
-          inline_keyboard: [[{ text: '🔗 Привязать Telegram', url: 'https://birtapcard.vercel.app/telegram' }]],
-        },
-      }
-    )
+    await handleSalesStart(chatId, firstName)
     return
   }
 
@@ -51,8 +46,19 @@ export async function handleLinkToken(chatId: number, telegramId: number, tgUser
     .is('confirmed_at', null)
     .single()
 
+  // Токена нет в базе — это не привязка, а метка источника из ссылки
+  // (t.me/birtapcard?start=card / pdp / info). Ведём человека в воронку.
   if (!acc) {
-    await sendMessage(chatId, '❌ Ссылка недействительна или уже использована. Запросите новую в личном кабинете.')
+    const profile = await findProfile(telegramId)
+    if (profile) {
+      await sendMessage(chatId, '❌ Ссылка недействительна или уже использована. Запросите новую в личном кабинете.')
+      return
+    }
+    if (/^(order|zayavka|lead)$/i.test(token)) {
+      await handleLeadStart(chatId, telegramId, undefined, token.toLowerCase())
+    } else {
+      await handleSalesStart(chatId, tgUser.first_name)
+    }
     return
   }
 
