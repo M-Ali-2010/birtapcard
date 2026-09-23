@@ -76,6 +76,22 @@ export async function GET(_req: NextRequest) {
       }
     : { id: 'migration_report_hour', label: 'Время отчёта (report_hour)', level: 'ok', detail: 'Готово' })
 
+  // ─── Миграция 0006: поддержка и уведомления об отзывах ─────────────────────
+  const supProbe = await db.from('support_messages').select('id', { count: 'exact', head: true })
+  if (supProbe.error?.code === '42P01') {
+    checks.push({
+      id: 'migration_support', label: 'Поддержка в боте', level: 'fail',
+      detail: 'Таблицы support_messages нет — обращения не сохранятся',
+      fix: 'Выполните 0006_support_and_alerts.sql в Supabase → SQL Editor',
+    })
+  } else {
+    const { count: open } = await db.from('support_messages').select('id', { count: 'exact', head: true }).eq('status', 'new')
+    checks.push({
+      id: 'migration_support', label: 'Поддержка в боте', level: 'ok',
+      detail: `Готова · без ответа: ${open ?? 0}`,
+    })
+  }
+
   // ─── Ключи в Vercel: только факт наличия ───────────────────────────────────
   const env: [string, string, boolean, string][] = [
     ['TELEGRAM_BOT_TOKEN', 'Токен бота', !!process.env.TELEGRAM_BOT_TOKEN, 'Без него бот не отвечает вообще'],

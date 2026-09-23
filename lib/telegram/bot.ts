@@ -241,6 +241,37 @@ export async function getWebhookInfo(): Promise<WebhookInfo | null> {
   return json.ok ? (json.result as WebhookInfo) : null
 }
 
+// ─── Настройка профиля бота (то, что обычно делают руками в BotFather) ──────
+
+export interface BotCommand { command: string; description: string }
+
+/** Область видимости набора команд */
+export type CommandScope =
+  | { type: 'default' }
+  | { type: 'all_private_chats' }
+  | { type: 'chat'; chat_id: number | string }
+
+async function call(method: string, body: Record<string, unknown>): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch(botUrl(method), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    const json = await res.json()
+    return json.ok ? { ok: true } : { ok: false, error: json.description }
+  } catch (e) {
+    return { ok: false, error: String(e) }
+  }
+}
+
+export const setMyName = (name: string) => call('setMyName', { name })
+export const setMyShortDescription = (short_description: string) => call('setMyShortDescription', { short_description })
+export const setMyDescription = (description: string) => call('setMyDescription', { description })
+export const setMyCommands = (commands: BotCommand[], scope?: CommandScope) =>
+  call('setMyCommands', { commands, ...(scope ? { scope } : {}) })
+export const setChatMenuButton = () => call('setChatMenuButton', { menu_button: { type: 'commands' } })
+
 /** Build inline keyboard from 2D array shorthand */
 export function keyboard(rows: InlineButton[][]): { inline_keyboard: InlineButton[][] } {
   return { inline_keyboard: rows }

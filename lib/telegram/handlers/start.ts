@@ -11,6 +11,7 @@ import { sendMessage } from '@/lib/telegram/bot'
 import { db, findProfile } from '@/lib/telegram/db'
 import { menuForRole } from '@/lib/telegram/keyboards/menus'
 import { handleSalesStart, handleLeadStart } from '@/lib/telegram/handlers/sales'
+import { applyCommandsForChat } from '@/lib/telegram/profile'
 import type { TgUser } from '@/lib/telegram/types'
 
 const ROLE_LABEL: Record<string, string> = {
@@ -82,6 +83,9 @@ export async function handleLinkToken(chatId: number, telegramId: number, tgUser
     .select('full_name, role')
     .eq('user_id', acc.user_id)
     .single()
+
+  // Персональный набор команд: клиенту — отчёты, админу — управление
+  await applyCommandsForChat(chatId, profile?.role)
 
   await sendMessage(chatId,
     `✅ *Telegram успешно привязан!*\n\n` +

@@ -1,5 +1,6 @@
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { extractPlaceId, fetchPlaceStats } from '@/lib/google-places'
+import { sendMessage, escapeMd } from '@/lib/telegram/bot'
 
 export type SyncResult = {
   synced: number
@@ -21,7 +22,7 @@ export async function syncGoogleReviews(): Promise<SyncResult> {
   const supabase = createServiceRoleClient()
   const { data: branches, error } = await supabase
     .from('branches')
-    .select('id, name, google_url, google_place_id')
+    .select('id, name, company_id, google_url, google_place_id')
     .eq('active', true)
   if (error) throw new Error(error.message)
 
@@ -37,6 +38,16 @@ export async function syncGoogleReviews(): Promise<SyncResult> {
 
     try {
       const stats = await fetchPlaceStats(placeId, apiKey)
+
+      // Предыдущий снимок — чтобы понять, появились ли отзывы прямо сейчас
+      const { data: prevSnap } = await supabase
+        .from('review_snapshots')
+        .select('review_count, rating')
+        .eq('branch_id', b.id)
+        .order('captured_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
       const { error: insErr } = await supabase.from('review_snapshots').insert({
         branch_id: b.id,
         source: 'google',
@@ -45,6 +56,10 @@ export async function syncGoogleReviews(): Promise<SyncResult> {
         reviews: stats.reviews,
       })
       if (insErr) throw new Error(insErr.message)
+
+      const gained = prevSnap ? stats.count - (prevSnap.review_count ?? 0) : 0
+      if (gained > 0) await notifyNewReviews(supabase, b, gained, stats.rating, prevSnap?.rating ?? null)
+
       result.synced++
       result.details.push({ branch: b.name, count: stats.count, rating: stats.rating, reviews: stats.reviews.length })
     } catch (e) {
@@ -52,4 +67,39 @@ export async function syncGoogleReviews(): Promise<SyncResult> {
     }
   }
   return result
+}
+
+
+/**
+ * Сообщение владельцу в момент появления отзывов, а не спустя сутки в сводке.
+ * Отправляем только если компания это включила (telegram_settings.notify_reviews).
+ */
+async function notifyNewReviews(
+  supabase: ReturnType<typeof createServiceRoleClient>,
+  branch: { id: string; name: string; company_id: string | null },
+  gained: number,
+  rating: number | null,
+  prevRating: number | null,
+): Promise<void> {
+  if (!branch.company_id) return
+
+  const { data: tg } = await supabase
+    .from('telegram_settings')
+    .select('chat_id, active, notify_reviews')
+    .eq('company_id', branch.company_id)
+    .maybeSingle()
+
+  if (!tg?.active || !tg.chat_id || tg.notify_reviews === false) return
+
+  const word = gained === 1 ? 'новый отзыв' : gained < 5 ? 'новых отзыва' : 'новых отзывов'
+  let text = `⭐ *${gained} ${word} в Google*\n🏪 ${escapeMd(branch.name)}`
+
+  if (rating !== null) {
+    const move = prevRating !== null && Math.abs(rating - prevRating) >= 0.05
+      ? ` _(${rating > prevRating ? '+' : '−'}${Math.abs(rating - prevRating).toFixed(1)})_`
+      : ''
+    text += `\n📈 Рейтинг: *${rating.toFixed(1)}*${move}`
+  }
+
+  await sendMessage(tg.chat_id, text)
 }

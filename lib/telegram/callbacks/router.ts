@@ -25,6 +25,12 @@ import { handleExportReport } from '@/lib/telegram/handlers/export'
 import { handleLeadsList, handleLeadStatus } from '@/lib/telegram/handlers/leads'
 import { handleNotifyMenu, handleNotifyHour, handleNotifyToggle } from '@/lib/telegram/handlers/notify'
 import {
+  handleSupportMenu, handleSupportWrite, handleSupportReplyStart, handleSupportInbox,
+} from '@/lib/telegram/handlers/support'
+import {
+  handlePlatformStats, handleCompanies, handleBroadcastSend, handleBroadcastCancel,
+} from '@/lib/telegram/handlers/platform'
+import {
   handleSalesWhat,
   handleSalesPlans,
   handleSalesPlan,
@@ -63,6 +69,34 @@ const EXACT_ROUTES: Record<string, (chatId: number, telegramId: number, cbId: st
   'lead:start': async (chatId, telegramId, cbId) => {
     await answerCallback(cbId)
     await handleLeadStart(chatId, telegramId)
+  },
+  'support:write': async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleSupportWrite(chatId, telegramId)
+  },
+  'support:menu': async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleSupportMenu(chatId, telegramId)
+  },
+  'support:inbox': async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleSupportInbox(chatId, telegramId)
+  },
+  'platform:stats': async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handlePlatformStats(chatId, telegramId)
+  },
+  'platform:companies': async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleCompanies(chatId, telegramId)
+  },
+  'broadcast:send': async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleBroadcastSend(chatId, telegramId)
+  },
+  'broadcast:cancel': async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleBroadcastCancel(chatId, telegramId)
   },
   notify_menu: async (chatId, telegramId, cbId) => {
     await answerCallback(cbId)
@@ -112,6 +146,10 @@ const PREFIX_ROUTES: Record<string, (chatId: number, telegramId: number, arg: st
   },
   'lead_set:': async (chatId, telegramId, arg, cbId) => {
     await handleLeadStatus(cbId, chatId, telegramId, arg)
+  },
+  'support_reply:': async (chatId, telegramId, arg, cbId) => {
+    await answerCallback(cbId)
+    await handleSupportReplyStart(chatId, telegramId, arg)
   },
   'notify_hour:': async (chatId, telegramId, arg, cbId) => {
     await handleNotifyHour(chatId, telegramId, arg, cbId)

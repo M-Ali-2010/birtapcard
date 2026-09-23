@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getWebhookInfo, setWebhook } from '@/lib/telegram/bot'
+import { configureBot } from '@/lib/telegram/profile'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,7 +55,12 @@ export async function POST(request: NextRequest) {
     if (!result.ok) {
       return NextResponse.json({ error: result.description ?? 'Telegram отклонил вебхук' }, { status: 502 })
     }
-    return NextResponse.json({ ok: true, url })
+
+    // Заодно прописываем имя, описания, команды и кнопку меню —
+    // чтобы в BotFather руками ничего вбивать не приходилось.
+    const configured = await configureBot()
+
+    return NextResponse.json({ ok: true, url, configured })
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : 'Ошибка' }, { status: 500 })
   }

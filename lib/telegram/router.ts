@@ -29,6 +29,13 @@ import { handleExportMenu } from '@/lib/telegram/handlers/export'
 import { handleLeadsList } from '@/lib/telegram/handlers/leads'
 import { handleNotifyMenu } from '@/lib/telegram/handlers/notify'
 import {
+  handleSupportMenu, handleSupportInput, isWritingSupport, handleSupportInbox,
+} from '@/lib/telegram/handlers/support'
+import {
+  handlePlatformStats, handleCompanies, handleBroadcastStart,
+  handleBroadcastText, isComposingBroadcast,
+} from '@/lib/telegram/handlers/platform'
+import {
   salesMenu,
   handleSalesStart,
   handleSalesWhat,
@@ -75,8 +82,12 @@ async function dispatchSalesText(chatId: number, telegramId: number, text: strin
     await handleLeadStart(chatId, telegramId)
     return true
   }
-  if (text === '🆘 Связаться с нами' || text === '/contacts' || text === '/help') {
+  if (text === '🆘 Связаться с нами' || text === '/contacts') {
     await handleSalesContacts(chatId)
+    return true
+  }
+  if (text === '🆘 Поддержка' || text === '/support' || text === '/help') {
+    await handleSupportMenu(chatId, telegramId)
     return true
   }
   return false
@@ -168,15 +179,32 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
     return true
   }
 
-  if (text === '🆘 Поддержка' || text === '🆘 Связаться с нами') {
-    await handleSalesContacts(chatId)
+  if (text === '🆘 Поддержка' || text === '/support') {
+    await handleSupportMenu(chatId, telegramId)
     return true
   }
 
-  // ─── Super Admin (Фаза 4) ────────────────────────────────────────────────
+  // ─── Super Admin ─────────────────────────────────────────────────────────
+  if (profile.role === 'super_admin') {
+    if (text === '📊 Статистика платформы' || text === '/stats') {
+      await handlePlatformStats(chatId, telegramId)
+      return true
+    }
+    if (text === '🏢 Компании' || text === '/companies') {
+      await handleCompanies(chatId, telegramId)
+      return true
+    }
+    if (text === '📢 Рассылка' || text === '/broadcast') {
+      await handleBroadcastStart(chatId, telegramId)
+      return true
+    }
+    if (text === '/support_inbox' || text === '📩 Обращения') {
+      await handleSupportInbox(chatId, telegramId)
+      return true
+    }
+  }
+
   const adminStubs: Record<string, string> = {
-    '📊 Статистика платформы': 'Статистика платформы',
-    '🏢 Компании': 'Компании',
     '🍽 Рестораны': 'Рестораны',
     '🏪 Филиалы': 'Филиалы',
     '👥 Пользователи': 'Пользователи',
@@ -211,8 +239,16 @@ export async function handleMessage(msg: TgMessage) {
   // Команды — кроме /cancel — из формы выпускаем, иначе «/start» станет
   // названием заведения и человек застрянет.
   const isCommand = text.startsWith('/') && text !== '/cancel'
-  if (!isCommand && (await isFillingLead(telegramId))) {
-    if (await handleLeadInput(chatId, telegramId, msg)) return
+  if (!isCommand) {
+    if (await isFillingLead(telegramId)) {
+      if (await handleLeadInput(chatId, telegramId, msg)) return
+    }
+    if (await isWritingSupport(telegramId)) {
+      if (await handleSupportInput(chatId, telegramId, msg)) return
+    }
+    if (await isComposingBroadcast(telegramId)) {
+      if (await handleBroadcastText(chatId, telegramId, text)) return
+    }
   }
 
   // Свой период: ждём от пользователя текст с датами (Фаза 2)

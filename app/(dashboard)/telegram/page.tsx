@@ -302,7 +302,7 @@ function BotSetupCard() {
 
           <div className="row row--wrap" style={{ gap: 9 }}>
             <Button variant={status.connected ? 'ghost' : 'primary'} icon="telegram" loading={connecting} onClick={connect}>
-              {status.connected ? 'Переподключить' : 'Подключить бота'}
+              {status.connected ? 'Переподключить и обновить профиль' : 'Подключить и настроить бота'}
             </Button>
             <Button icon="refresh" onClick={load}>Обновить статус</Button>
           </div>
