@@ -15,6 +15,35 @@ export function db(): SupabaseClient {
   )
 }
 
+// ─── Администраторы по Telegram ID ───────────────────────────────────────────
+//
+// Основатели должны иметь доступ к боту сразу, ещё до того как заведены
+// учётные записи и пройдена привязка через кабинет — иначе заявки и обращения
+// в поддержку некому получать. Список можно расширить переменной
+// TELEGRAM_ADMIN_IDS в Vercel (ID через запятую), не трогая код.
+const BUILTIN_ADMIN_IDS = [
+  1051284463,  // Мухаммад Али
+  7367605132,  // Алим
+]
+
+function adminIds(): Set<number> {
+  const fromEnv = (process.env.TELEGRAM_ADMIN_IDS ?? '')
+    .split(',')
+    .map(v => Number(v.trim()))
+    .filter(v => Number.isFinite(v) && v > 0)
+  return new Set<number>([...BUILTIN_ADMIN_IDS, ...fromEnv])
+}
+
+/** Этот Telegram ID — администратор платформы независимо от привязки аккаунта */
+export function isBuiltinAdmin(telegramId: number): boolean {
+  return adminIds().has(telegramId)
+}
+
+/** Все администраторы из списка — им дублируются заявки и обращения */
+export function builtinAdminIds(): number[] {
+  return [...adminIds()]
+}
+
 // ─── Типы профиля ─────────────────────────────────────────────────────────────
 
 export interface BotProfile {
@@ -29,6 +58,7 @@ export interface BotProfile {
 
 export async function findProfile(telegramId: number): Promise<BotProfile | null> {
   const supabase = db()
+  const builtinAdmin = isBuiltinAdmin(telegramId)
 
   const { data: tg } = await supabase
     .from('telegram_accounts')
@@ -36,7 +66,11 @@ export async function findProfile(telegramId: number): Promise<BotProfile | null
     .eq('telegram_id', telegramId)
     .single()
 
-  if (!tg || !tg.confirmed_at || !tg.active) return null
+  if (!tg || !tg.confirmed_at || !tg.active) {
+    // Аккаунт ещё не привязан, но ID в списке администраторов —
+    // пускаем с правами super_admin и без компании.
+    return builtinAdmin ? ADMIN_FALLBACK : null
+  }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -44,15 +78,25 @@ export async function findProfile(telegramId: number): Promise<BotProfile | null
     .eq('user_id', tg.user_id)
     .single()
 
-  if (!profile) return null
+  if (!profile) return builtinAdmin ? ADMIN_FALLBACK : null
 
   return {
     user_id: profile.user_id,
-    role: profile.role as BotProfile['role'],
+    // Привязанный аккаунт сохраняет свою компанию, но роль повышается
+    role: (builtinAdmin ? 'super_admin' : profile.role) as BotProfile['role'],
     company_id: profile.company_id ?? null,
     branch_id: profile.branch_id ?? null,
     full_name: profile.full_name ?? null,
   }
+}
+
+/** Профиль администратора без учётной записи в кабинете */
+const ADMIN_FALLBACK: BotProfile = {
+  user_id: '00000000-0000-0000-0000-000000000000',
+  role: 'super_admin',
+  company_id: null,
+  branch_id: null,
+  full_name: null,
 }
 
 // ─── Управление состоянием бота (персистентное, через БД) ────────────────────

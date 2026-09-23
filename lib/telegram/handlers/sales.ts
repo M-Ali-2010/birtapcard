@@ -13,7 +13,7 @@
  */
 
 import { sendMessage, keyboard, escapeMd, type ReplyMarkup, type InlineButton } from '@/lib/telegram/bot'
-import { db, setState, getState, clearState } from '@/lib/telegram/db'
+import { db, setState, getState, clearState, builtinAdminIds } from '@/lib/telegram/db'
 import type { TgMessage, TgUser } from '@/lib/telegram/types'
 
 /** Состояние формы заявки в bot_state */
@@ -329,17 +329,24 @@ async function saveLead(
 /** Telegram ID всех подтверждённых super_admin */
 export async function superAdminChatIds(): Promise<number[]> {
   const supabase = db()
+  const ids = new Set<number>(builtinAdminIds())
+
   const { data: admins } = await supabase.from('profiles').select('user_id').eq('role', 'super_admin')
-  if (!admins?.length) return []
+  if (admins?.length) {
+    const { data: accounts } = await supabase
+      .from('telegram_accounts')
+      .select('telegram_id')
+      .in('user_id', admins.map((a) => a.user_id))
+      .eq('active', true)
+      .not('confirmed_at', 'is', null)
 
-  const { data: accounts } = await supabase
-    .from('telegram_accounts')
-    .select('telegram_id')
-    .in('user_id', admins.map((a) => a.user_id))
-    .eq('active', true)
-    .not('confirmed_at', 'is', null)
+    for (const a of accounts ?? []) {
+      const id = Number(a.telegram_id)
+      if (id) ids.add(id)
+    }
+  }
 
-  return (accounts ?? []).map((a) => Number(a.telegram_id)).filter(Boolean)
+  return [...ids]
 }
 
 async function notifyAdminsAboutLead(lead: {

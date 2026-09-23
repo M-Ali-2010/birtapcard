@@ -29,6 +29,9 @@ export async function handleStart(chatId: number, telegramId: number, firstName?
     return
   }
 
+  // Набор команд под роль — чтобы меню рядом со скрепкой совпадало с правами
+  await applyCommandsForChat(chatId, profile.role)
+
   await sendMessage(chatId,
     `✅ Привет, *${profile.full_name ?? 'друг'}*!\n\n` +
     `${ROLE_LABEL[profile.role] ?? ''}\n\n` +
