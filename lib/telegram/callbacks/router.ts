@@ -23,6 +23,7 @@ import { handleAdminApprove, handleAdminReject } from '@/lib/telegram/handlers/a
 import { handleBranchRanking } from '@/lib/telegram/handlers/branches'
 import { handleExportReport } from '@/lib/telegram/handlers/export'
 import { handleLeadsList, handleLeadStatus } from '@/lib/telegram/handlers/leads'
+import { handleNotifyMenu, handleNotifyHour, handleNotifyToggle } from '@/lib/telegram/handlers/notify'
 import {
   handleSalesWhat,
   handleSalesPlans,
@@ -62,6 +63,13 @@ const EXACT_ROUTES: Record<string, (chatId: number, telegramId: number, cbId: st
   'lead:start': async (chatId, telegramId, cbId) => {
     await answerCallback(cbId)
     await handleLeadStart(chatId, telegramId)
+  },
+  notify_menu: async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleNotifyMenu(chatId, telegramId)
+  },
+  notify_toggle: async (chatId, telegramId, cbId) => {
+    await handleNotifyToggle(chatId, telegramId, cbId)
   },
   main_menu: async (chatId, telegramId, cbId) => {
     await answerCallback(cbId)
@@ -104,6 +112,9 @@ const PREFIX_ROUTES: Record<string, (chatId: number, telegramId: number, arg: st
   },
   'lead_set:': async (chatId, telegramId, arg, cbId) => {
     await handleLeadStatus(cbId, chatId, telegramId, arg)
+  },
+  'notify_hour:': async (chatId, telegramId, arg, cbId) => {
+    await handleNotifyHour(chatId, telegramId, arg, cbId)
   },
   'pay_plan:': async (chatId, telegramId, arg, cbId) => {
     await answerCallback(cbId)

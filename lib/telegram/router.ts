@@ -27,6 +27,7 @@ import { comingSoon } from '@/lib/telegram/handlers/comingSoon'
 import { handleMyBranches, handleBranchRankingMenu } from '@/lib/telegram/handlers/branches'
 import { handleExportMenu } from '@/lib/telegram/handlers/export'
 import { handleLeadsList } from '@/lib/telegram/handlers/leads'
+import { handleNotifyMenu } from '@/lib/telegram/handlers/notify'
 import {
   salesMenu,
   handleSalesStart,
@@ -162,8 +163,8 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
     return true
   }
 
-  if (text === '🔔 Уведомления') {
-    await comingSoon(chatId, 'Настройка уведомлений', 'Фазе 5')
+  if (text === '🔔 Уведомления' || text === '/notify') {
+    await handleNotifyMenu(chatId, telegramId)
     return true
   }
 

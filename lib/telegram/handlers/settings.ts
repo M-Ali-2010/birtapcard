@@ -22,6 +22,7 @@ export async function handleSettings(chatId: number, telegramId: number) {
     `Управляйте настройками уведомлений на сайте:`,
     {
       reply_markup: keyboard([
+        [{ text: '🔔 Ежедневный отчёт', callback_data: 'notify_menu' }],
         [{ text: '⚙️ Настройки на сайте', url: 'https://birtapcard.vercel.app/telegram' }],
         navRow(),
       ]),
@@ -39,9 +40,11 @@ export async function handleHelp(chatId: number) {
     `/month — этот месяц\n\n` +
     `💳 *Подписка:*\n` +
     `/subscription — статус и оплата\n\n` +
+    `🔔 *Отчёты:*\n` +
+    `/notify — включить и выбрать час\n\n` +
     `⚙️ *Аккаунт:*\n` +
     `/settings — настройки\n\n` +
-    `📞 *Поддержка:* @birtapcard_support`,
+    `📞 *Поддержка:* @birtapcard`,
     {
       reply_markup: keyboard([
         [{ text: '📊 Статистика', callback_data: 'report:today' }],

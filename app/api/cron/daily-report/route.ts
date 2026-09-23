@@ -1,145 +1,107 @@
+/**
+ * app/api/cron/daily-report/route.ts
+ *
+ * Ежедневная сводка владельцу в Telegram: касания, новые отзывы Google,
+ * переходы по кнопкам, лучшая точка. Текст собирает lib/telegram/reports.ts —
+ * тот же, что отдают кнопки бота, чтобы цифры нигде не расходились.
+ *
+ * Расписание (vercel.json) — ежечасно. Каждая компания получает отчёт в свой
+ * час (telegram_settings.report_hour, ташкентское время), один раз в сутки.
+ *
+ * Если тариф Vercel запускает крон реже, чем раз в час, точное время
+ * недостижимо — тогда срабатывает подстраховка: компания, не получавшая
+ * отчёт больше 26 часов, получает его при ближайшем запуске. Так сводка
+ * приходит в любом случае, просто не минута в минуту.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { sendMessage } from '@/lib/telegram/bot'
+import { fetchCompanyReport, formatReport, getReportRange, previousRange } from '@/lib/telegram/reports'
 
-// ─── Supabase service-role клиент (полный доступ, минуя RLS) ─────────────────
-function createServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+const TZ_OFFSET_MS = 5 * 60 * 60 * 1000  // Ташкент, UTC+5
+const MIN_GAP_MS = 20 * 60 * 60 * 1000   // ближе 20 часов второй отчёт не шлём
+const STALE_MS = 26 * 60 * 60 * 1000     // не было больше 26 часов — шлём, не дожидаясь часа
+
+function serviceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  )
 }
 
-// ─── Отправка сообщения в Telegram ────────────────────────────────────────────
-async function sendTelegram(chatId: string, text: string): Promise<boolean> {
-  const token = process.env.TELEGRAM_BOT_TOKEN
-  if (!token) return false
-
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' }),
-    })
-    const json = await res.json()
-    return json.ok === true
-  } catch {
-    return false
-  }
+interface Settings {
+  id: string
+  company_id: string
+  chat_id: string | null
+  report_hour: number | null
+  last_report_at: string | null
+  companies: { id: string; name: string; active: boolean }[] | { id: string; name: string; active: boolean } | null
 }
-
-// ─── Форматирование даты вида 26.06.2026 ──────────────────────────────────────
-function fmtDate(d: Date): string {
-  return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
-
-// ─── Cron endpoint ────────────────────────────────────────────────────────────
-//
-// Vercel Cron вызывает этот маршрут по расписанию (см. vercel.json):
-//   "0 3 * * *"  →  03:00 UTC = 08:00 по Ташкенту (UTC+5)
-//
-// Заголовок Authorization: Bearer <CRON_SECRET> обязателен.
 
 export async function GET(req: NextRequest) {
-  // ── Проверка секрета ──────────────────────────────────────────────────────
   const auth = req.headers.get('authorization') ?? ''
   const secret = process.env.CRON_SECRET ?? ''
   if (!secret || auth !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const supabase = createServiceClient()
+  const supabase = serviceClient()
+  const now = Date.now()
+  const localHour = new Date(now + TZ_OFFSET_MS).getUTCHours()
 
-  // ── Диапазон: вчера 00:00 — 23:59:59 UTC ─────────────────────────────────
-  const now = new Date()
-  const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
-  const yesterdayStart = new Date(todayUTC.getTime() - 24 * 60 * 60 * 1000)
-  const yesterdayEnd = new Date(todayUTC.getTime() - 1) // на 1 мс раньше сегодня
-  const reportDate = fmtDate(yesterdayStart)
+  const range = getReportRange('yesterday')
+  const prev = previousRange(range)
 
-  // ── Компании с активными Telegram-настройками ─────────────────────────────
-  const { data: tgSettings, error: tgErr } = await supabase
+  const { data: settings, error } = await supabase
     .from('telegram_settings')
-    .select('id, company_id, chat_id, companies(id, name, active)')
+    .select('id, company_id, chat_id, report_hour, last_report_at, companies(id, name, active)')
     .eq('notify_daily', true)
     .eq('active', true)
 
-  if (tgErr) {
-    console.error('[cron/daily-report] telegram_settings error:', tgErr)
-    return NextResponse.json({ error: tgErr.message }, { status: 500 })
+  if (error) {
+    console.error('[cron/daily-report] telegram_settings error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const results: { company: string; sent: boolean; error?: string }[] = []
+  const results: { company: string; sent: boolean; reason?: string }[] = []
 
-  for (const tg of tgSettings ?? []) {
-    const rawCompany = Array.isArray(tg.companies) ? tg.companies[0] : tg.companies
-    const company = rawCompany as { id: string; name: string; active: boolean } | null
-    if (!company || !company.active || !tg.chat_id) continue
+  for (const raw of (settings ?? []) as Settings[]) {
+    const company = Array.isArray(raw.companies) ? raw.companies[0] : raw.companies
+    if (!company?.active || !raw.chat_id) continue
 
-    // ── Филиалы компании ────────────────────────────────────────────────────
-    const { data: branches } = await supabase
-      .from('branches')
-      .select('id, name')
-      .eq('company_id', company.id)
-      .eq('active', true)
+    // ── Пора ли? ────────────────────────────────────────────────────────────
+    const sinceLast = raw.last_report_at ? now - new Date(raw.last_report_at).getTime() : Infinity
+    if (sinceLast < MIN_GAP_MS) continue                       // уже получили сегодня
 
-    if (!branches || branches.length === 0) continue
+    const hour = raw.report_hour ?? 8
+    const due = hour === localHour || sinceLast >= STALE_MS
+    if (!due) continue
 
-    const branchIds = branches.map(b => b.id)
-
-    // ── Статистика за вчера из scan_events ──────────────────────────────────
-    const { data: events } = await supabase
-      .from('scan_events')
-      .select('branch_id, scan_type, is_unique')
-      .in('branch_id', branchIds)
-      .gte('scanned_at', yesterdayStart.toISOString())
-      .lte('scanned_at', yesterdayEnd.toISOString())
-
-    const totalNfc = events?.filter(e => e.scan_type === 'nfc').length ?? 0
-    const totalQr = events?.filter(e => e.scan_type === 'qr').length ?? 0
-    const totalScans = (events?.length) ?? 0
-    const uniqueScans = events?.filter(e => e.is_unique).length ?? 0
-    const conversion = totalScans > 0 ? ((uniqueScans / totalScans) * 100).toFixed(1) : '0.0'
-
-    // ── Лучший филиал (по кол-ву сканов) ────────────────────────────────────
-    const countByBranch: Record<string, number> = {}
-    for (const e of events ?? []) {
-      countByBranch[e.branch_id] = (countByBranch[e.branch_id] ?? 0) + 1
-    }
-    let bestBranch: string | null = null
-    let bestCount = 0
-    for (const [bid, count] of Object.entries(countByBranch)) {
-      if (count > bestCount) { bestCount = count; bestBranch = bid }
-    }
-    const bestBranchName = branches.find(b => b.id === bestBranch)?.name ?? null
-
-    // ── Формируем сообщение ──────────────────────────────────────────────────
-    let text =
-      `📊 *BirTapCard · Отчёт за ${reportDate}*\n\n` +
-      `🏪 *${company.name}*\n` +
-      `📡 NFC: ${totalNfc} сканирований\n` +
-      `⬛ QR: ${totalQr} сканирований\n` +
-      `👥 Уникальных: ${uniqueScans}\n` +
-      `📈 Конверсия: ${conversion}%`
-
-    if (bestBranchName && totalScans > 0) {
-      text += `\n\n🏆 Лучший филиал: *${bestBranchName}* (${bestCount} сканов)`
+    // ── Собираем и отправляем ───────────────────────────────────────────────
+    const data = await fetchCompanyReport(supabase, company.id, range, prev)
+    if (!data) {
+      results.push({ company: company.name, sent: false, reason: 'no-branches' })
+      continue
     }
 
-    if (totalScans === 0) {
-      text += '\n\n_Вчера сканирований не было._'
+    const res = await sendMessage(raw.chat_id, formatReport(data))
+
+    if (res.ok) {
+      await supabase
+        .from('telegram_settings')
+        .update({ last_report_at: new Date(now).toISOString() })
+        .eq('id', raw.id)
+    } else {
+      console.error(`[cron/daily-report] ${company.name}: ${res.error}`)
     }
 
-    // ── Отправляем ──────────────────────────────────────────────────────────
-    const sent = await sendTelegram(tg.chat_id, text)
-    results.push({ company: company.name, sent })
+    results.push({ company: company.name, sent: res.ok, reason: res.ok ? undefined : res.error })
   }
 
-  console.log(`[cron/daily-report] ${reportDate}: sent=${results.filter(r => r.sent).length}/${results.length}`)
+  const sent = results.filter(r => r.sent).length
+  console.log(`[cron/daily-report] hour=${localHour} sent=${sent}/${results.length}`)
 
-  return NextResponse.json({
-    ok: true,
-    date: reportDate,
-    results,
-  })
+  return NextResponse.json({ ok: true, hour: localHour, period: range.label, sent, results })
 }
