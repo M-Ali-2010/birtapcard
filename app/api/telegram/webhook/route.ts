@@ -46,5 +46,12 @@ export async function POST(req: NextRequest) {
 // ─── GET /api/telegram/webhook — health check ────────────────────────────────
 
 export async function GET() {
-  return NextResponse.json({ ok: true, message: 'BirTapCard Telegram Webhook is running' })
+  // Версия сборки — чтобы с любой машины было видно, какой код реально
+  // задеплоен, и не гадать, доехало обновление или нет.
+  return NextResponse.json({
+    ok: true,
+    message: 'BirTapCard Telegram Webhook is running',
+    build: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? 'local',
+    features: ['sales', 'leads', 'support', 'reports', 'platform', 'admin-allowlist'],
+  })
 }

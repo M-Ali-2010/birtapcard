@@ -12,7 +12,7 @@
  */
 
 import { sendMessage, keyboard } from '@/lib/telegram/bot'
-import { findProfile, getState, type BotProfile } from '@/lib/telegram/db'
+import { findProfile, getState, isBuiltinAdmin, type BotProfile } from '@/lib/telegram/db'
 import { menuForRole } from '@/lib/telegram/keyboards/menus'
 import type { TgMessage } from '@/lib/telegram/types'
 import { handleStart, handleLinkToken } from '@/lib/telegram/handlers/start'
@@ -258,6 +258,19 @@ export async function handleMessage(msg: TgMessage) {
       await handleCustomRangeInput(chatId, telegramId, text)
       return
     }
+  }
+
+  // ─── /whoami — кто я для бота: ID, роль, есть ли админские права ────────
+  if (text === '/whoami' || text === '/id') {
+    const p = await findProfile(telegramId)
+    await sendMessage(chatId,
+      '🪪 *Кто вы для бота*\n\n' +
+      `Telegram ID: \`${telegramId}\`\n` +
+      `В списке администраторов: *${isBuiltinAdmin(telegramId) ? 'да' : 'нет'}*\n` +
+      `Роль: *${p?.role ?? 'гость (аккаунт не привязан)'}*\n` +
+      `Компания: *${p?.company_id ? 'привязана' : '—'}*`
+    )
+    return
   }
 
   // ─── /start ────────────────────────────────────────────────────────────
