@@ -25,6 +25,73 @@ type TelegramSetting = {
 
 type CompanyOption = { id: string; name: string }
 
+type Check = { id: string; label: string; level: 'ok' | 'warn' | 'fail'; detail: string; fix?: string }
+
+/* ─── Готовность системы ─────────────────────────────────────────────────── */
+
+const LEVEL_COLOR = { ok: 'var(--mint)', warn: 'var(--orange)', fail: '#FF5C5C' } as const
+
+function ReadinessCard() {
+  const [checks, setChecks] = useState<Check[] | null>(null)
+  const [level, setLevel] = useState<'ok' | 'warn' | 'fail'>('ok')
+  const [loading, setLoading] = useState(true)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/health')
+      const json = await res.json()
+      if (res.ok) { setChecks(json.checks ?? []); setLevel(json.level ?? 'ok') }
+      else setChecks([])
+    } catch { setChecks([]) }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const problems = (checks ?? []).filter(c => c.level !== 'ok')
+
+  return (
+    <Panel
+      title="Готовность системы"
+      sub={loading ? 'Проверяю…' : level === 'ok' ? 'Всё работает' : `Требует внимания: ${problems.length}`}
+      action={<Button icon="refresh" onClick={load} loading={loading}>Проверить</Button>}
+    >
+      {loading && !checks ? (
+        <Skeleton h={180} r={14} />
+      ) : (
+        <div className="stack" style={{ gap: 9 }}>
+          {(checks ?? []).map(c => (
+            <div
+              key={c.id}
+              style={{
+                display: 'flex', gap: 11, alignItems: 'flex-start',
+                background: 'var(--bg2)', border: '1px solid var(--border)',
+                borderRadius: 'var(--r-md)', padding: '11px 13px',
+              }}
+            >
+              <span style={{
+                width: 9, height: 9, borderRadius: '50%', flexShrink: 0, marginTop: 5,
+                background: LEVEL_COLOR[c.level],
+                boxShadow: `0 0 0 3px color-mix(in srgb, ${LEVEL_COLOR[c.level]} 18%, transparent)`,
+              }} />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 650, lineHeight: 1.35 }}>{c.label}</div>
+                <div style={{ fontSize: 12.5, color: 'var(--text-dim)', marginTop: 2, lineHeight: 1.45 }}>{c.detail}</div>
+                {c.fix && (
+                  <div style={{ fontSize: 12, color: 'var(--orange)', marginTop: 5, lineHeight: 1.45 }}>
+                    → {c.fix}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Panel>
+  )
+}
+
 /* ─── Карточка компании ──────────────────────────────────────────────────── */
 
 function CompanyTelegramCard({
@@ -328,12 +395,14 @@ export default function TelegramPage() {
           )}
         </div>
         <div style={{ fontSize: 13.5, lineHeight: 1.75, color: 'var(--text-dim)', position: 'relative' }}>
-          <strong style={{ color: 'var(--text)' }}>Ежедневные отчёты</strong> уходят каждое утро в{' '}
-          <strong style={{ color: 'var(--mint)' }}>08:00 по Ташкенту</strong>: сканирования, уникальные
-          посетители, конверсия и лучший филиал дня. Укажите Chat ID вашего чата или канала
-          и нажмите «Проверить подключение».
+          <strong style={{ color: 'var(--text)' }}>Ежедневный отчёт</strong> за прошедшие сутки:
+          касания, новые отзывы Google и рейтинг, переходы по каждой кнопке и лучшая точка.
+          Час отправки владелец выбирает сам в боте — <strong style={{ color: 'var(--mint)' }}>🔔 Уведомления</strong>,
+          по умолчанию 08:00 по Ташкенту. Укажите Chat ID чата или канала и нажмите «Проверить подключение».
         </div>
       </div>
+
+      <ReadinessCard />
 
       <BotSetupCard />
 
@@ -348,15 +417,15 @@ export default function TelegramPage() {
           }}
         >
           <div style={{ color: 'var(--mint)', fontWeight: 700, marginBottom: 6 }}>
-            📊 BirTapCard · Отчёт за 26.06.2026
+            📊 BirTapCard · Вчера, 22.09
           </div>
           <div>🏪 <strong>Grand Registan</strong></div>
-          <div style={{ color: 'var(--text-dim)' }}>📡 NFC: 247 сканирований</div>
-          <div style={{ color: 'var(--text-dim)' }}>⬛ QR: 389 сканирований</div>
-          <div style={{ color: 'var(--mint)' }}>📈 Конверсия: 81.3%</div>
-          <div style={{ color: 'var(--text-dim)' }}>👥 Уникальных: 512</div>
+          <div style={{ marginTop: 6 }}>👆 Касаний: <strong>636</strong> (+48) <span style={{ color: 'var(--text-muted)' }}>(NFC 247 · QR 389)</span></div>
+          <div style={{ color: 'var(--mint)' }}>⭐ Новых отзывов Google: <strong>14</strong> <span style={{ color: 'var(--text-muted)' }}>рейтинг 4.8 (+0.1)</span></div>
+          <div style={{ marginTop: 6 }}>👉 Переходы: <strong>512</strong> из 636 <span style={{ color: 'var(--text-muted)' }}>(81%)</span></div>
+          <div style={{ color: 'var(--text-dim)', paddingLeft: 14 }}>Google 341 · Instagram 96 · Telegram 48 · Яндекс 27</div>
           <div style={{ marginTop: 8, color: 'var(--text-muted)', fontSize: 11 }}>
-            🏆 Лучший филиал: Grand Airport (+23%)
+            🏆 Лучшая точка: Grand Airport — 284
           </div>
         </div>
       </Panel>
