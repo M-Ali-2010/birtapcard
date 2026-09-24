@@ -369,7 +369,7 @@ h1 em{font-style:normal;background:linear-gradient(120deg,var(--mint2),var(--min
 .yb li{position:relative;padding-left:20px;font-size:13.5px;line-height:1.5;color:var(--muted)}
 .yb li::before{content:'✓';position:absolute;left:0;top:0;color:#FFD666;font-weight:900;font-size:12px}
 .yb-note{margin:12px 0 0;padding-top:11px;border-top:1px dashed rgba(255,214,102,.3);font-size:12.5px;color:var(--dim);line-height:1.5}
-@media (min-width:860px){ .tiers{grid-template-columns:1fr 1fr 1fr;gap:14px} .yb-head{flex-direction:row;align-items:center;gap:12px} }
+@media (min-width:760px){ .tiers{grid-template-columns:1fr 1fr;gap:16px} .yb-head{flex-direction:row;align-items:center;gap:12px} }
 
 
 /* ─── FAQ ────────────────────────────────────────────── */
@@ -719,8 +719,8 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 <section>
   <div class="wrap">
     <div class="eyebrow rv"><i></i><span data-i="pz.eye">Тарифы</span></div>
-    <h2 class="rv" data-i="pz.h">Три тарифа. <em>Один год.</em> Без скрытых платежей</h2>
-    <p class="lead rv" data-i="pz.lead">В каждом тарифе — карточка NFC + QR, установка на месте, экран с вашим логотипом на трёх языках и личный кабинет. Разница — в том, сколько точек контакта вы получаете и насколько глубоко видите, что происходит.</p>
+    <h2 class="rv" data-i="pz.h">Два тарифа. <em>Год подписки.</em> Без скрытых платежей</h2>
+    <p class="lead rv" data-i="pz.lead">В обоих — карточка NFC + QR, установка на месте, все площадки и соцсети, экран с вашим логотипом на трёх языках и личный кабинет. Разница — в числе точек контакта и в глубине аналитики.</p>
 
     <div class="tiers">
       <!-- СТАРТ -->
@@ -731,34 +731,16 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
         <div class="tier-mo" data-i="t1.mo">≈ 50 000 сум в месяц — 1 650 сум в день</div>
         <ul>
           <li data-i="t1.1"><b>1 карточка</b> NFC + QR, установка на месте</li>
-          <li data-i="t1.2"><b>3 кнопки на выбор</b> — например Google, Instagram, Telegram</li>
+          <li data-i="t1.2"><b>Все площадки и соцсети</b>: Google, Яндекс, 2ГИС, Instagram, Telegram, бот, сайт</li>
           <li data-i="t1.3"><b>Экран с вашим логотипом</b>, узбекский / русский / английский</li>
-          <li data-i="t1.4"><b>Личный кабинет</b>: касания и нажатия по каждой кнопке за последние 30 дней, в реальном времени</li>
+          <li data-i="t1.4"><b>Личный кабинет</b>: касания и нажатия по каждой кнопке, в реальном времени</li>
+          <li data-i="t1.7"><b>Ежедневный отчёт в Telegram</b> — час отправки выбираете сами</li>
           <li data-i="t1.5">Замена карточки при поломке — 1 раз в год бесплатно</li>
           <li data-i="t1.6">Поддержка в Telegram, ответ в течение суток</li>
         </ul>
               </div>
 
       <!-- БИЗНЕС -->
-      <div class="tier hi rv">
-        <span class="tier-badge" data-i="t2.badge">Выбирают чаще всего</span>
-        <div class="tier-name" data-i="t2.name">Бизнес</div>
-        <div class="tier-for" data-i="t2.for">Заведение, которое управляет репутацией, а не надеется на неё</div>
-        <div class="tier-sum"><b>900&nbsp;000</b><span data-i="pz.peryear">сум / год</span></div>
-        <div class="tier-mo" data-i="t2.mo">≈ 75 000 сум в месяц — один средний чек</div>
-        <ul>
-          <li class="plus" data-i="t2.plus">Всё из «Старт», плюс:</li>
-          <li data-i="t2.1"><b>2 карточки</b> — касса + стол, ресепшн + бар. Вторая точка контакта даёт в 1,5–2 раза больше касаний</li>
-          <li data-i="t2.2"><b>Все кнопки без ограничений</b>: Google, Яндекс, 2ГИС, Instagram, Telegram, бот, сайт, меню, Wi-Fi</li>
-          <li data-i="t2.3"><b>Полная аналитика в личном кабинете</b>: любой период, по дням и часам, сравнение карточек, выгрузка в Excel</li>
-          <li data-i="t2.4"><b>Реальные отзывы и рейтинг Google</b> в кабинете — опубликованные отзывы, а не переходы</li>
-          <li data-i="t2.5"><b>Отчёт в Telegram</b> каждое утро в 9:00</li>
-          <li data-i="t2.7">Замена карточки при поломке — 2 раза в год бесплатно</li>
-          <li data-i="t2.8">Приоритетная поддержка — ответ в течение 2 часов в рабочее время</li>
-        </ul>
-      </div>
-
-      <!-- PRO -->
       <div class="tier top rv">
         <span class="tier-badge gold" data-i="t3.badge">Максимум</span>
         <div class="tier-name gold" data-i="t3.name">Pro</div>
@@ -766,8 +748,10 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
         <div class="tier-sum"><b>1&nbsp;200&nbsp;000</b><span data-i="pz.peryear">сум / год</span></div>
         <div class="tier-mo" data-i="t3.mo">≈ 100 000 сум в месяц — один вернувшийся гость окупает</div>
         <ul>
-          <li class="plus" data-i="t3.plus">Всё из «Бизнес», плюс:</li>
+          <li class="plus" data-i="t3.plus">Всё из «Старт», плюс:</li>
           <li data-i="t3.1"><b>До 4 карточек на один филиал</b> — бар, стол, ресепшн и любые точки на ваше усмотрение</li>
+          <li data-i="t3.2"><b>Полная аналитика</b>: любой период, по дням и часам, сравнение точек, выгрузка в Excel</li>
+          <li data-i="t3.2b"><b>Реальные отзывы и рейтинг Google</b> в кабинете — опубликованные отзывы, а не переходы</li>
           <li data-i="t3.3"><b>Индивидуальный дизайн экрана</b> в вашем фирменном стиле</li>
           <li data-i="t3.4"><b>Уведомление о каждом новом отзыве Google</b> и падении рейтинга — в Telegram</li>
           <li data-i="t3.5"><b>Кнопка «Написать владельцу»</b> — недовольный гость пишет вам напрямую, вы решаете вопрос до того, как он ушёл</li>
@@ -806,9 +790,17 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 
     <div class="rv" style="margin-bottom:11px">
       <div class="callout callout--lock">
+        <span>📅</span>
+        <div><b data-i="pz.daysh">Подписка — 365 дней с момента подключения.</b>
+          <span data-i="pz.daysp"> Отсчёт идёт со дня установки карточки, а не с начала месяца. Всё это время работает переадресация, кабинет и отчёты.</span></div>
+      </div>
+    </div>
+
+    <div class="rv" style="margin-bottom:11px">
+      <div class="callout callout--lock">
         <span>🔒</span>
         <div><b data-i="pz.lockh">Цена фиксируется за вами.</b>
-          <span data-i="pz.lockp"> Платформа растёт, функций становится больше — но для тех, кто подключается сейчас, стоимость подписки не изменится ни через год, ни через три. Всё, что мы добавим дальше, вы получаете без доплат. Для новых заведений цена позже будет выше — но не для вас.</span></div>
+          <span data-i="pz.lockp"> Подключились сейчас — эта цена закрепляется за вами. Платформа растёт, появляются новые функции, для новых заведений цена будет выше — вы продолжаете платить столько же и получаете все обновления без доплат.</span></div>
       </div>
     </div>
 
@@ -1048,36 +1040,27 @@ const UZ = {
 "wh.8": "Tarmoq va franshizalar",
 "cta.seeprice": "Tariflarni ko'rish",
 "pz.eye": "Tariflar",
-"pz.h": "Uchta tarif. <em>Bir yil.</em> Yashirin to'lovlarsiz",
-"pz.lead": "Har bir tarifda — NFC + QR kartochka, joyida o'rnatish, uch tilda logotipingiz bilan ekran va shaxsiy kabinet. Farq — nechta aloqa nuqtasi olishingizda va nima bo'layotganini qanchalik chuqur ko'rishingizda.",
+"pz.h": "Ikki tarif. <em>Bir yillik obuna.</em> Yashirin to'lovlarsiz",
+"pz.lead": "Ikkalasida ham — NFC + QR kartochka, joyida o'rnatish, barcha maydonchalar va ijtimoiy tarmoqlar, uch tilda logotipingiz bilan ekran va shaxsiy kabinet. Farq — aloqa nuqtalari sonida va analitika chuqurligida.",
 "t1.name": "Start",
 "t1.for": "Bitta nuqta. Sharh yig'ishni shu haftadayoq boshlash",
 "pz.peryear": "so'm / yil",
 "t1.mo": "≈ oyiga 50 000 so'm — kuniga 1 650 so'm",
 "t1.1": "<b>1 ta kartochka</b> NFC + QR, joyida o'rnatish",
-"t1.2": "<b>Tanlov uchun 3 ta tugma</b> — masalan Google, Instagram, Telegram",
+"t1.2": "<b>Barcha maydonchalar va ijtimoiy tarmoqlar</b>: Google, Yandex, 2GIS, Instagram, Telegram, bot, sayt",
 "t1.3": "<b>Logotipingiz bilan ekran</b>, o'zbek / rus / ingliz",
-"t1.4": "<b>Shaxsiy kabinet</b>: oxirgi 30 kundagi tegizishlar va har bir tugma bo'yicha bosishlar, real vaqtda",
+"t1.4": "<b>Shaxsiy kabinet</b>: tegizishlar va har bir tugma bo'yicha bosishlar, real vaqtda",
 "t1.5": "Buzilganda kartochkani almashtirish — yiliga 1 marta bepul",
+"t1.7": "<b>Telegram'da kunlik hisobot</b> — yuborish soatini o'zingiz tanlaysiz",
 "t1.6": "Telegram'da qo'llab-quvvatlash, bir sutka ichida javob",
-"t2.badge": "Eng ko'p tanlanadi",
-"t2.name": "Biznes",
-"t2.for": "Obro'siga umid qilmay, uni boshqaradigan muassasa",
-"t2.mo": "≈ oyiga 75 000 so'm — bitta o'rtacha chek",
-"t2.plus": "«Start»dagi hamma narsa, qo'shimcha:",
-"t2.1": "<b>2 ta kartochka</b> — kassa + stol, resepshn + bar. Ikkinchi aloqa nuqtasi 1,5–2 barobar ko'p tegizish beradi",
-"t2.2": "<b>Barcha tugmalar cheklovsiz</b>: Google, Yandex, 2GIS, Instagram, Telegram, bot, sayt, menyu, Wi-Fi",
-"t2.3": "<b>Shaxsiy kabinetda to'liq analitika</b>: istalgan davr, kun va soatlar bo'yicha, kartochkalarni taqqoslash, Excel'ga yuklash",
-"t2.4": "Kabinetda <b>haqiqiy Google sharhlari va reytingi</b> — o'tishlar emas, e'lon qilingan sharhlar",
-"t2.5": "Har kuni ertalab 9:00 da <b>Telegram'da hisobot</b>",
-"t2.7": "Buzilganda kartochkani almashtirish — yiliga 2 marta bepul",
-"t2.8": "Ustuvor qo'llab-quvvatlash — ish vaqtida 2 soat ichida javob",
 "t3.badge": "Maksimum",
 "t3.name": "Pro",
 "t3.for": "Bir nechta filiali bor muassasalar va mijoz kanallarini ma'lumotlar asosida boshqarmoqchi bo'lgan biznes uchun",
 "t3.mo": "≈ oyiga 100 000 so'm — bitta qaytgan mehmon qoplaydi",
-"t3.plus": "«Biznes»dagi hamma narsa, qo'shimcha:",
+"t3.plus": "«Start»dagi hamma narsa, qo'shimcha:",
 "t3.1": "<b>Bitta filialga 4 tagacha kartochka</b> — bar, stol, resepshn va o'zingiz xohlagan istalgan nuqtalar",
+"t3.2": "<b>To'liq analitika</b>: istalgan davr, kun va soatlar bo'yicha, nuqtalarni taqqoslash, Excel'ga yuklash",
+"t3.2b": "Kabinetda <b>haqiqiy Google sharhlari va reytingi</b> — o'tishlar emas, e'lon qilingan sharhlar",
 "t3.3": "Firma uslubingizda <b>ekranning individual dizayni</b>",
 "t3.4": "<b>Har bir yangi Google sharhi</b> va reyting tushishi haqida Telegram'da xabar",
 "t3.5": "<b>«Egasiga yozish» tugmasi</b> — norozi mehmon to'g'ridan-to'g'ri sizga yozadi, u ketmasdan masalani hal qilasiz",
@@ -1100,7 +1083,9 @@ const UZ = {
 "ad.3": "Tarifdan tashqari qo'shimcha kartochka",
 "ad.3p": "150 000 so'm / yil",
 "pz.lockh": "Narx siz uchun qat'iy qoladi.",
-"pz.lockp": " Platforma o'sadi, imkoniyatlar ko'payadi — lekin hozir ulanganlar uchun obuna narxi na bir yildan keyin, na uch yildan keyin o'zgaradi. Keyin qo'shadigan hamma narsani qo'shimcha to'lovsiz olasiz. Yangi muassasalar uchun narx keyinroq yuqori bo'ladi — lekin siz uchun emas.",
+"pz.daysh": "Obuna — ulangan paytdan 365 kun.",
+"pz.daysp": " Hisob kartochka o'rnatilgan kundan boshlanadi, oy boshidan emas. Shu davr mobaynida yo'naltirish, kabinet va hisobotlar ishlaydi.",
+"pz.lockp": " Hozir ulandingiz — bu narx siz uchun mahkamlanadi. Platforma o'sadi, yangi funksiyalar paydo bo'ladi, yangi muassasalar uchun narx yuqori bo'ladi — siz esa o'sha narxni to'lab, barcha yangilanishlarni qo'shimcha to'lovsiz olasiz.",
 "pz.uph": "Yuqori tarifga o'tish — istalgan paytda.",
 "pz.upp": " «Start»dan boshladingiz, ikki oydan keyin Yandex va 2GIS kerakligini tushundingiz — faqat qolgan oylar uchun farqni to'laysiz. Hech narsa kuymaydi.",
 "pz.grh": "Tekshirish uchun 14 kun.",
@@ -1251,36 +1236,27 @@ const EN = {
 "wh.8": "Chains & franchises",
 "cta.seeprice": "See pricing",
 "pz.eye": "Pricing",
-"pz.h": "Three plans. <em>One year.</em> No hidden fees",
-"pz.lead": "Every plan includes the NFC + QR card, on-site installation, a three-language screen with your logo and the owner dashboard. The difference is how many touchpoints you get and how deeply you see what's going on.",
+"pz.h": "Two plans. <em>A year of service.</em> No hidden fees",
+"pz.lead": "Both include the NFC + QR card, on-site installation, every platform and social network, a three-language screen with your logo and the owner dashboard. The difference is the number of touchpoints and the depth of analytics.",
 "t1.name": "Start",
 "t1.for": "One location. Start collecting reviews this week",
 "pz.peryear": "UZS / year",
 "t1.mo": "≈ 50,000 UZS a month — 1,650 UZS a day",
 "t1.1": "<b>1 card</b> NFC + QR, installed on site",
-"t1.2": "<b>3 buttons of your choice</b> — e.g. Google, Instagram, Telegram",
+"t1.2": "<b>Every platform and social network</b>: Google, Yandex, 2GIS, Instagram, Telegram, bot, website",
 "t1.3": "<b>Screen with your logo</b>, Uzbek / Russian / English",
-"t1.4": "<b>Owner dashboard</b>: taps and clicks per button for the last 30 days, in real time",
+"t1.4": "<b>Owner dashboard</b>: taps and clicks per button, in real time",
 "t1.5": "Card replacement if it breaks — once a year, free",
+"t1.7": "<b>Daily Telegram report</b> — you pick the hour it arrives",
 "t1.6": "Telegram support, reply within 24 hours",
-"t2.badge": "Most popular",
-"t2.name": "Business",
-"t2.for": "A venue that manages its reputation instead of hoping for it",
-"t2.mo": "≈ 75,000 UZS a month — one average bill",
-"t2.plus": "Everything in Start, plus:",
-"t2.1": "<b>2 cards</b> — till + table, reception + bar. A second touchpoint brings 1.5–2× more taps",
-"t2.2": "<b>All buttons, no limits</b>: Google, Yandex, 2GIS, Instagram, Telegram, bot, website, menu, Wi-Fi",
-"t2.3": "<b>Full analytics in the dashboard</b>: any period, by day and hour, card comparison, Excel export",
-"t2.4": "<b>Real Google reviews and rating</b> in the dashboard — published reviews, not clicks",
-"t2.5": "<b>Telegram report</b> every morning at 9:00",
-"t2.7": "Card replacement if it breaks — twice a year, free",
-"t2.8": "Priority support — reply within 2 hours in working time",
 "t3.badge": "Everything",
 "t3.name": "Pro",
 "t3.for": "For venues with several branches and businesses that want to manage customer channels based on data",
 "t3.mo": "≈ 100,000 UZS a month — one returning guest pays for it",
-"t3.plus": "Everything in Business, plus:",
+"t3.plus": "Everything in Start, plus:",
 "t3.1": "<b>Up to 4 cards per branch</b> — bar, table, reception and any spots you choose",
+"t3.2": "<b>Full analytics</b>: any period, by day and hour, location comparison, Excel export",
+"t3.2b": "<b>Real Google reviews and rating</b> in the dashboard — published reviews, not clicks",
 "t3.3": "<b>Custom screen design</b> in your brand style",
 "t3.4": "<b>Alert for every new Google review</b> and for rating drops — in Telegram",
 "t3.5": "<b>“Message the owner” button</b> — an unhappy guest writes to you directly, and you fix it before they leave",
@@ -1303,7 +1279,9 @@ const EN = {
 "ad.3": "Extra card beyond the plan",
 "ad.3p": "150,000 UZS / year",
 "pz.lockh": "Your price is locked in.",
-"pz.lockp": " The platform grows and gains features — but for those who join now the subscription price won't change in a year or in three. Everything we add later, you get at no extra cost. New venues will pay more later — you won't.",
+"pz.daysh": "The subscription runs 365 days from connection.",
+"pz.daysp": " It starts the day the card is installed, not at the start of a month. Redirects, dashboard and reports work for that whole time.",
+"pz.lockp": " Join now and this price is locked to you. The platform grows, new features arrive, new venues will pay more — you keep paying the same and get every update at no extra cost.",
 "pz.uph": "Upgrade any time.",
 "pz.upp": " Started on Start, realised two months later you need Yandex and 2GIS — you pay only the difference for the remaining months. Nothing is lost.",
 "pz.grh": "14 days to check.",
