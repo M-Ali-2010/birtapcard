@@ -681,19 +681,13 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
   <div class="wrap">
     <div class="eyebrow rv"><i></i><span data-i="pz.eye">Условия</span></div>
     <h2 class="rv" data-i="pz.h">Сколько это стоит</h2>
-    <p class="lead rv" data-i="pz.lead">Два тарифа, оба на год. В обоих — карточка в дизайне PDP School, установка на месте, все площадки школы и личный кабинет.</p>
+    <p class="lead rv" data-i="pz.lead">Один тариф на год. В него входит всё: карточки в дизайне PDP School, установка на месте, все площадки школы и личный кабинет.</p>
 
-    <div class="prices">
-      <div class="price rv">
-        <div class="price-top"><b data-i="pz.t1">Старт</b></div>
-        <div class="price-sum"><b>600&nbsp;000</b><span data-i="pz.peryear">сум / год</span></div>
-        <div class="price-note" data-i="pz.t1note">Одна карточка — ресепшн или приёмная комиссия. Все кнопки, личный кабинет и ежедневный отчёт в Telegram.</div>
-        <div class="price-then"><span data-i="pz.t1mo">это</span> <b>50&nbsp;000</b> <span data-i="pz.permonth">сум в месяц</span></div>
-      </div>
+    <div class="prices" style="grid-template-columns:1fr">
       <div class="price hi rv">
-        <div class="price-top"><b data-i="pz.t2">Pro</b><span class="vs-b" data-i="pz.t2badge">для школы</span></div>
+        <div class="price-top"><b data-i="pz.t2">Всё включено</b><span class="vs-b" data-i="pz.t2badge">для школы</span></div>
         <div class="price-sum"><b>1&nbsp;200&nbsp;000</b><span data-i="pz.peryear">сум / год</span></div>
-        <div class="price-note" data-i="pz.t2note">До 4 карточек на корпус, полная аналитика, реальные отзывы Google, индивидуальный дизайн экрана и до 5 сотрудников в кабинете.</div>
+        <div class="price-note" data-i="pz.t2note">До 4 карточек на корпус, полная аналитика, реальные отзывы Google, индивидуальный дизайн экрана, ежедневный отчёт и до 5 сотрудников в кабинете.</div>
         <div class="price-save" data-i="pz.t2save">Ресепшн + приёмная комиссия + коридоры — в одном тарифе</div>
       </div>
     </div>
@@ -705,7 +699,7 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
 
     <div class="callout callout--lock col rv" style="margin-bottom:18px">
       <b data-i="pz.multi">Несколько корпусов?</b>
-      <span data-i="pz.multip">Каждый корпус со своей статистикой в одном кабинете. От трёх корпусов — Pro на первый, −20% на каждый следующий.</span>
+      <span data-i="pz.multip">Каждый корпус со своей статистикой в одном кабинете. От трёх корпусов — полная цена за первый, −20% на каждый следующий.</span>
     </div>
 
     <h3 class="rv" style="font-size:16px;margin:0 0 10px" data-i="pz.sub">Что входит в подписку</h3>
@@ -715,7 +709,7 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
       <div class="rv"><b>✓</b><span data-i="pz.s1">Личный кабинет: нажатия по каждой кнопке, реальные отзывы Google, сравнение точек</span></div>
       <div class="rv"><b>✓</b><span data-i="pz.s2">Экран после касания на трёх языках с логотипом школы</span></div>
       <div class="rv"><b>✓</b><span data-i="pz.s3">Ежедневный отчёт в Telegram администрации</span></div>
-      <div class="rv"><b>✓</b><span data-i="pz.s4">Замена устройства при поломке — в «Старт» 1 раз в год, в Pro 4 раза</span></div>
+      <div class="rv"><b>✓</b><span data-i="pz.s4">Замена устройства при поломке — 4 раза в год</span></div>
       <div class="rv"><b>✓</b><span data-i="pz.s5">Поддержка напрямую в Telegram — без тикетов</span></div>
     </div>
 
@@ -931,18 +925,15 @@ const UZ = {
 
 'pz.eye':'Shartlar',
 'pz.h':'Bu qancha turadi',
-'pz.lead':"Ikkita tarif, ikkalasi ham bir yillik. Ikkalasida ham — PDP School dizaynidagi kartochka, joyida o'rnatish, maktabning barcha maydonchalari va shaxsiy kabinet.",
+'pz.lead':"Bir yillik bitta tarif. Unga hammasi kiradi: PDP School dizaynidagi kartochkalar, joyida o'rnatish, maktabning barcha maydonchalari va shaxsiy kabinet.",
 'pz.permonth':"so'm oyiga",
 'pz.multi':'Bir nechta bino bormi?',
-'pz.multip':"Har bir bino o'z statistikasi bilan bitta kabinetda. Uchta binodan boshlab — birinchisiga Pro, har keyingisiga −20%.",
+'pz.multip':"Har bir bino o'z statistikasi bilan bitta kabinetda. Uchta binodan boshlab — birinchisiga to'liq narx, har keyingisiga −20%.",
 'pz.peryear':"so'm / yil",
 'pz.permonth':"so'm oyiga",
-'pz.t1':'Start',
-'pz.t1note':"Bitta kartochka — resepshn yoki qabul komissiyasi. Barcha tugmalar, shaxsiy kabinet va Telegram'da kunlik hisobot.",
-'pz.t1mo':'bu',
-'pz.t2':'Pro',
+'pz.t2':'Hammasi kiritilgan',
 'pz.t2badge':'maktab uchun',
-'pz.t2note':"Binoga 4 tagacha kartochka, to'liq analitika, haqiqiy Google sharhlari, ekranning individual dizayni va kabinetda 5 tagacha xodim.",
+'pz.t2note':"Binoga 4 tagacha kartochka, to'liq analitika, haqiqiy Google sharhlari, ekranning individual dizayni, kunlik hisobot va kabinetda 5 tagacha xodim.",
 'pz.t2save':"Resepshn + qabul komissiyasi + yo'laklar — bitta tarifda",
 'pz.daysh':'Obuna — ulangan paytdan 365 kun.',
 'pz.daysp':"Hisob kartochka o'rnatilgan kundan boshlanadi, oy boshidan emas.",
@@ -952,7 +943,7 @@ const UZ = {
 'pz.s1':"Shaxsiy kabinet: har bir tugma bo'yicha bosishlar, haqiqiy Google sharhlari, nuqtalarni taqqoslash",
 'pz.s2':"Maktab logotipi bilan uch tilda tegizishdan keyingi ekran",
 'pz.s3':"Ma'muriyatga har kuni Telegram'da hisobot",
-'pz.s4':"Buzilganda qurilmani almashtirish — «Start»da yiliga 1 marta, Pro'da 4 marta",
+'pz.s4':'Buzilganda qurilmani almashtirish — yiliga 4 marta',
 'pz.s5':"To'g'ridan-to'g'ri Telegram'da qo'llab-quvvatlash — tiketlarsiz",
 'pz.lockh':"Narx maktab uchun muhrlanadi.",
 'pz.lockp':"Hozir ulandingiz — bu narx maktab uchun mahkamlanadi. Yangi funksiyalar paydo bo'ladi, yangi mijozlar uchun narx oshadi — PDP School esa o'sha narxni to'lab, barcha yangilanishlarni qo'shimcha to'lovsiz oladi.",
