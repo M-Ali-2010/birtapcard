@@ -106,14 +106,16 @@ h1 em{font-style:normal;background:linear-gradient(120deg,var(--mint2),var(--min
 .hero p{color:var(--muted);font-size:16px;line-height:1.6;margin:0 auto 26px;max-width:400px}
 
 .card-shot{
-  position:relative;margin:0 auto 26px;max-width:290px;border-radius:24px;overflow:hidden;
+  position:relative;margin:0 auto 26px;max-width:330px;border-radius:30px;overflow:hidden;
   border:1px solid var(--border2);
   box-shadow:0 30px 70px -25px rgba(0,0,0,.9),0 0 0 1px rgba(0,217,174,.1)
 }
 .card-shot::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(5,7,14,.55),transparent 45%)
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(5,7,14,.45),transparent 45%)
 }
+.card-shot.crop::after{background:linear-gradient(to top,rgba(5,7,14,.55),transparent 45%)}
+.card-shot:not(.crop)::after{background:none}
 .card-shot.crop{aspect-ratio:5/6}
 .card-shot.crop img{width:100%;height:100%;object-fit:cover;object-position:center 42%}
 .card-shot .tag{
@@ -559,7 +561,7 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
     <p data-i="h2.sub">Карточка NFC + QR у кассы. Гость приложил телефон — оставил отзыв, подписался на Instagram или Telegram. Вы видите каждое касание в кабинете.</p>
 
     <div class="card-shot">
-      <img src="card-white.jpg" alt="BirTapCard — карточка NFC и QR" width="1254" height="1254">
+      <img src="card-white.jpg" alt="BirTapCard — карточка NFC и QR" width="1160" height="1160">
     </div>
 
     <div class="stats3">
@@ -635,7 +637,7 @@ footer p{font-size:11.5px;color:var(--dim);margin-top:6px}
     <div class="eyebrow rv"><i></i><span data-i="dev.eye">Устройство</span></div>
     <h2 class="rv" data-i="dv.h">NFC + QR в одной карточке. <em>Без питания, без интернета.</em></h2>
     <div class="card-shot rv" style="max-width:100%;margin-bottom:18px">
-      <img src="card-white.jpg" alt="BirTapCard — NFC и QR на одной карточке" width="1254" height="1254">
+      <img src="card-white.jpg" alt="BirTapCard — NFC и QR на одной карточке" width="1160" height="1160">
     </div>
     <div class="cmp">
       <div class="cmp-row rv"><b data-i="cm.r1">Способ считывания</b><div class="cmp-two"><div><i data-i="cm.old">Обычный QR</i><span class="bad" data-i="cm.r1a">только QR</span></div><div><i>BirTapCard</i><span class="good" data-i="cm.r1b">NFC + QR</span></div></div></div>
