@@ -63,10 +63,29 @@ body.notes #vp{bottom:34vh}
 #stage[data-tone=blue] .bar{background:var(--y)}
 
 /* ─── Слайд ────────────────────────────────────── */
-.slide{position:absolute;inset:0;padding:118px 112px 100px;display:flex;flex-direction:column;justify-content:center;opacity:0;pointer-events:none;transition:opacity .45s var(--ease)}
-.slide.on{opacity:1;pointer-events:auto;z-index:2}
-.a{opacity:0;transform:translateY(18px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.slide{position:absolute;inset:0;padding:118px 112px 100px;display:flex;flex-direction:column;justify-content:center;opacity:0;pointer-events:none;transform:scale(.994);transition:opacity .42s var(--ease),transform .55s var(--ease)}
+.slide.on{opacity:1;pointer-events:auto;z-index:2;transform:none}
+@media (prefers-reduced-motion:reduce){.slide{transform:none;transition:opacity .2s linear}}
+.a{opacity:0;transform:translateY(20px);transition:opacity .62s var(--ease),transform .62s var(--ease)}
 .slide.on .a{opacity:1;transform:none}
+/* Каскад: каждый следующий элемент трогается на 70 мс позже — слайд
+   собирается на глазах, а не вспыхивает целиком. Глубже 12-го не уходим,
+   иначе низ слайда ждёт слишком долго. */
+.slide.on .a:nth-child(1){transition-delay:.05s}
+.slide.on .a:nth-child(2){transition-delay:.12s}
+.slide.on .a:nth-child(3){transition-delay:.19s}
+.slide.on .a:nth-child(4){transition-delay:.26s}
+.slide.on .a:nth-child(5){transition-delay:.33s}
+.slide.on .a:nth-child(6){transition-delay:.40s}
+.slide.on .a:nth-child(7){transition-delay:.47s}
+.slide.on .a:nth-child(8){transition-delay:.54s}
+.slide.on .a:nth-child(n+9){transition-delay:.60s}
+/* Уходящий слайд гасим без задержек, иначе переход назад «залипает» */
+.slide:not(.on) .a{transition-delay:0s!important}
+@media (prefers-reduced-motion:reduce){
+  .a{transition:opacity .2s linear;transform:none}
+  .slide.on .a{transition-delay:0s!important}
+}
 
 .eye{display:inline-flex;align-items:center;gap:12px;font-size:15px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mint);margin-bottom:22px}
 .eye::before{content:'';width:28px;height:2px;background:currentColor;opacity:.6}
@@ -512,9 +531,9 @@ body.script #script{display:block}
       <h2 class="a"><span class="r">Уже готово — <em>и&nbsp;уже работает</em></span><span class="u">Allaqachon tayyor — <em>va ishlayapti</em></span></h2>
       <ul class="feats">
         <li class="a"><b class="r">Дизайн под PDP School готов</b><b class="u">PDP School dizayni tayyor</b><span class="r">Ваш синий цвет и логотип. Родитель видит только PDP School.</span><span class="u">Sizning ko'k rangingiz va logotip. Ota-ona faqat PDP School'ni ko'radi.</span></li>
-        <li class="a"><b class="r">Работает на любом телефоне</b><b class="u">Har qanday telefonda ishlaydi</b><span class="r">NFC или QR — на одной карточке.</span><span class="u">NFC yoki QR — bitta kartochkada.</span></li>
+        <li class="a"><b class="r">Работает на любом телефоне</b><b class="u">Har qanday telefonda ishlaydi</b><span class="r">NFC или QR на одной карточке. По нашим данным гости делятся почти поровну: iPhone 51%, Android 48%. Не подходит никому — не бывает.</span><span class="u">NFC yoki QR — bitta kartochkada.</span></li>
         <li class="a"><b class="r">Не ломается</b><b class="u">Buzilmaydi</b><span class="r">Метка пассивная: без батареек и настроек, стоит годами. Ссылки меняются без перепечатки.</span><span class="u">Belgi passiv: batareyasiz va sozlashsiz, yillab turadi. Havolalar qayta chop etmasdan o'zgaradi.</span></li>
-        <li class="a"><b class="r">Уже стоит в заведениях</b><b class="u">Muassasalarda allaqachon turibdi</b><span class="r">Самарканд и Ташкент — <a href="https://www.instagram.com/birtapcard_official">@birtapcard_official</a></span><span class="u">Samarqand va Toshkent — <a href="https://www.instagram.com/birtapcard_official">@birtapcard_official</a></span></li>
+        <li class="a"><b class="r">Уже стоит в 40 заведениях</b><b class="u">Allaqachon 40 ta muassasada turibdi</b><span class="r">Самарканд и Ташкент — рестораны, кофейни, салоны, магазины. Смотрите сами: <a href="https://www.instagram.com/birtapcard_official" target="_blank" rel="noopener">@birtapcard_official</a></span><span class="u">Samarqand va Toshkent — restoranlar, kafelar, salonlar, do'konlar. O'zingiz ko'ring: <a href="https://www.instagram.com/birtapcard_official" target="_blank" rel="noopener">@birtapcard_official</a></span></li>
       </ul>
     </div>
   </div>
@@ -669,11 +688,11 @@ const NOTES = [
   next:{r:`Возникает вопрос: насколько это надёжно?`, u:`Savol tug'iladi: bu qanchalik ishonchli?`},
   design:`Слева — макет кабинета с подписью «иллюстративные» (обязательно проговорить), справа — 4 тезиса.` },
 { t:40,
-  idea:`Снимаем риск: дизайн готов, устройство надёжное, продукт уже работает у других.`,
-  say:{r:`Дизайн под PDP School уже готов — вот карточка и экран: ваш синий цвет, ваш логотип. Родитель видит только PDP School. Карточка работает на любом телефоне — NFC или QR. Метка пассивная: без батареек и настроек, стоит годами. Ссылки меняются без перепечатки. И BirTapCard уже стоит в заведениях Самарканда и Ташкента — их можно посмотреть в нашем Instagram.`,
+  idea:`Снимаем риск: дизайн готов, устройство надёжное, продукт уже работает у сорока заведений. Если спросит, сколько отзывов они собрали — не называйте цифру: у кафе гость забегает на пять минут, у школы 612 семей ходят годами, сравнение не в нашу пользу. Отвечайте: «у каждого по-своему, у вас в кабинете будет своя честная цифра с первого дня».`,
+  say:{r:`Дизайн под PDP School уже готов — вот карточка и экран: ваш синий цвет, ваш логотип. Родитель видит только PDP School. Карточка работает на любом телефоне — NFC или QR. Метка пассивная: без батареек и настроек, стоит годами. Ссылки меняются без перепечатки. И BirTapCard уже стоит в заведениях Самарканда и Ташкента — их можно посмотреть в нашем Instagram. И главное — это не эксперимент на вас: карточка уже стоит в сорока заведениях Самарканда и Ташкента. Можете прямо сейчас открыть наш инстаграм и посмотреть, где именно.`,
        u:`PDP School uchun dizayn allaqachon tayyor — mana kartochka va ekran: sizning ko'k rangingiz, logotipingiz. Ota-ona faqat PDP School'ni ko'radi. Kartochka har qanday telefonda ishlaydi — NFC yoki QR. Belgi passiv: batareyasiz va sozlashsiz, yillab turadi. Havolalar qayta chop etmasdan o'zgaradi. BirTapCard Samarqand va Toshkentdagi muassasalarda allaqachon turibdi — ularni Instagram sahifamizda ko'rish mumkin.`},
   next:{r:`Теперь о цене.`, u:`Endi narx haqida.`},
-  design:`Слева — готовые макеты PDP (карточка + экран), справа — 4 факта. Если появятся цифры других клиентов — добавить одну строку с ними.` },
+  design:`Слева — готовые макеты PDP (карточка + экран), справа — 4 факта. Четвёртый факт держит доказательство: 40 заведений и живой инстаграм.` },
 { t:60,
   idea:`Цена — только после ценности. Назвать спокойно и замолчать, не оправдываться.`,
   say:{r:`Один тариф — 1 200 000 сум в год, это около 100 000 сум в месяц. Всё включено: до четырёх карточек на корпус в дизайне PDP School, установка, экран на трёх языках, кабинет до пяти сотрудников, ежедневный отчёт, замена устройства при поломке и поддержка в Telegram. Цена закрепляется за школой: для новых клиентов она вырастет, у вас останется та же. Если корпусов три и больше — на каждый следующий минус 20%. <i>[пауза]</i>`,
