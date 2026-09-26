@@ -37,9 +37,15 @@ html[lang=uz] .r{display:none!important}
 /* ─── Сцена 16:9 ───────────────────────────────── */
 #vp{position:fixed;inset:0;overflow:hidden;transition:bottom .35s var(--ease)}
 body.notes #vp{bottom:34vh}
+/* Масштаб через zoom, а не transform: браузер пересчитывает раскладку
+   и рисует текст сразу в нужном кегле. transform:scale рисовал слайд в
+   1600×900 и растягивал готовую картинку — отсюда и мыло на большом экране.
+   Центрируем отступами, которые считает fit(): при zoom проценты и translate
+   работают в уже увеличенных координатах, и элемент уезжает. */
 #stage{
-  position:absolute;left:50%;top:50%;width:1600px;height:900px;
-  transform:translate(-50%,-50%) scale(var(--s,1));transform-origin:center;
+  position:absolute;left:0;top:0;width:1600px;height:900px;
+  margin-left:var(--ox,0px);margin-top:var(--oy,0px);
+  zoom:var(--s,1);
   background:
     radial-gradient(900px 620px at 88% -8%, rgba(47,107,255,.16), transparent 62%),
     radial-gradient(700px 500px at -5% 105%, rgba(0,217,174,.07), transparent 62%),
@@ -755,7 +761,16 @@ document.getElementById('ctot').textContent = pad(N);
 
 function fit(){
   const r = vp.getBoundingClientRect();
-  stage.style.setProperty('--s', Math.min(r.width/1600, r.height/900));
+  // Ужимаем до целых долей device-пикселя: дробный zoom вроде 1.3333
+  // даёт полупиксельные границы и лёгкую нерезкость на краях блоков.
+  const dpr = window.devicePixelRatio || 1;
+  let k = Math.min(r.width / 1600, r.height / 900);
+  k = Math.floor(k * 1600 * dpr) / (1600 * dpr);
+  stage.style.setProperty('--s', k);
+  // Поля считаем в координатах вьюпорта и делим на zoom — margin внутри
+  // увеличенного элемента тоже увеличивается.
+  stage.style.setProperty('--ox', ((r.width  - 1600 * k) / 2 / k) + 'px');
+  stage.style.setProperty('--oy', ((r.height -  900 * k) / 2 / k) + 'px');
 }
 function go(i, user){
   i = Math.max(0, Math.min(N-1, i));
