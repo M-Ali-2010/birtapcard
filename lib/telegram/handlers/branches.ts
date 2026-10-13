@@ -79,9 +79,7 @@ export async function handleMyBranches(chatId: number, telegramId: number) {
   }
   text += `_Статистика — за сегодня. Для рейтинга по периоду используйте "🏆 Рейтинг филиалов".`
 
-  await sendMessage(chatId, text, {
-    reply_markup: keyboard([[{ text: '🔗 Ссылки точек', callback_data: 'mylinks' }], navRow()]),
-  })
+  await sendMessage(chatId, text, { reply_markup: keyboard([navRow()]) })
 }
 
 // ─── 🔗 Ссылки точек ───────────────────────────────────────────────────────
@@ -129,23 +127,24 @@ export async function sendBranchLinks(chatId: number, companyId: string, opts: {
   }
 }
 
-/** «🔗 Ссылки точек» у владельца и управляющего — только их заведение (или их точка) */
-export async function handleOwnLinks(chatId: number, telegramId: number) {
-  const profile = await findProfile(telegramId)
-  if (!profile?.company_id) {
-    await sendMessage(chatId, '⚠️ Ваш аккаунт не привязан к компании.')
-    return
-  }
-  await sendBranchLinks(chatId, profile.company_id, {
-    branchId: profile.role === 'branch_manager' ? profile.branch_id : null,
-  })
+/**
+ * Адреса NFC и QR выдаёт только администратор платформы (у него это кнопка на карточке заведения).
+ * Директору они не нужны: метки пишет и печатает BirTapCard. Обработчик оставлен для старых
+ * сообщений с кнопкой «Ссылки точек» — нажатие объясняет, что это раздел администратора.
+ */
+export async function handleOwnLinks(chatId: number, _telegramId: number) {
+  await sendMessage(chatId,
+    '🔗 *Ссылки точек* выдаёт администратор BirTapCard — метки записываем и печатаем мы. ' +
+    'Нужна новая метка или наклейка? Напишите в «🆘 Поддержка».',
+    { reply_markup: keyboard([navRow()]) }
+  )
 }
 
 // ─── 🏆 Рейтинг филиалов ─────────────────────────────────────────────────────
 
 /** Шаг 1: выбор периода */
 export async function handleBranchRankingMenu(chatId: number) {
-  await sendMessage(chatId, '🏆 *Рейтинг филиалов*\n\nВыберите период:', {
+  await sendMessage(chatId, '🏪 *По точкам*\n\nВыберите период:', {
     reply_markup: rankPeriodPickerKeyboard(),
   })
 }
@@ -171,7 +170,7 @@ export async function handleBranchRanking(chatId: number, telegramId: number, pe
   const sorted = [...data.branches].sort((a, b) => b.total - a.total)
   const medals = ['🥇', '🥈', '🥉']
 
-  let text = `🏆 *Рейтинг филиалов · ${range.label}*\n🏢 ${data.companyName}\n\n`
+  let text = `🏪 *По точкам · ${range.label}*\n🏢 ${data.companyName}\n\n`
   sorted.forEach((b, i) => {
     const place = medals[i] ?? `${i + 1}.`
     text += `${place} *${b.branchName}*\n`
