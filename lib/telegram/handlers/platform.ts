@@ -72,7 +72,7 @@ export async function handlePlatformStats(chatId: number, telegramId: number) {
 
   await sendMessage(chatId,
     '📊 *Платформа BirTapCard*\n\n' +
-    `🏢 Компаний: *${n(companies)}* · 🏪 точек: *${n(branches)}*\n` +
+    `🏢 Заведений: *${n(companies)}* · 🏪 точек: *${n(branches)}*\n` +
     `💳 Активных подписок: *${n(subs)}*\n\n` +
     `👆 Касаний сегодня: *${n(tapsToday)}*\n` +
     `👆 За 7 дней: *${n(tapsWeek)}* · переходов: *${n(clicksWeek)}*\n` +
@@ -82,7 +82,7 @@ export async function handlePlatformStats(chatId: number, telegramId: number) {
     {
       reply_markup: keyboard([
         [{ text: '🔥 Заявки', callback_data: 'leads:open' }, { text: '🆘 Поддержка', callback_data: 'support:inbox' }],
-        [{ text: '🏢 Компании', callback_data: 'platform:companies' }],
+        [{ text: '🏢 Заведения', callback_data: 'platform:companies' }],
         navRow(),
       ]),
     }
@@ -175,7 +175,7 @@ async function sendCompanyList(chatId: number, periodKey: string, heading: strin
   )
 }
 
-/** «🏢 Компании» / «🍽 Рестораны» — все заведения, кто сколько принёс за неделю */
+/** «🏢 Заведения» — все заведения, кто сколько принёс за неделю */
 export async function handleCompanies(chatId: number, telegramId: number) {
   if (!(await requireAdmin(chatId, telegramId))) return
   await sendCompanyList(chatId, '7d', '🏢 *Заведения*')

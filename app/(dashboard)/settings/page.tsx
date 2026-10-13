@@ -270,7 +270,7 @@ export default function SettingsPage() {
         <div className="stack" style={{ gap: 0 }}>
           {[
             { key: 'Роль в системе', value: roleLabel(role) },
-            { key: 'Ресторан', value: companyName ?? '—' },
+            { key: 'Заведение', value: companyName ?? '—' },
             { key: 'ID пользователя', value: profile?.user_id ?? '—', mono: true },
           ].map(row => (
             <div key={row.key} className="row" style={{

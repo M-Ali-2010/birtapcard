@@ -17,13 +17,12 @@ import type { BotProfile } from '@/lib/telegram/db'
 export function superAdminMenu(): ReplyMarkup {
   return {
     keyboard: [
-      [{ text: '📊 Статистика платформы' }, { text: '🏢 Компании' }],
-      [{ text: '🍽 Рестораны' }, { text: '🏪 Филиалы' }],
-      [{ text: '👥 Пользователи' }, { text: '💳 Подписки' }],
-      [{ text: '💰 Оплаты' }, { text: '📩 Обращения' }],
-      [{ text: '🔥 Заявки' }, { text: '📢 Рассылка' }],
-      [{ text: '🤖 Telegram' }, { text: '📈 Аналитика' }],
-      [{ text: '⚙ Настройки' }],
+      [{ text: '📊 Статистика платформы' }, { text: '🏢 Заведения' }],
+      [{ text: '🏪 Филиалы' }, { text: '👥 Пользователи' }],
+      [{ text: '💳 Подписки' }, { text: '💰 Оплаты' }],
+      [{ text: '📩 Обращения' }, { text: '🔥 Заявки' }],
+      [{ text: '📢 Рассылка' }, { text: '🤖 Telegram' }],
+      [{ text: '📈 Аналитика' }, { text: '⚙ Настройки' }],
     ],
     resize_keyboard: true,
     persistent: true,

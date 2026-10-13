@@ -117,7 +117,7 @@ function CompanyModal({
   const [name, setName] = useState(company?.name ?? '')
   const [slug, setSlug] = useState(company?.slug ?? '')
   const [logoUrl, setLogoUrl] = useState(company?.logo_url ?? '')
-  // Новый файл ждёт сохранения: сначала создаём/обновляем ресторан, потом грузим логотип
+  // Новый файл ждёт сохранения: сначала создаём/обновляем заведение, потом грузим логотип
   const [logoFile, setLogoFile] = useState<string | null>(null)
   const [logoError, setLogoError] = useState<string | null>(null)
   const [active, setActive] = useState(company?.active ?? true)
@@ -149,7 +149,7 @@ function CompanyModal({
   }
 
   async function handleSave() {
-    if (!name.trim()) { setError('Введите название ресторана'); return }
+    if (!name.trim()) { setError('Введите название заведения'); return }
     if (!slug.trim()) { setError('Введите slug'); return }
     setSaving(true)
     setError(null)
@@ -175,13 +175,13 @@ function CompanyModal({
       const upJson = await up.json().catch(() => ({}))
       if (!up.ok) {
         setSaving(false)
-        setError(`${isEdit ? 'Ресторан обновлён' : 'Ресторан создан'}, но логотип не загрузился: ${upJson.error ?? up.status}`)
+        setError(`${isEdit ? 'Заведение обновлено' : 'Заведение создано'}, но логотип не загрузился: ${upJson.error ?? up.status}`)
         return
       }
     }
 
     setSaving(false)
-    onSaved(isEdit ? 'Ресторан обновлён' : 'Ресторан создан')
+    onSaved(isEdit ? 'Заведение обновлено' : 'Заведение создано')
   }
 
   const logoPreview = logoFile ?? (logoUrl.trim() || null)
@@ -189,7 +189,7 @@ function CompanyModal({
   return (
     <Modal
       icon={isEdit ? 'edit' : 'plus'}
-      title={isEdit ? 'Редактировать ресторан' : 'Новый ресторан'}
+      title={isEdit ? 'Редактировать заведение' : 'Новое заведение'}
       sub={isEdit ? company!.name : 'Добавьте заведение в платформу'}
       onClose={onClose}
       footer={
@@ -235,7 +235,7 @@ function CompanyModal({
       </Field>
 
       <div style={{ marginBottom: 15 }}>
-        <Switch checked={active} onChange={setActive} label="Ресторан активен" />
+        <Switch checked={active} onChange={setActive} label="Заведение активно" />
       </div>
 
       {error && <div style={{ marginBottom: 14 }}><Note tone="danger">{error}</Note></div>}
@@ -307,7 +307,7 @@ export default function CompaniesPage() {
     if (branchCount > 0) {
       await confirm({
         title: 'Сначала удалите филиалы',
-        text: `У ресторана «${c.name}» ещё ${branchCount} ${plural(branchCount, ['филиал', 'филиала', 'филиалов'])}. Удалите их в разделе «Филиалы», затем возвращайтесь сюда.`,
+        text: `У заведения «${c.name}» ещё ${branchCount} ${plural(branchCount, ['филиал', 'филиала', 'филиалов'])}. Удалите их в разделе «Филиалы», затем возвращайтесь сюда.`,
         confirmLabel: 'Понятно',
         cancelLabel: 'Закрыть',
       })
@@ -316,7 +316,7 @@ export default function CompaniesPage() {
 
     const ok = await confirm({
       title: `Удалить «${c.name}»?`,
-      text: 'Ресторан будет удалён безвозвратно. Это действие нельзя отменить.',
+      text: 'Заведение будет удалено безвозвратно. Это действие нельзя отменить.',
       confirmLabel: 'Удалить',
       danger: true,
     })
@@ -331,12 +331,12 @@ export default function CompaniesPage() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.error || 'Не удалось удалить ресторан')
+        throw new Error(err.error || 'Не удалось удалить заведение')
       }
       setCompanies(prev => prev.filter(x => x.id !== c.id))
-      success('Ресторан удалён', c.name)
+      success('Заведение удалено', c.name)
     } catch (e) {
-      errorToast(e instanceof Error ? e.message : 'Не удалось удалить ресторан')
+      errorToast(e instanceof Error ? e.message : 'Не удалось удалить заведение')
     }
     setBusyId(null)
   }
@@ -345,7 +345,7 @@ export default function CompaniesPage() {
     return <div className="grid grid--kpi-3"><KpiSkeleton count={3} /></div>
   }
 
-  if (!isSuperAdmin) return <AccessDenied what="Рестораны" />
+  if (!isSuperAdmin) return <AccessDenied what="Заведения" />
 
   return (
     <div className="stack has-fab">
@@ -353,12 +353,12 @@ export default function CompaniesPage() {
       <div className="grid grid--kpi-3">
         {loading ? <KpiSkeleton count={3} /> : (
           <>
-            <KpiCard label="Ресторанов" icon="restaurants" accent="mint"
+            <KpiCard label="Заведений" icon="restaurants" accent="mint"
               value={companies.length} sub="Подключено к платформе" />
             <KpiCard label="Активных" icon="check" accent="blue"
               value={activeCount} sub={`Отключено: ${companies.length - activeCount}`} />
             <KpiCard label="Филиалов" icon="branches" accent="purple"
-              value={totalBranches} sub="По всем ресторанам" />
+              value={totalBranches} sub="По всем заведениям" />
           </>
         )}
       </div>
@@ -367,15 +367,15 @@ export default function CompaniesPage() {
         <SearchInput value={search} onChange={setSearch} placeholder="Поиск по названию или slug…" />
         <div className="toolbar__spacer hide-mobile">
           <Button variant="primary" icon="plus" onClick={() => { setEditing(null); setModalOpen(true) }}>
-            Добавить ресторан
+            Добавить заведение
           </Button>
         </div>
       </div>
 
-      <Fab label="Ресторан" onClick={() => { setEditing(null); setModalOpen(true) }} />
+      <Fab label="Заведение" onClick={() => { setEditing(null); setModalOpen(true) }} />
 
       <Panel
-        title="Рестораны"
+        title="Заведения"
         sub={search ? `Найдено ${filtered.length} из ${companies.length}` : `Всего ${companies.length}`}
       >
         {loading ? (
@@ -383,13 +383,13 @@ export default function CompaniesPage() {
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={companies.length === 0 ? 'restaurants' : 'search'}
-            title={companies.length === 0 ? 'Пока нет ресторанов' : 'Ничего не найдено'}
+            title={companies.length === 0 ? 'Пока нет заведений' : 'Ничего не найдено'}
             text={companies.length === 0
               ? 'Добавьте первое заведение — после этого можно будет создавать филиалы и генерировать QR-коды.'
               : 'Попробуйте изменить запрос.'}
             action={companies.length === 0 && (
               <Button variant="primary" icon="plus" onClick={() => { setEditing(null); setModalOpen(true) }}>
-                Добавить ресторан
+                Добавить заведение
               </Button>
             )}
           />

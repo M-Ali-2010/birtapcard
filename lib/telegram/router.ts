@@ -190,7 +190,8 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
       await handlePlatformStats(chatId, telegramId)
       return true
     }
-    if (text === '🏢 Компании' || text === '🍽 Рестораны' || text === '🏪 Филиалы' || text === '/companies') {
+    // «Заведения» и «Компании» — прежние названия кнопки: у людей клавиатура обновится только после /start
+    if (text === '🏢 Заведения' || text === '🏢 Компании' || text === '🍽 Заведения' || text === '🏪 Филиалы' || text === '/companies') {
       await handleCompanies(chatId, telegramId)
       return true
     }

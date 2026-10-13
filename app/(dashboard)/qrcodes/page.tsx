@@ -233,7 +233,7 @@ export default function QrCodesPage() {
       <div className="toolbar" style={{ marginBottom: 0 }}>
         <select className="select" value={companyFilter}
           onChange={e => setCompanyFilter(e.target.value)} style={{ width: 'auto', maxWidth: 220 }}>
-          <option value="all">Все рестораны</option>
+          <option value="all">Все заведения</option>
           {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
 

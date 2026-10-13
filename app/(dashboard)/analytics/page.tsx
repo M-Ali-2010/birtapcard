@@ -291,7 +291,7 @@ function AnalyticsView() {
   function exportCsv() {
     downloadCsv(
       `birtapcard-analytics-${new Date().toISOString().slice(0, 10)}.csv`,
-      ['Филиал', 'Ресторан', 'NFC', 'QR', 'Всего', 'Уникальных', 'Конверсия %', 'Переходы', 'Google', 'Яндекс', '2ГИС', 'Instagram', 'Telegram', 'Бот', 'Новых отзывов Google', 'Всего отзывов Google', 'Рейтинг Google'],
+      ['Филиал', 'Заведение', 'NFC', 'QR', 'Всего', 'Уникальных', 'Конверсия %', 'Переходы', 'Google', 'Яндекс', '2ГИС', 'Instagram', 'Telegram', 'Бот', 'Новых отзывов Google', 'Всего отзывов Google', 'Рейтинг Google'],
       branchRows.map(r => [
         r.name, r.company, r.nfc, r.qr, r.total, r.unique, r.conversion, r.clicks,
         ...TARGET_ORDER.map(k => r.byTarget[k] ?? 0),
@@ -510,7 +510,7 @@ function AnalyticsView() {
               <thead>
                 <tr>
                   <th>Филиал</th>
-                  <th>Ресторан</th>
+                  <th>Заведение</th>
                   {(Object.keys(SORT_LABELS) as SortKey[]).map(key => (
                     <th
                       key={key}

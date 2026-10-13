@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'BirTapCard — Аналитика',
     short_name: 'BirTapCard',
-    description: 'NFC и QR аналитика для ресторанов Узбекистана',
+    description: 'NFC и QR аналитика для заведений Узбекистана',
     start_url: '/dashboard',
     display: 'standalone',
     orientation: 'portrait',

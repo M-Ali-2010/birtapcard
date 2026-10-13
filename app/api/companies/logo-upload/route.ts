@@ -7,7 +7,7 @@ const MAX_BYTES = 2 * 1024 * 1024
 
 /**
  * POST /api/companies/logo-upload
- * Загружает логотип ресторана в Supabase Storage и сразу записывает
+ * Загружает логотип заведения в Supabase Storage и сразу записывает
  * публичную ссылку в companies.logo_url. SUPER ADMIN ONLY.
  * Body: { companyId: string, imageBase64: string }  (data:image/png|jpeg|webp;base64,…)
  * Пустой imageBase64 — удалить логотип.

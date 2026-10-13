@@ -18,7 +18,7 @@ export const SUPER_ADMIN_NAV: NavGroup[] = [
   {
     group: 'Управление',
     items: [
-      { href: '/companies', label: 'Рестораны',     icon: 'restaurants', desc: 'Управление сетью ресторанов' },
+      { href: '/companies', label: 'Заведения',     icon: 'restaurants', desc: 'Управление сетью заведений' },
       { href: '/branches',  label: 'Филиалы',       icon: 'branches',    desc: 'Точки и NFC/QR-токены' },
       { href: '/qrcodes',   label: 'QR-коды',       icon: 'qrcodes',     desc: 'Просмотр и скачивание QR' },
       { href: '/users',     label: 'Пользователи',  icon: 'users',       desc: 'Доступ и роли сотрудников' },
@@ -48,7 +48,7 @@ export function flatNav(role: string | null): NavItem[] {
 export const PAGE_META: Record<string, { title: string; sub: string }> = {
   '/dashboard': { title: 'Дашборд',      sub: 'Общая статистика по сканированиям' },
   '/analytics': { title: 'Аналитика',    sub: 'Детальная аналитика сканирований' },
-  '/companies': { title: 'Рестораны',    sub: 'Управление сетью ресторанов' },
+  '/companies': { title: 'Заведения',    sub: 'Управление сетью заведений' },
   '/branches':  { title: 'Филиалы',      sub: 'Управление точками и NFC/QR-токенами' },
   '/qrcodes':   { title: 'QR-коды',      sub: 'Просмотр и скачивание QR-кодов' },
   '/users':     { title: 'Пользователи', sub: 'Доступ и роли сотрудников' },
