@@ -1,10 +1,14 @@
 /**
- * Отдельный экран ссылок для PDP School.
+ * Отдельный экран ссылок для компаний PDP (сейчас — PDP School).
  *
  * Общий экран после скана (`renderScanGate` в lib/scan-gate.ts) одинаковый для всех
- * заведений. PDP School получает свой — в стиле school.pdp.uz и PDP Design System v1.0:
- * семь карточек (отзыв в Google, сайт, Telegram-бот и канал, Google Play, App Store, Wi-Fi)
- * на синем поле, языки UZ / RU / EN.
+ * заведений. PDP получает свой: карточки (отзыв в Google, сайт, Telegram-бот и канал,
+ * Instagram, Google Play, App Store, Wi-Fi), языки UZ / RU / EN.
+ *
+ * Оформление — параметр `brand`:
+ *   · 'ecosystem' (по умолчанию) — PDP EcoSystem: чёрная сцена, лайм и зелень, бот / канал /
+ *     Instagram экосистемы. Один дизайн «на всё»: School, Junior, University, Academy;
+ *   · 'school' — прежний вид в стиле school.pdp.uz (синее поле); демо: /pdp/links?brand=school.
  *
  * Как он попадает к гостю: /r/nfc и /r/qr фиксируют скан и ведут на /r/go/[token];
  * там по названию компании (`isPdpSchoolCompany`) выбирается этот экран вместо общего.
@@ -21,8 +25,12 @@
  */
 
 import { PDP_CSS, PDP_FAVICON, PDP_LOGO, PDP_MARK, PDP_SPRITE } from './pdp-school.assets'
+import { ECO_CSS, ECO_FAVICON, ECO_LOGO, ECO_MARK, ECO_SPRITE } from './pdp-ecosystem.assets'
 
 export type PdpLang = 'uz' | 'ru' | 'en'
+
+/** Оформление экрана: PDP EcoSystem (по умолчанию) или прежнее — PDP School */
+export type PdpBrand = 'ecosystem' | 'school'
 
 /**
  * Ссылки по умолчанию. Всё, что заведено у филиала в кабинете (google_url, bot_url),
@@ -46,6 +54,16 @@ export const PDP_SCHOOL_LINKS = {
   ios: 'https://apps.apple.com/uz/app/pdp-school/id6807296022',
 }
 
+/**
+ * Ссылки экосистемы PDP — бот, канал и Instagram. Отзыв, сайт, приложения и Wi-Fi остаются
+ * школьными, пока у заведения не заведены свои (branches.google_url и т.д. перекрывают).
+ */
+export const PDP_ECOSYSTEM_LINKS = {
+  bot: 'https://t.me/PDPEcosystemBot',
+  channel: 'https://t.me/pdpecosystem',
+  instagram: 'https://www.instagram.com/pdp_ecosystem/',
+}
+
 /** Метки для сайта школы: по ним школа видит в своей аналитике, что гость пришёл с карточки */
 const UTM = { utm_source: 'birtapcard', utm_medium: 'card', utm_campaign: 'links' }
 
@@ -60,6 +78,8 @@ export type PdpScreenOptions = {
   telegramUrl?: string | null
   /** Wi-Fi школы; без него карточка не показывается. Источник — getVenueWifi() или `pdpWifiFromEnv()`. */
   wifi?: PdpWifi | null
+  /** Оформление; по умолчанию PDP EcoSystem */
+  brand?: PdpBrand
 }
 
 export type PdpWifi = { ssid: string; password?: string }
@@ -112,6 +132,12 @@ function telegramHandle(url: string): string | null {
   return m ? '@' + m[1] : null
 }
 
+/** instagram.com/pdp_ecosystem → «@pdp_ecosystem» */
+function instagramHandle(url: string): string | null {
+  const m = url.match(/^https?:\/\/(?:www\.)?instagram\.com\/([A-Za-z0-9_.]{2,})\/?(?:\?.*)?$/i)
+  return m ? '@' + m[1] : null
+}
+
 /** Данные в <script> без риска закрыть тег раньше времени */
 function jsonForScript(value: unknown): string {
   // «<» экранируем, чтобы данные не закрыли тег script; U+2028/2029 — потому что они ломают строки в старом JS
@@ -121,7 +147,7 @@ function jsonForScript(value: unknown): string {
     .replace(new RegExp('\\u2029', 'g'), '\\u2029')
 }
 
-const TEXT: Record<PdpLang, Record<string, string>> = {
+const TEXT_SCHOOL: Record<PdpLang, Record<string, string>> = {
   uz: {
     title: 'PDP School — Havolalar', nav: 'Havolalar', lang: 'Til', skip: 'Havolalarga o‘tish',
     pill: 'Bizda yoqdimi?', h1a: 'Sharh qoldiring', h1b: 'va obuna bo‘ling',
@@ -169,21 +195,48 @@ const TEXT: Record<PdpLang, Record<string, string>> = {
   },
 }
 
+/** EcoSystem: те же тексты, но от имени экосистемы + карточка Instagram */
+const TEXT_ECO: Record<PdpLang, Record<string, string>> = {
+  uz: {
+    ...TEXT_SCHOOL.uz,
+    title: 'PDP EcoSystem — Havolalar',
+    lead: 'PDP EcoSystem’ning yangiliklari, tadbirlari va imkoniyatlaridan birinchi bo‘lib xabardor bo‘ling',
+    ig_t: 'Instagram', ig_d: 'Suratlar va yangiliklar',
+  },
+  ru: {
+    ...TEXT_SCHOOL.ru,
+    title: 'PDP EcoSystem — Ссылки',
+    lead: 'Узнавайте первыми о новостях, мероприятиях и возможностях PDP EcoSystem',
+    ig_t: 'Instagram', ig_d: 'Фото и новости',
+  },
+  en: {
+    ...TEXT_SCHOOL.en,
+    title: 'PDP EcoSystem — Links',
+    lead: 'Be the first to hear about PDP EcoSystem news, events and opportunities',
+    ig_t: 'Instagram', ig_d: 'Photos and news',
+  },
+}
+
 const ARROW = '<span class="link__go"><svg aria-hidden="true"><use href="#i-arrow-up-right"/></svg></span>'
 
 function icon(id: string): string {
   return `<span class="link__ico"><svg aria-hidden="true"><use href="#i-${id}"/></svg></span>`
 }
 
-export function renderPdpSchoolScreen(opts: PdpScreenOptions = {}): string {
+export function renderPdpScreen(opts: PdpScreenOptions = {}): string {
   const L = PDP_SCHOOL_LINKS
+  const eco = (opts.brand ?? 'ecosystem') === 'ecosystem'
+  const TEXT = eco ? TEXT_ECO : TEXT_SCHOOL
   const t = TEXT.uz // первичная отрисовка; язык гостя выбирает скрипт ниже
 
   const reviewUrl = httpUrl(opts.googleUrl) ?? L.review
-  const botUrl = httpUrl(opts.botUrl) ?? L.bot
+  const botUrl = httpUrl(opts.botUrl) ?? (eco ? PDP_ECOSYSTEM_LINKS.bot : L.bot)
   const botHandle = telegramHandle(botUrl)
-  const channelUrl = httpUrl(opts.telegramUrl) ?? L.channel
+  const channelUrl = httpUrl(opts.telegramUrl) ?? (eco ? PDP_ECOSYSTEM_LINKS.channel : L.channel)
   const channelHandle = telegramHandle(channelUrl)
+  const igUrl = PDP_ECOSYSTEM_LINKS.instagram
+  const igHandle = instagramHandle(igUrl)
+  const brandName = eco ? 'PDP EcoSystem' : 'PDP School'
   const web = { uz: withUtm(L.web.uz), ru: withUtm(L.web.ru), en: withUtm(L.web.en) }
   const wifi = opts.wifi && opts.wifi.ssid ? opts.wifi : null
 
@@ -234,6 +287,18 @@ export function renderPdpSchoolScreen(opts: PdpScreenOptions = {}): string {
               <span class="link__title" data-i="ch_t">${t.ch_t}</span>
               <span class="link__text">${channelHandle ? `<span class="link__url">${escapeHtml(channelHandle)}</span>` : ''}<span data-i="ch_d">${t.ch_d}</span></span>
             </span>
+          </a>
+        </li>`
+
+  const igCard = `
+        <li class="is-wide">
+          <a class="link link--wide" href="${escapeHtml(igUrl)}" ${open} data-t="instagram">
+            ${icon('instagram-logo')}
+            <span class="link__body">
+              <span class="link__title" data-i="ig_t">${t.ig_t ?? ''}</span>
+              <span class="link__text">${igHandle ? `<span class="link__url">${escapeHtml(igHandle)}</span>` : ''}<span data-i="ig_d">${t.ig_d ?? ''}</span></span>
+            </span>
+            ${ARROW}
           </a>
         </li>`
 
@@ -297,25 +362,27 @@ export function renderPdpSchoolScreen(opts: PdpScreenOptions = {}): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2168F2">
-<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="${eco ? '#141414' : '#2168F2'}">
+<meta name="color-scheme" content="${eco ? 'dark only' : 'light only'}">
 <meta name="robots" content="noindex">
 <title>${escapeHtml(t.title)}</title>
-<link rel="icon" href="${escapeHtml(PDP_FAVICON)}">
-<link rel="preload" href="/pdp/fonts/onest-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="${escapeHtml(eco ? ECO_FAVICON : PDP_FAVICON)}">${eco ? `
+<link rel="preload" href="/pdp/fonts/space-grotesk-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/pdp/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin>` : `
+<link rel="preload" href="/pdp/fonts/onest-latin.woff2" as="font" type="font/woff2" crossorigin>`}
 <style>
-${PDP_CSS}
+${eco ? ECO_CSS : PDP_CSS}
 </style>
 </head>
 <body>
 <a class="skip" id="skip" href="#links" data-i="skip">${t.skip}</a>
 
-${PDP_SPRITE}
+${eco ? ECO_SPRITE : PDP_SPRITE}
 
 <div class="screen">
   <header class="head">
-    <a class="logo" href="${escapeHtml(web.uz)}" ${open} data-t="website" data-web aria-label="PDP School">
-      ${PDP_LOGO}
+    <a class="logo" href="${escapeHtml(web.uz)}" ${open} data-t="website" data-web aria-label="${brandName}">
+      ${eco ? ECO_LOGO : PDP_LOGO}
     </a>
     <div class="lang" id="lang" role="group" aria-label="${escapeHtml(t.lang)}">
       <button type="button" data-lang="uz" aria-pressed="true">UZ</button>
@@ -323,10 +390,10 @@ ${PDP_SPRITE}
       <button type="button" data-lang="en" aria-pressed="false">EN</button>
     </div>
   </header>
-  <div class="rule" aria-hidden="true"><i></i><i></i><i></i></div>
+  ${eco ? '<div class="rule" aria-hidden="true"></div>' : '<div class="rule" aria-hidden="true"><i></i><i></i><i></i></div>'}
 
   <main class="field">
-    ${PDP_MARK}
+    ${eco ? ECO_MARK : PDP_MARK}
     <section class="hero">
       <p class="pill"><span class="pill__dot" aria-hidden="true"></span><span data-i="pill">${t.pill}</span></p>
       <h1><span data-i="h1a">${t.h1a}</span> <span data-i="h1b">${t.h1b}</span></h1>
@@ -334,12 +401,12 @@ ${PDP_SPRITE}
     </section>
 
     <nav id="links" class="links-nav" aria-label="${escapeHtml(t.nav)}">
-      <ul class="links">${reviewCard}${webCard}${botCard}${channelCard}${playCard}${iosCard}${wifiCard}
+      <ul class="links">${reviewCard}${webCard}${botCard}${channelCard}${eco ? igCard : ''}${playCard}${iosCard}${wifiCard}
       </ul>
     </nav>
 
     <footer class="foot">
-      <p class="foot__brand">PDP School</p>
+      <p class="foot__brand">${brandName}</p>
       <a class="foot__site" href="${escapeHtml(web.uz)}" ${open} data-t="website" data-web>school.pdp.uz <svg aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
       <p class="foot__tag" data-i="tag">${t.tag}</p>
     </footer>

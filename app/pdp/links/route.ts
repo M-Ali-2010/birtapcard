@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
-import { pdpWifiFromEnv, renderPdpSchoolScreen, type PdpWifi } from '@/lib/screens/pdp-school'
+import { pdpWifiFromEnv, renderPdpScreen, type PdpWifi } from '@/lib/screens/pdp-school'
 import { getPdpSchoolWifi } from '@/lib/venue-wifi'
 
-// Экран ссылок PDP School без токена: открывается по /pdp/links — для показа и проверки.
+// Экран ссылок PDP без токена: открывается по /pdp/links — для показа и проверки.
+// Оформление по умолчанию — PDP EcoSystem; прежний вид School: /pdp/links?brand=school.
 // Нажатия здесь не считаются (токена филиала нет). Язык выбирается на самой странице: ?lang=uz|ru|en.
 // Адреса /pdp/* открыты без входа — см. isPublicInfoRoute в lib/supabase/middleware.ts.
 //
@@ -13,7 +14,8 @@ import { getPdpSchoolWifi } from '@/lib/venue-wifi'
 // Исключение — переменные PDP_WIFI_*: их владелец задал осознанно, они показываются как есть.
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(request: Request) {
+  const brand = new URL(request.url).searchParams.get('brand') === 'school' ? 'school' : 'ecosystem'
   let wifi: PdpWifi | null = pdpWifiFromEnv()
   if (!wifi) {
     try {
@@ -24,7 +26,7 @@ export async function GET() {
     }
   }
 
-  return new NextResponse(renderPdpSchoolScreen({ wifi }), {
+  return new NextResponse(renderPdpScreen({ wifi, brand }), {
     status: 200,
     headers: {
       'content-type': 'text/html; charset=utf-8',
