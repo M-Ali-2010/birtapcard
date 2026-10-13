@@ -53,6 +53,11 @@ const TARGETS: { key: string; label: string; color: string }[] = [
   { key: 'instagram', label: 'Instagram', color: '#E1306C' },
   { key: 'telegram',  label: 'Telegram',  color: '#229ED9' },
   { key: 'bot',       label: 'Бот',       color: '#4F6BED' },
+  // экран PDP School
+  { key: 'website',     label: 'Сайт',        color: 'var(--blue)' },
+  { key: 'google_play', label: 'Google Play', color: '#01875F' },
+  { key: 'app_store',   label: 'App Store',   color: '#0D96F6' },
+  { key: 'wifi',        label: 'Wi-Fi',       color: 'var(--mint)' },
 ]
 type ClickRow = { target: string; branch_id: string }
 

@@ -4,14 +4,18 @@ import { createServiceRoleClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-const TARGETS = new Set(['google', 'yandex', 'gis', 'instagram', 'telegram', 'bot'])
+const TARGETS = new Set([
+  'google', 'yandex', 'gis', 'instagram', 'telegram', 'bot',
+  // экран PDP School (lib/screens/pdp-school.ts)
+  'website', 'google_play', 'app_store', 'wifi',
+])
 
 /**
  * POST /api/track — гость нажал кнопку на странице после скана.
  *
  * Вызывается через navigator.sendBeacon с экрана /r/go, поэтому тело
  * приходит как text/plain. Никакой авторизации: страница публичная, а
- * записать можно только валидный токен филиала и одну из шести целей.
+ * записать можно только валидный токен филиала и одну из известных целей.
  * Ответ всегда 204 — гостю не нужно ждать, а ошибки не должны ему мешать.
  */
 export async function POST(request: NextRequest) {

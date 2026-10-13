@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { renderScanGate } from '@/lib/scan-gate'
+import { isPdpSchoolCompany, pdpWifiFromEnv, renderPdpSchoolScreen } from '@/lib/screens/pdp-school'
 import { isSubscriptionExpired, renderExpiredPage } from '@/lib/scan-lock'
 
 export const dynamic = 'force-dynamic'
@@ -31,16 +32,34 @@ export async function GET(
   const supabase = createServiceRoleClient()
   const { data: branch } = await supabase
     .from('branches')
-    .select('name, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, active, paid_until, companies(logo_url)')
+    .select('name, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, active, paid_until, companies(name, logo_url)')
     .or(`nfc_token.eq.${token},qr_token.eq.${token}`)
     .maybeSingle()
 
-  if (!branch || !branch.active || !branch.google_url) {
+  const company = Array.isArray(branch?.companies) ? branch.companies[0] : branch?.companies
+  // У PDP School свой экран; ссылку на Google при необходимости подставит он сам
+  const isPdp = isPdpSchoolCompany(company?.name)
+
+  if (!branch || !branch.active || (!branch.google_url && !isPdp)) {
     return NextResponse.redirect(new URL('/scan-error', _request.url))
   }
 
   if (isSubscriptionExpired(branch.paid_until)) {
     return new NextResponse(renderExpiredPage(branch.name ?? ''), {
+      status: 200,
+      headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' },
+    })
+  }
+
+  // Отдельный экран под PDP School — вместо общего (lib/screens/pdp-school.ts)
+  if (isPdp) {
+    const html = renderPdpSchoolScreen({
+      token,
+      googleUrl: branch.google_url,
+      botUrl: branch.bot_url,
+      wifi: pdpWifiFromEnv(),
+    })
+    return new NextResponse(html, {
       status: 200,
       headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' },
     })
@@ -60,7 +79,7 @@ export async function GET(
     gisUrl: branch.gis_url,
     telegramUrl: branch.telegram_url,
     botUrl: branch.bot_url,
-    logoUrl: (Array.isArray(branch.companies) ? branch.companies[0] : branch.companies)?.logo_url ?? null,
+    logoUrl: company?.logo_url ?? null,
   })
 
   return new NextResponse(html, {
