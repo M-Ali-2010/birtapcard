@@ -9,6 +9,7 @@
 import { sendMessage, keyboard } from '@/lib/telegram/bot'
 import { db, findProfile, setState, clearState, type BotProfile } from '@/lib/telegram/db'
 import { fetchOwnerReport, fetchBranchReport, getReportRange, type ReportPeriod } from '@/lib/telegram/reports'
+import { handleCompanyPicker } from '@/lib/telegram/handlers/platform'
 
 export const CUSTOM_RANGE_STATE = 'awaiting_custom_range'
 
@@ -42,6 +43,12 @@ export async function handleReport(chatId: number, telegramId: number, period: s
   const profile = await findProfile(telegramId)
   if (!profile) {
     await sendMessage(chatId, '⚠️ Ваш аккаунт не привязан. Перейдите на сайт для привязки.')
+    return
+  }
+
+  // Администратор без своей компании: отчёт строится по заведению — даём выбрать
+  if (profile.role === 'super_admin' && !profile.company_id) {
+    await handleCompanyPicker(chatId, period)
     return
   }
 

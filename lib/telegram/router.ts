@@ -32,7 +32,7 @@ import {
   handleSupportMenu, handleSupportInput, isWritingSupport, handleSupportInbox,
 } from '@/lib/telegram/handlers/support'
 import {
-  handlePlatformStats, handleCompanies, handleBroadcastStart,
+  handlePlatformStats, handleCompanies, handleCompanyPicker, handleBroadcastStart,
   handleBroadcastText, isComposingBroadcast,
 } from '@/lib/telegram/handlers/platform'
 import {
@@ -122,7 +122,7 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
   // ─── "📈 Аналитика" неоднозначна: у owner это период, у super_admin — раздел Фазы 4 ──
   if (text === '📈 Аналитика') {
     if (profile.role === 'super_admin') {
-      await comingSoon(chatId, 'Аналитика платформы', 'Фазе 4')
+      await handleCompanyPicker(chatId, '7d')
     } else {
       await sendPeriodPicker(chatId)
     }
@@ -190,7 +190,7 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
       await handlePlatformStats(chatId, telegramId)
       return true
     }
-    if (text === '🏢 Компании' || text === '/companies') {
+    if (text === '🏢 Компании' || text === '🍽 Рестораны' || text === '/companies') {
       await handleCompanies(chatId, telegramId)
       return true
     }
@@ -205,7 +205,6 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
   }
 
   const adminStubs: Record<string, string> = {
-    '🍽 Рестораны': 'Рестораны',
     '🏪 Филиалы': 'Филиалы',
     '👥 Пользователи': 'Пользователи',
     '💳 Подписки': 'Подписки клиентов',
