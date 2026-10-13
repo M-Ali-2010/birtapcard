@@ -190,7 +190,7 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
       await handlePlatformStats(chatId, telegramId)
       return true
     }
-    if (text === '🏢 Компании' || text === '🍽 Рестораны' || text === '/companies') {
+    if (text === '🏢 Компании' || text === '🍽 Рестораны' || text === '🏪 Филиалы' || text === '/companies') {
       await handleCompanies(chatId, telegramId)
       return true
     }
@@ -205,7 +205,6 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
   }
 
   const adminStubs: Record<string, string> = {
-    '🏪 Филиалы': 'Филиалы',
     '👥 Пользователи': 'Пользователи',
     '💳 Подписки': 'Подписки клиентов',
     '💰 Оплаты': 'Оплаты',

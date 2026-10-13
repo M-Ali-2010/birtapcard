@@ -69,7 +69,9 @@ export async function findProfile(telegramId: number): Promise<BotProfile | null
   if (!tg || !tg.confirmed_at || !tg.active) {
     // Аккаунт ещё не привязан, но ID в списке администраторов —
     // пускаем с правами super_admin и без компании.
-    return builtinAdmin ? ADMIN_FALLBACK : null
+    if (builtinAdmin) return ADMIN_FALLBACK
+    // Или человек подключён приглашением из бота, без учётной записи в кабинете
+    return await findBotClient(telegramId)
   }
 
   const { data: profile } = await supabase
@@ -78,7 +80,7 @@ export async function findProfile(telegramId: number): Promise<BotProfile | null
     .eq('user_id', tg.user_id)
     .single()
 
-  if (!profile) return builtinAdmin ? ADMIN_FALLBACK : null
+  if (!profile) return builtinAdmin ? ADMIN_FALLBACK : await findBotClient(telegramId)
 
   return {
     user_id: profile.user_id,
@@ -90,9 +92,40 @@ export async function findProfile(telegramId: number): Promise<BotProfile | null
   }
 }
 
+/** user_id тех, у кого нет учётной записи в кабинете (админ из списка, клиент по приглашению) */
+export const NO_ACCOUNT_USER_ID = '00000000-0000-0000-0000-000000000000'
+
+export function hasCabinetAccount(profile: BotProfile): boolean {
+  return profile.user_id !== NO_ACCOUNT_USER_ID
+}
+
+/**
+ * Клиент, подключённый приглашением из бота (таблица bot_clients, миграция 0008).
+ * Если таблицы ещё нет — это просто «не клиент», бот продолжает работать как раньше.
+ */
+async function findBotClient(telegramId: number): Promise<BotProfile | null> {
+  try {
+    const { data } = await db()
+      .from('bot_clients')
+      .select('role, company_id, branch_id, full_name, active')
+      .eq('telegram_id', telegramId)
+      .maybeSingle()
+    if (!data || data.active === false) return null
+    return {
+      user_id: NO_ACCOUNT_USER_ID,
+      role: (data.role === 'branch_manager' ? 'branch_manager' : 'owner') as BotProfile['role'],
+      company_id: data.company_id ?? null,
+      branch_id: data.branch_id ?? null,
+      full_name: data.full_name ?? null,
+    }
+  } catch {
+    return null
+  }
+}
+
 /** Профиль администратора без учётной записи в кабинете */
 const ADMIN_FALLBACK: BotProfile = {
-  user_id: '00000000-0000-0000-0000-000000000000',
+  user_id: NO_ACCOUNT_USER_ID,
   role: 'super_admin',
   company_id: null,
   branch_id: null,
