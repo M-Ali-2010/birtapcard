@@ -57,6 +57,7 @@ export async function GET(
       token,
       googleUrl: branch.google_url,
       botUrl: branch.bot_url,
+      telegramUrl: branch.telegram_url,
       wifi: pdpWifiFromEnv(),
     })
     return new NextResponse(html, {

@@ -154,6 +154,9 @@ h1 span{display:block}
   .link:hover,.link:active{transform:none}
 }
 
+/* широкая карточка: адрес сайта стоит в одной строке с подписью */
+.link--wide .link__url{display:inline;margin-right:8px}
+
 /* ── Wi-Fi: карточка-кнопка и шторка (на вебе сеть сама не подключается — показываем имя и пароль) ── */
 button.link{appearance:none;-webkit-appearance:none;border:0;width:100%;text-align:left;font:inherit;color:var(--navy)}
 .sheet{width:100%;max-width:430px;margin:auto auto 0;padding:0;border:0;border-radius:var(--r-panel) var(--r-panel) 0 0;
@@ -189,6 +192,7 @@ export const PDP_SPRITE = `<svg width="0" height="0" style="position:absolute" a
     <symbol id="i-wifi-high" viewBox="0 0 256 256" fill="currentColor"><path d="M140,204a12,12,0,1,1-12-12A12,12,0,0,1,140,204ZM237.08,87A172,172,0,0,0,18.92,87,8,8,0,0,0,29.08,99.37a156,156,0,0,1,197.84,0A8,8,0,0,0,237.08,87ZM205,122.77a124,124,0,0,0-153.94,0A8,8,0,0,0,61,135.31a108,108,0,0,1,134.06,0,8,8,0,0,0,11.24-1.3A8,8,0,0,0,205,122.77Zm-32.26,35.76a76.05,76.05,0,0,0-89.42,0,8,8,0,0,0,9.42,12.94,60,60,0,0,1,70.58,0,8,8,0,1,0,9.42-12.94Z"/></symbol>
     <symbol id="i-arrow-up-right" viewBox="0 0 256 256" fill="currentColor"><path d="M200,64V168a8,8,0,0,1-16,0V83.31L69.66,197.66a8,8,0,0,1-11.32-11.32L172.69,72H88a8,8,0,0,1,0-16H192A8,8,0,0,1,200,64Z"/></symbol>
       <symbol id="i-x" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></symbol>
+      <symbol id="i-megaphone-simple" viewBox="0 0 256 256" fill="currentColor"><path d="M228.54,86.66l-176.06-54A16,16,0,0,0,32,48V192a16,16,0,0,0,16,16,16,16,0,0,0,4.52-.65L136,181.73V192a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16v-29.9l28.54-8.75A16.09,16.09,0,0,0,240,138V102A16.09,16.09,0,0,0,228.54,86.66ZM136,165,48,192V48l88,27Zm48,27H152V176.82L184,167Zm40-54-.11,0L152,160.08V79.92l71.89,22,.11,0v36Z"/></symbol>
   </defs>
 </svg>`
 
