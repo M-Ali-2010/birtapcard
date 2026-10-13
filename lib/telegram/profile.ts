@@ -65,7 +65,7 @@ export const ADMIN_COMMANDS: BotCommand[] = [
   { command: 'stats', description: 'Статистика платформы' },
   { command: 'leads', description: 'Заявки из бота' },
   { command: 'support_inbox', description: 'Обращения в поддержку' },
-  { command: 'companies', description: 'Компании и филиалы' },
+  { command: 'companies', description: 'Заведения и филиалы' },
   { command: 'broadcast', description: 'Рассылка клиентам' },
   { command: 'today', description: 'Отчёт за сегодня' },
   { command: 'help', description: 'Справка' },

@@ -17,26 +17,29 @@ import type { BotProfile } from '@/lib/telegram/db'
 export function superAdminMenu(): ReplyMarkup {
   return {
     keyboard: [
-      [{ text: '📊 Статистика платформы' }, { text: '🏢 Компании' }],
-      [{ text: '🍽 Рестораны' }, { text: '🏪 Филиалы' }],
-      [{ text: '👥 Пользователи' }, { text: '💳 Подписки' }],
-      [{ text: '💰 Оплаты' }, { text: '📩 Обращения' }],
-      [{ text: '🔥 Заявки' }, { text: '📢 Рассылка' }],
-      [{ text: '🤖 Telegram' }, { text: '📈 Аналитика' }],
-      [{ text: '⚙ Настройки' }],
+      [{ text: '📊 Статистика платформы' }, { text: '🏢 Заведения' }],
+      [{ text: '🏪 Филиалы' }, { text: '👥 Пользователи' }],
+      [{ text: '💳 Подписки' }, { text: '💰 Оплаты' }],
+      [{ text: '📩 Обращения' }, { text: '🔥 Заявки' }],
+      [{ text: '📢 Рассылка' }, { text: '🤖 Telegram' }],
+      [{ text: '📈 Аналитика' }, { text: '⚙ Настройки' }],
     ],
     resize_keyboard: true,
     persistent: true,
   }
 }
 
+/**
+ * Директор заведения (owner): только цифры — сколько касаний, куда перешли
+ * (Wi-Fi, бот, сайт…) и утренний отчёт. Ссылки точек, подписка и выгрузки
+ * из клавиатуры убраны; подписка и оплата по-прежнему доступны командой /subscription.
+ */
 export function ownerMenu(): ReplyMarkup {
   return {
     keyboard: [
-      [{ text: '📊 Сегодня' }, { text: '📈 Аналитика' }],
-      [{ text: '🏪 Мои филиалы' }, { text: '🏆 Рейтинг филиалов' }],
-      [{ text: '💳 Подписка' }, { text: '📄 Скачать отчёт' }],
-      [{ text: '🔔 Уведомления' }, { text: '🆘 Поддержка' }],
+      [{ text: '📊 Сегодня' }, { text: '📈 Статистика' }],
+      [{ text: '🏪 По точкам' }, { text: '🔔 Отчёт' }],
+      [{ text: '🆘 Поддержка' }],
     ],
     resize_keyboard: true,
     persistent: true,

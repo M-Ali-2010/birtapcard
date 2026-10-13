@@ -46,6 +46,9 @@ import {
   isFillingLead,
 } from '@/lib/telegram/handlers/sales'
 
+/** Прежняя подпись кнопки «Заведения» у администратора — оставлена намеренно, не переименовывать */
+const LEGACY_VENUES_BUTTON = '🍽 Рестораны'
+
 const COMMAND_MAP: Record<string, string> = {
   '/today': 'today',
   '/yesterday': 'yesterday',
@@ -160,7 +163,8 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
     return true
   }
 
-  if (text === '🏆 Рейтинг филиалов') {
+  // «🏪 По точкам» — рейтинг точек за выбранный период (то же, что «🏆 Рейтинг филиалов»)
+  if (text === '🏆 Рейтинг филиалов' || text === '🏪 По точкам') {
     await handleBranchRankingMenu(chatId)
     return true
   }
@@ -174,7 +178,7 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
     return true
   }
 
-  if (text === '🔔 Уведомления' || text === '/notify') {
+  if (text === '🔔 Уведомления' || text === '🔔 Отчёт' || text === '/notify') {
     await handleNotifyMenu(chatId, telegramId)
     return true
   }
@@ -190,7 +194,10 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
       await handlePlatformStats(chatId, telegramId)
       return true
     }
-    if (text === '🏢 Компании' || text === '🍽 Рестораны' || text === '🏪 Филиалы' || text === '/companies') {
+    // Прежние названия этой кнопки («Компании», «Рестораны») тоже принимаем: у людей
+    // клавиатура в чате обновится только после /start
+    if (text === '🏢 Заведения' || text === '🏢 Компании' || text === LEGACY_VENUES_BUTTON ||
+        text === '🏪 Филиалы' || text === '/companies') {
       await handleCompanies(chatId, telegramId)
       return true
     }

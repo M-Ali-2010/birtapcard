@@ -20,7 +20,7 @@ async function getAuthenticatedRole(): Promise<{ userId: string; role: string } 
 
 /**
  * POST /api/companies/manage
- * Creates a new company (restaurant network). SUPER ADMIN ONLY.
+ * Creates a new company (venue network). SUPER ADMIN ONLY.
  */
 export async function POST(request: NextRequest) {
   const auth = await getAuthenticatedRole()
@@ -93,7 +93,7 @@ export async function PUT(request: NextRequest) {
 
 /**
  * DELETE /api/companies/manage
- * Deletes a company (restaurant network). SUPER ADMIN ONLY.
+ * Deletes a company (venue network). SUPER ADMIN ONLY.
  * Refuses to delete while branches still reference it — branches and their
  * scan history must be removed first so nothing is silently cascade-deleted.
  */
@@ -121,7 +121,7 @@ export async function DELETE(request: NextRequest) {
 
   if ((count ?? 0) > 0) {
     return NextResponse.json(
-      { error: `У ресторана есть ${count} филиал(а) — сначала удалите все филиалы` },
+      { error: `У заведения есть ${count} филиал(а) — сначала удалите все филиалы` },
       { status: 409 }
     )
   }

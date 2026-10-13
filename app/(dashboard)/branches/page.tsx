@@ -163,7 +163,7 @@ function BranchModal({
   }
 
   async function handleSave() {
-    if (!companyId) { setError('Выберите ресторан'); return }
+    if (!companyId) { setError('Выберите заведение'); return }
     if (!name.trim()) { setError('Введите название филиала'); return }
     if (!slug.trim()) { setError('Введите slug'); return }
     if (!googleUrl.trim()) { setError('Укажите ссылку на отзывы Google'); return }
@@ -275,9 +275,9 @@ function BranchModal({
         </>
       }
     >
-      <Field label="Ресторан" hint="Логотип на экране после скана берётся из карточки ресторана.">
+      <Field label="Заведение" hint="Логотип на экране после скана берётся из карточки заведения.">
         <select className="select" value={companyId} onChange={e => setCompanyId(e.target.value)}>
-          {companies.length === 0 && <option value="">Нет ресторанов</option>}
+          {companies.length === 0 && <option value="">Нет заведений</option>}
           {companies.map(c => (
             <option key={c.id} value={c.id}>{c.name}{!c.active ? ' (отключен)' : ''}</option>
           ))}
@@ -576,7 +576,7 @@ function BranchesView() {
         {loading ? <KpiSkeleton /> : (
           <>
             <KpiCard label="Филиалов" icon="branches" accent="mint"
-              value={branches.length} sub="По всем ресторанам" />
+              value={branches.length} sub="По всем заведениям" />
             <KpiCard label="Активных" icon="check" accent="blue"
               value={activeCount} sub={`Отключено: ${branches.length - activeCount}`} />
             <KpiCard label="Подписка истекла" icon="lock" accent="orange"
@@ -594,7 +594,7 @@ function BranchesView() {
           onChange={e => setCompanyFilter(e.target.value)}
           style={{ width: 'auto', maxWidth: 240 }}
         >
-          <option value="all">Все рестораны</option>
+          <option value="all">Все заведения</option>
           {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
 
@@ -617,7 +617,7 @@ function BranchesView() {
 
       {companies.length === 0 && !loading && (
         <Note tone="warning">
-          Сначала добавьте хотя бы один ресторан в разделе «Рестораны» — филиал привязывается к ресторану.
+          Сначала добавьте хотя бы одно заведение в разделе «Заведения» — филиал привязывается к заведению.
         </Note>
       )}
 
@@ -635,7 +635,7 @@ function BranchesView() {
             title={branches.length === 0 ? 'Пока нет филиалов' : 'Ничего не найдено'}
             text={branches.length === 0
               ? 'Создайте первый филиал — токены NFC/QR и QR-код сгенерируются автоматически.'
-              : 'Измените запрос или сбросьте фильтр по ресторану.'}
+              : 'Измените запрос или сбросьте фильтр по заведению.'}
           />
         ) : (
           <div className="stack" style={{ gap: 12 }}>

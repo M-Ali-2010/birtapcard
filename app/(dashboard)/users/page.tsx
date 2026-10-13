@@ -120,13 +120,13 @@ function EditUserModal({
       <Field label="Роль" hint="Super Admin видит всю систему, остальные — только аналитику.">
         <select className="select" value={role} onChange={e => setRole(e.target.value)}>
           <option value="super_admin">Super Admin</option>
-          <option value="owner">Owner — владелец ресторана</option>
+          <option value="owner">Owner — владелец заведения</option>
           <option value="branch_manager">Branch Manager — управляющий</option>
         </select>
       </Field>
 
       {role !== 'super_admin' && (
-        <Field label="Ресторан">
+        <Field label="Заведение">
           <select className="select" value={companyId} onChange={e => setCompanyId(e.target.value)}>
             <option value="">— Не привязан —</option>
             {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -249,14 +249,14 @@ export default function UsersPage() {
           <>
             <KpiCard label="Пользователей" icon="users" accent="mint" value={kpi.total} sub="В системе" />
             <KpiCard label="Super Admin" icon="zap" accent="purple" value={kpi.admins} sub="Полный доступ" />
-            <KpiCard label="Владельцев" icon="restaurants" accent="orange" value={kpi.owners} sub="Владельцы ресторанов" />
+            <KpiCard label="Владельцев" icon="restaurants" accent="orange" value={kpi.owners} sub="Владельцы заведений" />
             <KpiCard label="Менеджеров" icon="branches" accent="blue" value={kpi.managers} sub="Управляющие филиалов" />
           </>
         )}
       </div>
 
       <div className="toolbar" style={{ marginBottom: 0 }}>
-        <SearchInput value={search} onChange={setSearch} placeholder="Поиск по имени или ресторану…" />
+        <SearchInput value={search} onChange={setSearch} placeholder="Поиск по имени или заведению…" />
 
         <select className="select" value={roleFilter}
           onChange={e => setRoleFilter(e.target.value)} style={{ width: 'auto', maxWidth: 190 }}>
@@ -268,8 +268,8 @@ export default function UsersPage() {
 
         <select className="select" value={companyFilter}
           onChange={e => setCompanyFilter(e.target.value)} style={{ width: 'auto', maxWidth: 220 }}>
-          <option value="all">Все рестораны</option>
-          <option value="">Без ресторана</option>
+          <option value="all">Все заведения</option>
+          <option value="">Без заведения</option>
           {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
 
@@ -303,7 +303,7 @@ export default function UsersPage() {
                       {u.full_name ?? <span style={{ color: 'var(--text-muted)' }}>Имя не указано</span>}
                     </div>
                     <div className="truncate" style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
-                      {u.company_name ?? 'без ресторана'} · с {shortDate(u.created_at)}
+                      {u.company_name ?? 'без заведения'} · с {shortDate(u.created_at)}
                     </div>
                   </div>
                   <IconButton icon="edit" title="Редактировать" onClick={() => setEditing(u)} />
@@ -327,7 +327,7 @@ export default function UsersPage() {
                 <tr>
                   <th>Пользователь</th>
                   <th>Роль</th>
-                  <th>Ресторан</th>
+                  <th>Заведение</th>
                   <th>Филиалы</th>
                   <th>Регистрация</th>
                   <th />
@@ -380,7 +380,7 @@ export default function UsersPage() {
       <Note tone="info" icon="info">
         Пользователи появляются здесь после регистрации через Supabase Auth — им автоматически
         создаётся профиль с ролью <strong>branch_manager</strong>. Здесь можно изменить роль,
-        привязать к ресторану и поправить имя. Email хранится в Supabase Auth
+        привязать к заведению и поправить имя. Email хранится в Supabase Auth
         (<span style={{ color: 'var(--blue)' }}>Authentication → Users</span>).
       </Note>
 

@@ -103,7 +103,7 @@ export function CommandPalette({
     const companyCmds: Cmd[] = companies.map(c => ({
       id: `co:${c.id}`,
       label: c.name,
-      group: 'Рестораны',
+      group: 'Заведения',
       icon: 'restaurants',
       run: go(`/branches?company=${c.id}`),
     }))

@@ -22,7 +22,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'BirTapCard — Аналитика',
-  description: 'NFC и QR аналитика для ресторанов Узбекистана',
+  description: 'NFC и QR аналитика для заведений Узбекистана',
   applicationName: 'BirTapCard',
   appleWebApp: {
     capable: true,
