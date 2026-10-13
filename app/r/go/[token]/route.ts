@@ -56,7 +56,6 @@ export async function GET(
     const html = renderPdpSchoolScreen({
       token,
       googleUrl: branch.google_url,
-      telegramUrl: branch.telegram_url,
       botUrl: branch.bot_url,
     })
     return new NextResponse(html, {

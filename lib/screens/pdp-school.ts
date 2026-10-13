@@ -3,7 +3,7 @@
  *
  * Общий экран после скана (`renderScanGate` в lib/scan-gate.ts) одинаковый для всех
  * заведений. PDP School получает свой — в стиле school.pdp.uz и PDP Design System v1.0:
- * шесть карточек (карта и отзыв, сайт, Telegram, Google Play, App Store, Wi-Fi) на
+ * шесть карточек (отзыв в Google, сайт, Telegram-бот, Google Play, App Store, Wi-Fi) на
  * синем поле, языки UZ / RU / EN.
  *
  * Как он попадает к гостю: /r/nfc и /r/qr фиксируют скан и ведут на /r/go/[token];
@@ -11,7 +11,7 @@
  * Без токена экран открывается по адресу /pdp/links — для показа и проверки.
  *
  * Нажатия считаются так же, как на общем экране: sendBeacon на /api/track с токеном
- * филиала и целью (google, bot, telegram, website, google_play, app_store, wifi).
+ * филиала и целью (google, bot, website, google_play, app_store, wifi).
  */
 
 import { PDP_CSS, PDP_FAVICON, PDP_LOGO, PDP_MARK, PDP_SPRITE } from './pdp-school.assets'
@@ -19,20 +19,20 @@ import { PDP_CSS, PDP_FAVICON, PDP_LOGO, PDP_MARK, PDP_SPRITE } from './pdp-scho
 export type PdpLang = 'uz' | 'ru' | 'en'
 
 /**
- * Ссылки по умолчанию. Всё, что заведено у филиала в кабинете (google_url, bot_url,
- * telegram_url), перекрывает эти значения — здесь только то, чего в базе нет.
+ * Ссылки по умолчанию. Всё, что заведено у филиала в кабинете (google_url, bot_url),
+ * перекрывает эти значения — здесь только то, чего в базе нет.
  */
 export const PDP_SCHOOL_LINKS = {
-  /** Google Maps — та же ссылка, что в подвале school.pdp.uz */
-  maps: 'https://maps.app.goo.gl/pCSgNhW1kn8mnAA7A',
+  /** «Написать отзыв» в Google: прямо в форму отзыва школы (Place ID школы) */
+  review: 'https://search.google.com/local/writereview?placeid=ChIJcaGG9PthrjgRKO9yt89GDJM',
   /** Сайт школы: узбекская версия — «/», русская — «/ru». Английской версии на сайте нет. */
   web: {
     uz: 'https://school.pdp.uz/',
     ru: 'https://school.pdp.uz/ru',
     en: 'https://school.pdp.uz/',
   } as Record<PdpLang, string>,
-  /** Telegram школы — указан в контактах на school.pdp.uz */
-  telegram: 'https://t.me/pdpschooll',
+  /** Telegram-бот школы: оценки, посещаемость, расписание, платежи */
+  bot: 'https://t.me/PDPUzBot',
   /** Приложение «PDP School» для учеников, родителей и сотрудников */
   play: 'https://play.google.com/store/apps/details?id=uz.pdpschool.lms',
   ios: 'https://apps.apple.com/uz/app/pdp-school/id6807296022',
@@ -49,11 +49,9 @@ const UTM = { utm_source: 'birtapcard', utm_medium: 'card', utm_campaign: 'links
 export type PdpScreenOptions = {
   /** Токен филиала — по нему считаются нажатия. В демо-режиме (/pdp/links) его нет. */
   token?: string | null
-  /** branches.google_url — ссылка на отзыв или карточку места в Google */
+  /** branches.google_url — ссылка на отзыв в Google */
   googleUrl?: string | null
-  /** branches.telegram_url — канал */
-  telegramUrl?: string | null
-  /** branches.bot_url — бот; если задан, карточка Telegram ведёт в бота */
+  /** branches.bot_url — Telegram-бот */
   botUrl?: string | null
 }
 
@@ -107,9 +105,9 @@ const TEXT: Record<PdpLang, Record<string, string>> = {
     title: 'PDP School — Havolalar', nav: 'Havolalar', lang: 'Til', skip: 'Havolalarga o‘tish',
     pill: 'Bizda yoqdimi?', h1a: 'Sharh qoldiring', h1b: 'va obuna bo‘ling',
     lead: 'PDP School’ning yangiliklari, tadbirlari va imkoniyatlaridan birinchi bo‘lib xabardor bo‘ling',
-    maps_t: 'Google Maps', maps_d: 'Xaritada toping va sharh qoldiring',
+    maps_t: 'Google Maps', maps_d: 'Google Maps’da sharh qoldiring',
     web_t: 'Veb-sayt', web_d: 'Rasmiy saytimiz',
-    tg_t: 'Telegram', tg_d: 'Tezkor ma’lumot va yordam',
+    bot_t: 'Telegram bot', bot_d: 'Tezkor ma’lumot va yordam',
     play_t: 'Google Play', play_d: 'Android ilovasini yuklab oling',
     ios_t: 'App Store', ios_d: 'iOS ilovasini yuklab oling',
     wifi_t: 'Wi-Fi', wifi_d: 'PDP tarmog‘iga ulanish',
@@ -121,9 +119,9 @@ const TEXT: Record<PdpLang, Record<string, string>> = {
     title: 'PDP School — Ссылки', nav: 'Ссылки', lang: 'Язык', skip: 'Перейти к ссылкам',
     pill: 'Вам у нас понравилось?', h1a: 'Оставьте отзыв', h1b: 'и подпишитесь',
     lead: 'Узнавайте первыми о новостях, мероприятиях и возможностях PDP School',
-    maps_t: 'Google Maps', maps_d: 'Найдите на карте и оставьте отзыв',
+    maps_t: 'Google Maps', maps_d: 'Оставьте отзыв в Google Maps',
     web_t: 'Веб-сайт', web_d: 'Официальный сайт',
-    tg_t: 'Telegram', tg_d: 'Быстрая информация и помощь',
+    bot_t: 'Telegram-бот', bot_d: 'Быстрая информация и помощь',
     play_t: 'Google Play', play_d: 'Скачать для Android',
     ios_t: 'App Store', ios_d: 'Скачать для iOS',
     wifi_t: 'Wi-Fi', wifi_d: 'Подключитесь к сети PDP',
@@ -135,9 +133,9 @@ const TEXT: Record<PdpLang, Record<string, string>> = {
     title: 'PDP School — Links', nav: 'Links', lang: 'Language', skip: 'Skip to links',
     pill: 'Like it here?', h1a: 'Leave a review', h1b: 'and subscribe',
     lead: 'Be the first to hear about PDP School news, events and opportunities',
-    maps_t: 'Google Maps', maps_d: 'Find us on the map and leave a review',
+    maps_t: 'Google Maps', maps_d: 'Leave a review on Google Maps',
     web_t: 'Website', web_d: 'Our official site',
-    tg_t: 'Telegram', tg_d: 'Quick info and help',
+    bot_t: 'Telegram bot', bot_d: 'Quick info and help',
     play_t: 'Google Play', play_d: 'Download the Android app',
     ios_t: 'App Store', ios_d: 'Download the iOS app',
     wifi_t: 'Wi-Fi', wifi_d: 'Connect to the PDP network',
@@ -157,19 +155,17 @@ export function renderPdpSchoolScreen(opts: PdpScreenOptions = {}): string {
   const L = PDP_SCHOOL_LINKS
   const t = TEXT.uz // первичная отрисовка; язык гостя выбирает скрипт ниже
 
-  const mapsUrl = httpUrl(opts.googleUrl) ?? L.maps
-  const botUrl = httpUrl(opts.botUrl)
-  const tgUrl = botUrl ?? httpUrl(opts.telegramUrl) ?? L.telegram
-  const tgTarget = botUrl ? 'bot' : 'telegram'
-  const tgHandle = telegramHandle(tgUrl)
+  const reviewUrl = httpUrl(opts.googleUrl) ?? L.review
+  const botUrl = httpUrl(opts.botUrl) ?? L.bot
+  const botHandle = telegramHandle(botUrl)
   const web = { uz: withUtm(L.web.uz), ru: withUtm(L.web.ru), en: withUtm(L.web.en) }
   const wifi = L.wifi && L.wifi.ssid ? L.wifi : null
 
   const open = 'target="_blank" rel="noopener"'
 
-  const mapsCard = `
+  const reviewCard = `
         <li class="is-wide">
-          <a class="link link--wide link--primary" href="${escapeHtml(mapsUrl)}" ${open} data-t="google">
+          <a class="link link--wide link--primary" href="${escapeHtml(reviewUrl)}" ${open} data-t="google">
             ${icon('map-pin')}
             <span class="link__body">
               <span class="link__title" data-i="maps_t">${t.maps_t}</span>
@@ -191,14 +187,14 @@ export function renderPdpSchoolScreen(opts: PdpScreenOptions = {}): string {
           </a>
         </li>`
 
-  const tgCard = `
+  const botCard = `
         <li>
-          <a class="link" href="${escapeHtml(tgUrl)}" ${open} data-t="${tgTarget}">
+          <a class="link" href="${escapeHtml(botUrl)}" ${open} data-t="bot">
             ${icon('telegram-logo')}
             ${ARROW}
             <span class="link__body">
-              <span class="link__title" data-i="tg_t">${t.tg_t}</span>
-              <span class="link__text">${tgHandle ? `<span class="link__url">${escapeHtml(tgHandle)}</span>` : ''}<span data-i="tg_d">${t.tg_d}</span></span>
+              <span class="link__title" data-i="bot_t">${t.bot_t}</span>
+              <span class="link__text">${botHandle ? `<span class="link__url">${escapeHtml(botHandle)}</span>` : ''}<span data-i="bot_d">${t.bot_d}</span></span>
             </span>
           </a>
         </li>`
@@ -300,7 +296,7 @@ ${PDP_SPRITE}
     </section>
 
     <nav id="links" class="links-nav" aria-label="${escapeHtml(t.nav)}">
-      <ul class="links">${mapsCard}${webCard}${tgCard}${playCard}${iosCard}${wifiCard}
+      <ul class="links">${reviewCard}${webCard}${botCard}${playCard}${iosCard}${wifiCard}
       </ul>
     </nav>
 
