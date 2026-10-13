@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#008982">
+<meta name="color-scheme" content="light only">
+<meta name="robots" content="noindex">
+<title>PDP University — Havolalar</title>
+<link rel="preload" href="/pdp/fonts/space-grotesk-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/pdp/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/*
+  PDP University — ekran maketi (ko‘rsatish uchun).
+  Qoidalar: PDP Design System, brend "university" (https://design.pdp.uz/ds/ai/university.md, taklif holati).
+  Shriftlar: PDP Display (Space Grotesk + Golos Text), Inter, IBM Plex Mono — SIL OFL, /pdp/fonts.
+  Tugmalar maket uchun: ishchi ssilkalar rasmiy sahifalardan olingan, hisoblash ulanmagan.
+*/
+
+/* ── Shriftlar (design.pdp.uz/ds/fonts, o‘z hostimizdan beriladi) ───────── */
+@font-face{font-family:"PDP Display";font-style:normal;font-weight:650 700;font-display:swap;
+  src:url(/pdp/fonts/space-grotesk-var-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"PDP Display";font-style:normal;font-weight:650 700;font-display:swap;
+  src:url(/pdp/fonts/golos-text-600-cyrillic.woff2) format("woff2");
+  size-adjust:96%;ascent-override:102.5%;descent-override:30.4%;line-gap-override:0%;
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;
+  src:url(/pdp/fonts/inter-var-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;
+  src:url(/pdp/fonts/inter-var-cyrillic.woff2) format("woff2");
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;
+  src:url(/pdp/fonts/ibm-plex-mono-500-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;
+  src:url(/pdp/fonts/ibm-plex-mono-500-cyrillic.woff2) format("woff2");
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+
+/* ── Tokenlar — design.pdp.uz/ds/tokens/university.css (yorug‘ mavzu) ───── */
+:root{
+  --eco-color-white:#fff;
+  --eco-color-black:#141414;
+  --eco-color-university-teal:#26A49D;        /* --eco-bg-brand-solid */
+  --eco-color-university-teal-dark:#008982;   /* hover, maydon boshlanishi */
+  --eco-color-university-teal-50:#E9F6F5;     /* --eco-color-brand-tint */
+  --eco-color-university-teal-700:#00746E;    /* havola, fokus (5.64:1) */
+  --eco-color-university-teal-800:#035C58;
+  --eco-color-university-teal-950:#01302D;
+  --eco-color-university-yellow:#FFCC19;      /* urg‘u: nuqta, fokus maydonda, chiziq */
+  --eco-color-university-navy:#202D4C;
+  --eco-text-primary:#141414;
+  --eco-text-secondary:#424242;               /* neutral-700, 10:1 */
+  --eco-text-on-field:rgba(255,255,255,.94);
+  --eco-radius-xl:12px; --eco-radius-3xl:20px; --eco-radius-full:9999px;
+  --eco-font-display:"PDP Display","PDP Display Fallback",system-ui,sans-serif;
+  --eco-font-body:"Inter","Inter Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --eco-font-mono:"IBM Plex Mono","IBM Plex Mono Fallback",ui-monospace,monospace;
+  --eco-gradient:linear-gradient(90deg,#E9F6F5 0%,#FFCC19 22%,#26A49D 58%,#034440 100%);
+  --field:linear-gradient(160deg,var(--eco-color-university-teal-dark) 0%,var(--eco-color-university-teal-700) 56%,var(--eco-color-university-teal-800) 100%);
+  --ease:cubic-bezier(.4,0,.2,1);
+  --gutter:clamp(18px,5.2vw,24px);
+  --fs-hero:clamp(34px,20.5px + 4.22vw,44px);
+  --fs-lead:clamp(15.5px,14.6px + .24vw,17px);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--eco-color-university-teal-50);color:var(--eco-text-primary);
+  font-family:var(--eco-font-body);line-height:1.45;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer}
+ul{list-style:none;margin:0;padding:0}
+p,h1{margin:0}
+svg{display:block;flex:none}
+
+:focus-visible{outline:3px solid var(--eco-color-university-teal-700);outline-offset:3px;border-radius:6px}
+.field :focus-visible{outline-color:var(--eco-color-university-yellow)}
+.skip{position:absolute;left:-9999px;top:0;z-index:10;padding:12px 20px;border-radius:0 0 12px 0;
+  background:var(--eco-color-university-teal-700);color:#fff;font-weight:600}
+.skip:focus{left:0}
+
+/* ── Ekran: 390 asos, 320–430 oqib turadi ───────────────────────────────── */
+.screen{position:relative;display:flex;flex-direction:column;width:100%;max-width:430px;margin-inline:auto;
+  min-height:100vh;min-height:100dvh;background:#fff}
+@media (min-width:520px){
+  :root{--gutter:20px;--fs-hero:37px;--fs-lead:15.5px}
+  .screen{width:390px;max-width:none;box-shadow:0 30px 80px rgba(1,48,45,.22)}
+}
+
+/* ── Sarlavha: logotip + til tanlash ────────────────────────────────────── */
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:13px var(--gutter);padding-top:max(13px,env(safe-area-inset-top));background:#fff}
+.logo{display:block;width:clamp(112px,38vw,160px);border-radius:6px}
+.logo svg{width:100%;height:auto}
+
+.lang{display:flex;align-items:center;gap:2px;padding:3px;border-radius:var(--eco-radius-full);background:#F0F0F0}
+.lang button{min-width:44px;min-height:44px;padding:6px 12px;border:0;border-radius:var(--eco-radius-full);background:none;
+  font-family:var(--eco-font-body);font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--eco-text-secondary);
+  transition:background .15s var(--ease),color .15s var(--ease)}
+.lang button[aria-pressed="true"]{background:#fff;color:var(--eco-text-primary);font-weight:700;box-shadow:0 1px 3px rgba(20,20,20,.18)}
+
+/* Brend gradienti (--eco-gradient) — ekranda bir marta, sarlavha ostida */
+.rule{height:4px;background:var(--eco-gradient)}
+
+/* ── Brend maydoni ──────────────────────────────────────────────────────── */
+.field{position:relative;flex:1;display:flex;flex-direction:column;overflow:hidden;
+  padding:26px var(--gutter) 0;color:#fff;background:var(--field)}
+.mark{position:absolute;right:-70px;top:-34px;width:300px;height:auto;opacity:.10;pointer-events:none;
+  -webkit-mask-image:linear-gradient(180deg,#000 0,#000 45%,transparent 78%);
+          mask-image:linear-gradient(180deg,#000 0,#000 45%,transparent 78%)}
+.hero,.links-nav,.foot{position:relative}
+.links-nav{margin-bottom:28px}
+
+.pill{display:inline-flex;align-items:center;gap:9px;padding:8px 16px 8px 12px;border-radius:var(--eco-radius-full);
+  border:1px solid rgba(255,255,255,.36);background:rgba(255,255,255,.10);
+  font-family:var(--eco-font-mono);font-size:12.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase}
+.pill__dot{width:7px;height:7px;border-radius:50%;background:var(--eco-color-university-yellow)}
+
+h1{margin-top:16px;font-family:var(--eco-font-display);font-size:var(--fs-hero);font-weight:700;
+  line-height:1.04;letter-spacing:-.04em}
+h1 span{display:block}
+.lead{margin-top:14px;max-width:34ch;font-size:var(--fs-lead);line-height:1.5;font-weight:450;
+  color:var(--eco-text-on-field);text-wrap:pretty}
+
+/* ── Havola kartalari ───────────────────────────────────────────────────── */
+.links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:28px;
+  filter:drop-shadow(0 16px 24px rgba(1,48,45,.30))}
+.links>li{display:flex;min-width:0}
+.links>li.is-wide{grid-column:1/-1}
+
+.link{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:"ico go" "body body";align-content:start;row-gap:16px;
+  min-height:150px;padding:16px;border-radius:var(--eco-radius-3xl);background:#fff;color:var(--eco-text-primary);
+  -webkit-tap-highlight-color:transparent;transition:transform .15s var(--ease)}
+.link__ico{grid-area:ico;display:grid;place-items:center;width:40px;height:40px;border-radius:var(--eco-radius-xl);
+  background:var(--eco-color-university-teal-50);color:var(--eco-color-university-teal-700);
+  transition:background .15s var(--ease),color .15s var(--ease)}
+.link__ico svg{width:20px;height:20px}
+.link__go{grid-area:go;display:grid;place-items:center;width:20px;height:20px;margin:10px 4px 0 0;
+  color:#767676;transition:color .15s var(--ease),transform .15s var(--ease)}
+.link__go svg{width:20px;height:20px}
+.link__body{grid-area:body;min-width:0}
+.link__title{display:block;font-family:var(--eco-font-display);font-size:17px;font-weight:700;line-height:1.2}
+.link__text{display:block;margin-top:5px;font-size:13px;line-height:1.4;color:var(--eco-text-secondary);text-wrap:balance}
+.link__url{display:block;font-weight:600;color:var(--eco-color-university-teal-700)}
+
+.link--wide{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"ico body go";
+  align-items:center;column-gap:14px;min-height:0;padding:16px}
+.link--wide .link__go{margin:0 4px 0 0}
+.link--wide .link__text{margin-top:3px}
+
+/* asosiy karta — sharh (Google Maps): brend to‘ldirishi, ustida oq belgi (--eco-text-primary_on-brand) */
+.link--primary{padding:18px;column-gap:16px}
+.link--primary .link__ico{width:48px;height:48px;border-radius:14px;background:var(--eco-color-university-teal);color:#fff}
+.link--primary .link__ico svg{width:24px;height:24px}
+.link--primary .link__go{width:40px;height:40px;margin:0;border-radius:var(--eco-radius-full);background:var(--eco-color-university-teal);color:#fff}
+.link--primary .link__title{font-size:19px;letter-spacing:-.04em}
+.link--primary .link__text{font-size:13.5px}
+
+@media (hover:hover){
+  .link:hover{transform:translateY(-2px)}
+  .link:hover .link__ico{background:var(--eco-color-university-teal);color:#fff}
+  .link:hover .link__go{color:var(--eco-color-university-teal-700);transform:translate(2px,-2px)}
+  .link--primary:hover .link__go{color:#fff;background:var(--eco-color-university-teal-dark)}
+}
+.link:active{transform:translateY(0) scale(.985)}
+
+/* ── Pastki qism ────────────────────────────────────────────────────────── */
+.foot{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand site" "tag tag";
+  align-items:center;column-gap:16px;margin-top:auto;
+  padding:8px 0 max(24px,env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.22)}
+.foot__brand{grid-area:brand;font-family:var(--eco-font-mono);font-size:12.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase}
+.foot__tag{grid-area:tag;font-family:var(--eco-font-mono);font-size:12px;font-weight:500;letter-spacing:.12em;
+  text-transform:uppercase;color:rgba(255,255,255,.82)}
+.foot__site{grid-area:site;display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:14.5px;font-weight:600}
+.foot__site svg{width:16px;height:16px}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important}
+  .link:hover,.link:active{transform:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" id="skip" href="#links" data-i="skip">Havolalarga o‘tish</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-map-pin" viewBox="0 0 256 256" fill="currentColor"><path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 256 256" fill="currentColor"><path d="M128,24h0A104,104,0,1,0,232,128,104.12,104.12,0,0,0,128,24Zm88,104a87.61,87.61,0,0,1-3.33,24H174.16a157.44,157.44,0,0,0,0-48h38.51A87.61,87.61,0,0,1,216,128ZM102,168H154a115.11,115.11,0,0,1-26,45A115.27,115.27,0,0,1,102,168Zm-3.9-16a140.84,140.84,0,0,1,0-48h59.88a140.84,140.84,0,0,1,0,48ZM40,128a87.61,87.61,0,0,1,3.33-24H81.84a157.44,157.44,0,0,0,0,48H43.33A87.61,87.61,0,0,1,40,128ZM154,88H102a115.11,115.11,0,0,1,26-45A115.27,115.27,0,0,1,154,88Zm52.33,0H170.71a135.28,135.28,0,0,0-22.3-45.6A88.29,88.29,0,0,1,206.37,88ZM107.59,42.4A135.28,135.28,0,0,0,85.29,88H49.63A88.29,88.29,0,0,1,107.59,42.4ZM49.63,168H85.29a135.28,135.28,0,0,0,22.3,45.6A88.29,88.29,0,0,1,49.63,168Zm98.78,45.6a135.28,135.28,0,0,0,22.3-45.6h35.66A88.29,88.29,0,0,1,148.41,213.6Z"/></symbol>
+    <symbol id="i-telegram-logo" viewBox="0 0 256 256" fill="currentColor"><path d="M228.88,26.19a9,9,0,0,0-9.16-1.57L17.06,103.93a14.22,14.22,0,0,0,2.43,27.21L72,141.45V200a15.92,15.92,0,0,0,10,14.83,15.91,15.91,0,0,0,17.51-3.73l25.32-26.26L165,220a15.88,15.88,0,0,0,10.51,4,16.3,16.3,0,0,0,5-.79,15.85,15.85,0,0,0,10.67-11.63L231.77,35A9,9,0,0,0,228.88,26.19Zm-61.14,36L78.15,126.35l-49.6-9.73ZM88,200V152.52l24.79,21.74Zm87.53,8L92.85,135.5l119-85.29Z"/></symbol>
+    <symbol id="i-megaphone-simple" viewBox="0 0 256 256" fill="currentColor"><path d="M228.54,86.66l-176.06-54A16,16,0,0,0,32,48V192a16,16,0,0,0,16,16,16,16,0,0,0,4.52-.65L136,181.73V192a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16v-29.9l28.54-8.75A16.09,16.09,0,0,0,240,138V102A16.09,16.09,0,0,0,228.54,86.66ZM136,165,48,192V48l88,27Zm48,27H152V176.82L184,167Zm40-54-.11,0L152,160.08V79.92l71.89,22,.11,0v36Z"/></symbol>
+    <symbol id="i-arrow-up-right" viewBox="0 0 256 256" fill="currentColor"><path d="M200,64V168a8,8,0,0,1-16,0V83.31L69.66,197.66a8,8,0,0,1-11.32-11.32L172.69,72H88a8,8,0,0,1,0-16H192A8,8,0,0,1,200,64Z"/></symbol>
+    <symbol id="i-instagram-logo" viewBox="0 0 256 256" fill="currentColor"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160ZM176,24H80A56.06,56.06,0,0,0,24,80v96a56.06,56.06,0,0,0,56,56h96a56.06,56.06,0,0,0,56-56V80A56.06,56.06,0,0,0,176,24Zm40,152a40,40,0,0,1-40,40H80a40,40,0,0,1-40-40V80A40,40,0,0,1,80,40h96a40,40,0,0,1,40,40ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"/></symbol>
+    <symbol id="i-youtube-logo" viewBox="0 0 256 256" fill="currentColor"><path d="M164.44,121.34l-48-32A8,8,0,0,0,104,96v64a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM120,145.05V111l25.58,17ZM234.33,69.52a24,24,0,0,0-14.49-16.4C185.56,39.88,131,40,128,40s-57.56-.12-91.84,13.12a24,24,0,0,0-14.49,16.4C19.08,79.5,16,97.74,16,128s3.08,48.5,5.67,58.48a24,24,0,0,0,14.49,16.41C69,215.56,120.4,216,127.34,216h1.32c6.94,0,58.37-.44,91.18-13.11a24,24,0,0,0,14.49-16.41c2.59-10,5.67-28.22,5.67-58.48S236.92,79.5,234.33,69.52Zm-15.49,113a8,8,0,0,1-4.77,5.49c-31.65,12.22-85.48,12-86,12H128c-.54,0-54.33.2-86-12a8,8,0,0,1-4.77-5.49C34.8,173.39,32,156.57,32,128s2.8-45.39,5.16-54.47A8,8,0,0,1,41.93,68c30.52-11.79,81.66-12,85.85-12h.27c.54,0,54.38-.18,86,12a8,8,0,0,1,4.77,5.49C221.2,82.61,224,99.43,224,128S221.2,173.39,218.84,182.47Z"/></symbol>
+  </defs>
+</svg>
+
+<div class="screen">
+  <header class="head">
+    <a class="logo" href="https://university.pdp.uz/uz" target="_blank" rel="noopener" data-web aria-label="PDP University">
+      <svg viewBox="0 0 431.356 52.296" fill="none" aria-hidden="true" focusable="false">
+<path d="M12.454 25.369C12.454 28.736 13.791 31.964 16.172 34.345C18.552 36.725 21.781 38.062 25.147 38.062C28.514 38.062 31.742 36.725 34.123 34.345C36.503 31.964 37.84 28.736 37.84 25.369L12.454 25.369Z" fill="#FFCC19"/>
+<path d="M50.293 25.414C50.15 39.18 38.946 50.296 25.147 50.296C11.347 50.296 0.143 39.18 0 25.414L11.188 25.414C11.33 33.002 17.525 39.11 25.147 39.11C32.768 39.11 38.964 33.002 39.106 25.414L50.293 25.414Z" fill="#26A49D"/>
+<path d="M25.147 0C38.786 0 49.889 10.858 50.283 24.402L39.089 24.402C38.701 17.038 32.607 11.186 25.147 11.186C17.686 11.186 11.592 17.038 11.204 24.402L0.01 24.402C0.404 10.858 11.507 0 25.147 0Z" fill="#26A49D"/>
+<path d="M74.704 31.654L74.704 42.266L66.733 42.266L66.733 8.03L84.211 8.03C88.581 8.03 91.99 8.462 94.631 9.279C99.865 11.007 102.025 14.464 102.025 20.082C102.025 27.813 96.455 31.702 84.98 31.654L74.704 31.654ZM74.704 14.801L74.704 24.884L84.499 24.884C91.51 24.884 93.911 23.78 93.911 20.034C93.911 18.402 93.575 17.297 92.854 16.577C91.51 15.089 88.677 14.801 84.259 14.801L74.704 14.801Z" fill="#000000"/>
+<path d="M105.994 8.03L121.936 8.03C136.004 8.03 143.207 13.12 143.207 25.22L143.207 25.46C143.207 37.368 136.004 42.266 122.416 42.266L105.994 42.266L105.994 8.03ZM113.965 14.993L113.965 35.255L121.984 35.255C125.201 35.255 127.698 34.919 129.618 34.295C133.411 32.999 134.996 30.214 134.996 25.316L134.996 25.172C134.996 22.675 134.516 20.755 133.7 19.218C131.875 16.241 128.178 14.993 121.599 14.993L113.965 14.993Z" fill="#000000"/>
+<path d="M155.758 31.654L155.758 42.266L147.787 42.266L147.787 8.03L165.265 8.03C169.634 8.03 173.044 8.462 175.684 9.279C180.918 11.007 183.079 14.464 183.079 20.082C183.079 27.813 177.509 31.702 166.033 31.654L155.758 31.654ZM155.758 14.801L155.758 24.884L165.553 24.884C172.563 24.884 174.964 23.78 174.964 20.034C174.964 18.402 174.628 17.297 173.908 16.577C172.563 15.089 169.73 14.801 165.313 14.801L155.758 14.801Z" fill="#000000"/>
+<path d="M214.467 42.933C205.344 42.933 201.311 38.036 201.311 27.376L201.311 8.073L206.112 8.073L206.112 27.184C206.112 34.963 208.561 38.42 214.467 38.42C220.373 38.42 222.678 35.011 222.678 27.184L222.678 8.073L227.575 8.073L227.575 27.376C227.575 38.036 223.158 42.933 214.467 42.933Z" fill="#000000"/>
+<path d="M237.683 42.213L232.977 42.213L232.977 14.796L236.915 14.796L237.395 21.038C238.883 16.812 242.196 14.027 247.43 14.027C254.488 14.027 258.138 18.589 258.138 25.551L258.138 42.213L253.432 42.213L253.432 26.608C253.432 21.47 251.367 18.109 246.038 18.109C240.612 18.109 237.683 21.998 237.683 27.856L237.683 42.213Z" fill="#000000"/>
+<path d="M266.014 11.291C263.613 11.291 262.701 10.426 262.701 7.977C262.701 5.529 263.805 4.664 266.014 4.664C268.223 4.664 269.279 5.529 269.279 7.977C269.279 10.378 268.223 11.291 266.014 11.291ZM263.565 42.213L263.565 14.796L268.319 14.796L268.319 42.213L263.565 42.213Z" fill="#000000"/>
+<path d="M282.437 42.213L271.249 14.796L276.147 14.796L284.646 36.691L293.433 14.796L298.33 14.796L286.662 42.213L282.437 42.213Z" fill="#000000"/>
+<path d="M325.47 34.05C323.885 39.716 319.276 42.933 312.457 42.933C303.334 42.933 298.773 37.555 298.773 29.009L298.773 28.432C298.773 25.551 299.349 23.055 300.453 20.846C302.71 16.524 306.936 14.027 312.602 14.027C315.627 14.027 318.123 14.652 320.044 15.948C323.981 18.541 325.854 22.91 325.854 27.856L325.854 30.065L303.382 30.065C303.719 35.731 306.984 38.996 312.65 38.996C316.635 38.996 319.42 37.267 320.428 34.05L325.47 34.05ZM312.65 17.821C307.368 17.821 304.007 21.038 303.43 26.368L321.196 26.368C320.812 21.134 317.931 17.821 312.65 17.821Z" fill="#000000"/>
+<path d="M330.094 42.213L330.094 14.796L333.887 14.796L334.511 21.614C335.664 17.052 338.785 14.604 344.451 14.604L346.131 14.604L346.131 19.309L343.826 19.309C341.522 19.309 339.649 19.645 338.352 20.366C335.664 21.854 334.703 24.687 334.703 29.393L334.703 42.213L330.094 42.213Z" fill="#000000"/>
+<path d="M360.275 42.933C352.497 42.933 348.031 39.62 347.263 33.234L352.305 33.234C352.881 37.171 356.05 38.948 360.371 38.948C365.461 38.948 367.334 36.883 367.334 34.29C367.334 33.186 366.949 32.418 366.181 31.889C364.597 30.785 361.908 30.401 359.027 30.017C356.53 29.633 353.937 29.153 351.872 28.144C349.808 27.04 348.463 25.311 348.463 22.334C348.463 20.798 348.847 19.405 349.616 18.205C351.248 15.612 354.417 14.027 359.363 14.027C366.805 14.027 370.647 17.389 371.367 22.718L366.613 22.718C366.181 19.453 363.732 17.821 359.315 17.821C354.609 17.821 353.073 19.837 353.073 22.094C353.073 23.103 353.457 23.919 354.273 24.495C355.906 25.503 358.547 25.887 361.428 26.32C363.924 26.704 366.517 27.184 368.582 28.192C370.647 29.297 371.943 30.977 371.943 34.002C371.943 35.683 371.511 37.171 370.695 38.516C369.014 41.205 365.701 42.933 360.275 42.933Z" fill="#000000"/>
+<path d="M378.477 11.291C376.076 11.291 375.164 10.426 375.164 7.977C375.164 5.529 376.268 4.664 378.477 4.664C380.686 4.664 381.742 5.529 381.742 7.977C381.742 10.378 380.686 11.291 378.477 11.291ZM376.028 42.213L376.028 14.796L380.782 14.796L380.782 42.213L376.028 42.213Z" fill="#000000"/>
+<path d="M401.795 42.213L398.77 42.213C396.321 42.213 394.4 41.877 393.056 41.253C390.367 39.956 389.407 37.075 389.407 31.601L389.407 18.925L384.029 18.925L384.029 14.94L386.67 14.94C387.486 14.94 388.11 14.892 388.542 14.7C389.359 14.364 389.551 13.451 389.695 11.387C389.695 11.146 389.695 10.714 389.743 10.186C389.743 9.082 389.791 7.929 389.791 7.545L393.728 7.545L393.728 14.796L401.795 14.796L401.795 18.925L393.728 18.925L393.728 30.929C393.728 32.946 393.872 34.386 394.208 35.347C394.929 37.363 396.561 37.843 399.826 37.843L401.795 37.843L401.795 42.213Z" fill="#000000"/>
+<path d="M404.755 52.296L404.755 48.215L407.156 48.215C408.692 48.215 409.796 48.071 410.709 47.831C412.437 47.255 413.446 45.91 414.79 42.933L415.318 41.637L403.602 14.796L408.596 14.796L417.575 36.019L417.623 36.211L417.671 35.971L426.458 14.796L431.356 14.796L419.016 43.701C417.431 47.447 416.231 49.607 414.598 50.808C412.917 51.96 410.757 52.296 407.107 52.296L404.755 52.296Z" fill="#000000"/>
+</svg>
+    </a>
+    <div class="lang" id="lang" role="group" aria-label="Til">
+      <button type="button" data-lang="uz" aria-pressed="true">UZ</button>
+      <button type="button" data-lang="ru" aria-pressed="false">RU</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+  <div class="rule" aria-hidden="true"></div>
+
+  <main class="field">
+    <svg class="mark" viewBox="0 0 50.3 50.3" aria-hidden="true" focusable="false"><path d="M12.454 25.369C12.454 28.736 13.791 31.964 16.172 34.345C18.552 36.725 21.781 38.062 25.147 38.062C28.514 38.062 31.742 36.725 34.123 34.345C36.503 31.964 37.84 28.736 37.84 25.369L12.454 25.369Z" fill="#fff"/><path d="M50.293 25.414C50.15 39.18 38.946 50.296 25.147 50.296C11.347 50.296 0.143 39.18 0 25.414L11.188 25.414C11.33 33.002 17.525 39.11 25.147 39.11C32.768 39.11 38.964 33.002 39.106 25.414L50.293 25.414Z" fill="#fff"/><path d="M25.147 0C38.786 0 49.889 10.858 50.283 24.402L39.089 24.402C38.701 17.038 32.607 11.186 25.147 11.186C17.686 11.186 11.592 17.038 11.204 24.402L0.01 24.402C0.404 10.858 11.507 0 25.147 0Z" fill="#fff"/></svg>
+    <section class="hero">
+      <p class="pill"><span class="pill__dot" aria-hidden="true"></span><span data-i="pill">Bizda yoqdimi?</span></p>
+      <h1><span data-i="h1a">Sharh qoldiring</span> <span data-i="h1b">va obuna bo‘ling</span></h1>
+      <p class="lead" data-i="lead">PDP University’ning yangiliklari, qabul va imkoniyatlaridan birinchi bo‘lib xabardor bo‘ling</p>
+    </section>
+
+    <nav id="links" class="links-nav" aria-label="Havolalar">
+      <ul class="links">
+        <li class="is-wide">
+          <a class="link link--wide link--primary" href="https://search.google.com/local/writereview?placeid=ChIJFzkx6oNhrjgRDNI013pgWdw" target="_blank" rel="noopener">
+            <span class="link__ico"><svg aria-hidden="true"><use href="#i-map-pin"/></svg></span>
+            <span class="link__body">
+              <span class="link__title" data-i="maps_t">Google Maps</span>
+              <span class="link__text" data-i="maps_d">Google Maps’da sharh qoldiring</span>
+            </span>
+            <span class="link__go"><svg aria-hidden="true"><use href="#i-arrow-up-right"/></svg></span>
+          </a>
+        </li>
+        <li class="is-wide">
+          <a class="link link--wide" href="https://university.pdp.uz/uz" target="_blank" rel="noopener" data-web>
+            <span class="link__ico"><svg aria-hidden="true"><use href="#i-globe"/></svg></span>
+            <span class="link__body">
+              <span class="link__title" data-i="web_t">Veb-sayt</span>
+              <span class="link__text"><span class="link__url">university.pdp.uz</span><span data-i="web_d">Rasmiy saytimiz</span></span>
+            </span>
+            <span class="link__go"><svg aria-hidden="true"><use href="#i-arrow-up-right"/></svg></span>
+          </a>
+        </li>
+        <li>
+          <a class="link" href="https://t.me/PDPUniversityBot" target="_blank" rel="noopener">
+            <span class="link__ico"><svg aria-hidden="true"><use href="#i-telegram-logo"/></svg></span>
+            <span class="link__go"><svg aria-hidden="true"><use href="#i-arrow-up-right"/></svg></span>
+            <span class="link__body">
+              <span class="link__title" data-i="bot_t">Telegram bot</span>
+              <span class="link__text"><span class="link__url">@PDPUniversityBot</span><span data-i="bot_d">Tezkor ma’lumot va yordam</span></span>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="link" href="https://t.me/pdpuniversity" target="_blank" rel="noopener">
+            <span class="link__ico"><svg aria-hidden="true"><use href="#i-megaphone-simple"/></svg></span>
+            <span class="link__go"><svg aria-hidden="true"><use href="#i-arrow-up-right"/></svg></span>
+            <span class="link__body">
+              <span class="link__title" data-i="ch_t">Telegram kanal</span>
+              <span class="link__text"><span class="link__url">@pdpuniversity</span><span data-i="ch_d">Yangiliklar va e’lonlar</span></span>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="link" href="https://www.instagram.com/pdp.university/" target="_blank" rel="noopener">
+            <span class="link__ico"><svg aria-hidden="true"><use href="#i-instagram-logo"/></svg></span>
+            <span class="link__go"><svg aria-hidden="true"><use href="#i-arrow-up-right"/></svg></span>
+            <span class="link__body">
+              <span class="link__title" data-i="ig_t">Instagram</span>
+              <span class="link__text"><span class="link__url">@pdp.university</span><span data-i="ig_d">Suratlar va yangiliklar</span></span>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="link" href="https://www.youtube.com/channel/UCjpbksOprX8kSciHQY6yupw" target="_blank" rel="noopener">
+            <span class="link__ico"><svg aria-hidden="true"><use href="#i-youtube-logo"/></svg></span>
+            <span class="link__go"><svg aria-hidden="true"><use href="#i-arrow-up-right"/></svg></span>
+            <span class="link__body">
+              <span class="link__title" data-i="yt_t">YouTube</span>
+              <span class="link__text" data-i="yt_d">Videolar va tadbirlar</span>
+            </span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <footer class="foot">
+      <p class="foot__brand">PDP University</p>
+      <a class="foot__site" href="https://university.pdp.uz/uz" target="_blank" rel="noopener" data-web>university.pdp.uz <svg aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+      <p class="foot__tag" data-i="tag">To‘laqonli IT universitet</p>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var T = {
+    uz: { title:'PDP University — Havolalar', nav:'Havolalar', lang:'Til', skip:'Havolalarga o‘tish',
+      pill:'Bizda yoqdimi?', h1a:'Sharh qoldiring', h1b:'va obuna bo‘ling',
+      lead:'PDP University’ning yangiliklari, qabul va imkoniyatlaridan birinchi bo‘lib xabardor bo‘ling',
+      maps_t:'Google Maps', maps_d:'Google Maps’da sharh qoldiring', web_t:'Veb-sayt', web_d:'Rasmiy saytimiz',
+      bot_t:'Telegram bot', bot_d:'Tezkor ma’lumot va yordam', ch_t:'Telegram kanal', ch_d:'Yangiliklar va e’lonlar',
+      ig_t:'Instagram', ig_d:'Suratlar va yangiliklar', yt_t:'YouTube', yt_d:'Videolar va tadbirlar',
+      tag:'To‘laqonli IT universitet' },
+    ru: { title:'PDP University — Ссылки', nav:'Ссылки', lang:'Язык', skip:'Перейти к ссылкам',
+      pill:'Вам у нас понравилось?', h1a:'Оставьте отзыв', h1b:'и подпишитесь',
+      lead:'Узнавайте первыми о новостях, приёме и возможностях PDP University',
+      maps_t:'Google Maps', maps_d:'Оставьте отзыв в Google Maps', web_t:'Веб-сайт', web_d:'Официальный сайт',
+      bot_t:'Telegram-бот', bot_d:'Быстрая информация и помощь', ch_t:'Telegram-канал', ch_d:'Новости и объявления',
+      ig_t:'Instagram', ig_d:'Фото и новости', yt_t:'YouTube', yt_d:'Видео и мероприятия',
+      tag:'Полноценный IT-университет' },
+    en: { title:'PDP University — Links', nav:'Links', lang:'Language', skip:'Skip to links',
+      pill:'Like it here?', h1a:'Leave a review', h1b:'and subscribe',
+      lead:'Be the first to hear about PDP University news, admissions and opportunities',
+      maps_t:'Google Maps', maps_d:'Leave a review on Google Maps', web_t:'Website', web_d:'Our official site',
+      bot_t:'Telegram bot', bot_d:'Quick info and help', ch_t:'Telegram channel', ch_d:'News and announcements',
+      ig_t:'Instagram', ig_d:'Photos and news', yt_t:'YouTube', yt_d:'Videos and events',
+      tag:'A full-fledged IT university' }
+  };
+  // Saytda rus tili yo‘q: RU uchun o‘zbekcha sahifa ochiladi
+  var WEB = { uz:'https://university.pdp.uz/uz', ru:'https://university.pdp.uz/uz', en:'https://university.pdp.uz/en' };
+  var KEY = 'btc:lang';
+  var $ = function(id){ return document.getElementById(id) };
+  var each = function(sel, fn){ [].forEach.call(document.querySelectorAll(sel), fn) };
+
+  function initial(){
+    var m = location.search.match(/[?&]lang=(uz|ru|en)\b/);
+    if (m) return m[1];
+    try { var s = localStorage.getItem(KEY); if (s && T[s]) return s; } catch (e) {}
+    var nl = (navigator.language || '').toLowerCase();
+    return nl.indexOf('ru') === 0 ? 'ru' : nl.indexOf('en') === 0 ? 'en' : 'uz';
+  }
+  function apply(l){
+    var d = T[l];
+    document.documentElement.lang = l;
+    document.title = d.title;
+    each('[data-i]', function(n){ var v = d[n.getAttribute('data-i')]; if (v != null) n.textContent = v; });
+    each('[data-lang]', function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-lang') === l ? 'true' : 'false'); });
+    each('[data-web]', function(a){ a.setAttribute('href', WEB[l]); });
+    $('links').setAttribute('aria-label', d.nav);
+    $('lang').setAttribute('aria-label', d.lang);
+  }
+  $('lang').addEventListener('click', function(e){
+    var b = e.target.closest('[data-lang]'); if (!b) return;
+    var l = b.getAttribute('data-lang'); apply(l);
+    try { localStorage.setItem(KEY, l); } catch (err) {}
+  });
+  apply(initial());
+})();
+</script>
+</body>
+</html>
