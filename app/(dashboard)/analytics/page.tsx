@@ -41,8 +41,9 @@ type SortKey = 'total' | 'nfc' | 'qr' | 'unique' | 'conversion' | 'clicks' | 're
 
 const TARGET_LABEL: Record<string, string> = {
   google: 'Google', yandex: 'Яндекс', gis: '2ГИС', instagram: 'Instagram', telegram: 'Telegram', bot: 'Бот',
+  website: 'Сайт', google_play: 'Google Play', app_store: 'App Store', wifi: 'Wi-Fi',
 }
-const TARGET_ORDER = ['google', 'yandex', 'gis', 'instagram', 'telegram', 'bot']
+const TARGET_ORDER = ['google', 'yandex', 'gis', 'instagram', 'telegram', 'bot', 'website', 'google_play', 'app_store', 'wifi']
 
 /** «Google 12 · Яндекс 3 · Instagram 5» */
 function clicksSummary(byTarget: Clicks): string {

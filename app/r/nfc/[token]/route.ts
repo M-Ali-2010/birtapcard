@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { getVisitorDevice, getClientIp, getBrowserLang, isBot } from '@/lib/visitor-hash'
 import { isSubscriptionExpired, renderExpiredPage } from '@/lib/scan-lock'
+import { isPdpSchoolCompany } from '@/lib/screens/pdp-school'
 
 export const dynamic = 'force-dynamic'
 
@@ -76,7 +77,7 @@ export async function GET(
   //    Скан уже записан выше, повторно /r/go его не фиксирует.
   const { data: branch } = await supabase
     .from('branches')
-    .select('name, paid_until, instagram_url, yandex_url, gis_url, telegram_url, bot_url')
+    .select('name, paid_until, instagram_url, yandex_url, gis_url, telegram_url, bot_url, companies(name)')
     .or(`nfc_token.eq.${token},qr_token.eq.${token}`)
     .maybeSingle()
 
@@ -89,7 +90,9 @@ export async function GET(
     })
   }
 
-  if (branch?.instagram_url || branch?.yandex_url || branch?.gis_url || branch?.telegram_url || branch?.bot_url) {
+  // У PDP School свой экран ссылок — ведём на него, даже если дополнительных ссылок в кабинете нет
+  const company = Array.isArray(branch?.companies) ? branch?.companies[0] : branch?.companies
+  if (isPdpSchoolCompany(company?.name) || branch?.instagram_url || branch?.yandex_url || branch?.gis_url || branch?.telegram_url || branch?.bot_url) {
     return NextResponse.redirect(new URL(`/r/go/${token}`, request.url))
   }
 

@@ -118,7 +118,9 @@ function delta(current: number, previous: number): string {
 
 // ─── Типы данных отчёта ──────────────────────────────────────────────────────
 
-export type ClickTarget = 'google' | 'yandex' | 'gis' | 'instagram' | 'telegram' | 'bot'
+export type ClickTarget =
+  | 'google' | 'yandex' | 'gis' | 'instagram' | 'telegram' | 'bot'
+  | 'website' | 'google_play' | 'app_store' | 'wifi'
 
 export const TARGET_LABEL: Record<ClickTarget, string> = {
   google: 'Google',
@@ -127,6 +129,10 @@ export const TARGET_LABEL: Record<ClickTarget, string> = {
   instagram: 'Instagram',
   telegram: 'Telegram',
   bot: 'бот',
+  website: 'сайт',
+  google_play: 'Google Play',
+  app_store: 'App Store',
+  wifi: 'Wi-Fi',
 }
 
 export interface BranchStats {
@@ -171,6 +177,7 @@ export interface ReportData {
 
 const EMPTY_CLICKS: Record<ClickTarget, number> = {
   google: 0, yandex: 0, gis: 0, instagram: 0, telegram: 0, bot: 0,
+  website: 0, google_play: 0, app_store: 0, wifi: 0,
 }
 
 // ─── Отзывы Google из снимков ────────────────────────────────────────────────
