@@ -4,6 +4,7 @@ import { renderScanGate } from '@/lib/scan-gate'
 import { isPdpSchoolCompany, pdpWifiFromEnv, renderPdpScreen } from '@/lib/screens/pdp-school'
 import { isSubscriptionExpired, renderExpiredPage } from '@/lib/scan-lock'
 import { getVenueWifi } from '@/lib/venue-wifi'
+import { getVenueLinks } from '@/lib/venue-links'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,12 +57,14 @@ export async function GET(
   // Wi-Fi: сначала то, что админ ввёл в боте (venue_wifi), запасной вариант — переменные PDP_WIFI_*
   if (isPdp) {
     const wifi = (await getVenueWifi(supabase, branch.company_id)) ?? pdpWifiFromEnv()
+    const links = await getVenueLinks(supabase, branch.company_id)
     const html = renderPdpScreen({
       token,
       googleUrl: branch.google_url,
       botUrl: branch.bot_url,
       telegramUrl: branch.telegram_url,
       wifi,
+      links,
     })
     return new NextResponse(html, {
       status: 200,

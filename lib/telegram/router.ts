@@ -29,6 +29,7 @@ import { handleExportMenu } from '@/lib/telegram/handlers/export'
 import { handleLeadsList } from '@/lib/telegram/handlers/leads'
 import { handleNotifyMenu } from '@/lib/telegram/handlers/notify'
 import { handleWifiInput, isWifiState } from '@/lib/telegram/handlers/wifi'
+import { handleScreenInput, isScreenInputState } from '@/lib/telegram/handlers/screen'
 import {
   handleSupportMenu, handleSupportInput, isWritingSupport, handleSupportInbox,
 } from '@/lib/telegram/handlers/support'
@@ -267,6 +268,9 @@ export async function handleMessage(msg: TgMessage) {
     }
     if (state && isWifiState(state.state)) {
       if (await handleWifiInput(chatId, telegramId, msg, state)) return
+    }
+    if (state && isScreenInputState(state.state)) {
+      if (await handleScreenInput(chatId, telegramId, msg, state)) return
     }
   }
 
