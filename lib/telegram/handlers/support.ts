@@ -10,7 +10,7 @@
  */
 
 import { sendMessage, keyboard, escapeMd, type InlineButton } from '@/lib/telegram/bot'
-import { db, findProfile, setState, getState, clearState } from '@/lib/telegram/db'
+import { db, findProfile, setState, getState, clearState, hasCabinetAccount } from '@/lib/telegram/db'
 import { navRow } from '@/lib/telegram/keyboards/main'
 import { salesMenu, superAdminChatIds } from '@/lib/telegram/handlers/sales'
 import { menuForRole } from '@/lib/telegram/keyboards/menus'
@@ -107,7 +107,8 @@ export async function handleSupportInput(chatId: number, telegramId: number, msg
     const { data: row } = await db().from('support_messages').insert({
       telegram_id: telegramId,
       tg_username: msg.from?.username ?? null,
-      user_id: profile?.user_id ?? null,
+      // без учётной записи в кабинете user_id остаётся пустым — иначе упрёмся во внешний ключ
+      user_id: profile && hasCabinetAccount(profile) ? profile.user_id : null,
       company_id: profile?.company_id ?? null,
       text: text.slice(0, 4000),
     }).select('id').single()

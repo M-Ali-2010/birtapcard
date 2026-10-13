@@ -9,7 +9,7 @@
  */
 
 import { sendMessage, getFile, keyboard, type InlineButton } from '@/lib/telegram/bot'
-import { db, findProfile, setState, getState, clearState } from '@/lib/telegram/db'
+import { db, findProfile, setState, getState, clearState, hasCabinetAccount } from '@/lib/telegram/db'
 import { navRow } from '@/lib/telegram/keyboards/main'
 import type { TgMessage } from '@/lib/telegram/types'
 
@@ -66,6 +66,16 @@ export async function handleSubscriptionMenu(chatId: number, telegramId: number)
 
   if (!profile.company_id) {
     await sendMessage(chatId, '⚠️ Ваш аккаунт не привязан к компании. Обратитесь к администратору.')
+    return
+  }
+
+  // Подключены по приглашению, без кабинета: подписку и оплату ведёт администратор
+  if (!hasCabinetAccount(profile) && profile.role !== 'super_admin') {
+    await sendMessage(chatId,
+      '💳 *Подписка*\n\nПодпиской и оплатой занимается администратор BirTapCard — ' +
+      'вам ничего делать не нужно. Вопросы — через «🆘 Поддержка».',
+      { reply_markup: keyboard([navRow()]) }
+    )
     return
   }
 

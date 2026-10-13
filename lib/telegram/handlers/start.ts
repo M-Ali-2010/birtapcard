@@ -12,6 +12,7 @@ import { db, findProfile } from '@/lib/telegram/db'
 import { menuForRole } from '@/lib/telegram/keyboards/menus'
 import { handleSalesStart, handleLeadStart } from '@/lib/telegram/handlers/sales'
 import { applyCommandsForChat } from '@/lib/telegram/profile'
+import { handleInviteAccept, INVITE_PREFIX } from '@/lib/telegram/handlers/invite'
 import type { TgUser } from '@/lib/telegram/types'
 
 const ROLE_LABEL: Record<string, string> = {
@@ -41,6 +42,12 @@ export async function handleStart(chatId: number, telegramId: number, firstName?
 }
 
 export async function handleLinkToken(chatId: number, telegramId: number, tgUser: TgUser, token: string) {
+  // Приглашение из бота: t.me/<бот>?start=inv_<код> — клиент без кабинета
+  if (token.startsWith(INVITE_PREFIX)) {
+    await handleInviteAccept(chatId, telegramId, tgUser, token.slice(INVITE_PREFIX.length))
+    return
+  }
+
   const supabase = db()
 
   const { data: acc } = await supabase

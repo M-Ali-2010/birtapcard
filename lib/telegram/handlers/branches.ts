@@ -8,7 +8,7 @@
  * (см. меню в keyboards/menus.ts).
  */
 
-import { sendMessage, keyboard } from '@/lib/telegram/bot'
+import { sendMessage, keyboard, escapeMd } from '@/lib/telegram/bot'
 import { db, findProfile } from '@/lib/telegram/db'
 import { navRow } from '@/lib/telegram/keyboards/main'
 import { fetchCompanyReport, getReportRange, type ReportPeriod } from '@/lib/telegram/reports'
@@ -79,7 +79,66 @@ export async function handleMyBranches(chatId: number, telegramId: number) {
   }
   text += `_Статистика — за сегодня. Для рейтинга по периоду используйте "🏆 Рейтинг филиалов".`
 
-  await sendMessage(chatId, text, { reply_markup: keyboard([navRow()]) })
+  await sendMessage(chatId, text, {
+    reply_markup: keyboard([[{ text: '🔗 Ссылки точек', callback_data: 'mylinks' }], navRow()]),
+  })
+}
+
+// ─── 🔗 Ссылки точек ───────────────────────────────────────────────────────
+
+/** Базовый адрес сайта: по нему открываются карточки (/r/nfc/…, /r/qr/…) */
+function siteUrl(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL || 'https://birtapcard.vercel.app').replace(/\/+$/, '')
+}
+
+/**
+ * Ссылки точек для записи на NFC-метки и печати QR: по две на точку.
+ * Показываются моноширинным шрифтом — нажатие в Telegram копирует ссылку.
+ * Длинный список режется на несколько сообщений.
+ */
+export async function sendBranchLinks(chatId: number, companyId: string, opts: { branchId?: string | null; back?: string } = {}) {
+  const supabase = db()
+  let query = supabase
+    .from('branches').select('id, name, nfc_token, qr_token, active').eq('company_id', companyId).order('name')
+  if (opts.branchId) query = query.eq('id', opts.branchId)
+  const { data: branches } = await query
+
+  const nav = keyboard([navRow(opts.back)])
+  if (!branches?.length) {
+    await sendMessage(chatId, '🔗 Точек пока нет.', { reply_markup: nav })
+    return
+  }
+
+  const base = siteUrl()
+  const blocks = branches.map(b =>
+    `${b.active === false ? '⚪️' : '🟢'} *${escapeMd(String(b.name))}*\n` +
+    `NFC (в метку):\n\`${base}/r/nfc/${b.nfc_token}\`\n` +
+    `QR (в наклейку):\n\`${base}/r/qr/${b.qr_token}\``
+  )
+
+  const chunks: string[] = []
+  let cur = '🔗 *Ссылки точек*\n_Нажмите на ссылку — она скопируется._\n'
+  for (const block of blocks) {
+    if ((cur + '\n' + block).length > 3500) { chunks.push(cur); cur = '' }
+    cur += (cur ? '\n' : '') + block + '\n'
+  }
+  if (cur.trim()) chunks.push(cur)
+
+  for (let i = 0; i < chunks.length; i++) {
+    await sendMessage(chatId, chunks[i], i === chunks.length - 1 ? { reply_markup: nav } : {})
+  }
+}
+
+/** «🔗 Ссылки точек» у владельца и управляющего — только их заведение (или их точка) */
+export async function handleOwnLinks(chatId: number, telegramId: number) {
+  const profile = await findProfile(telegramId)
+  if (!profile?.company_id) {
+    await sendMessage(chatId, '⚠️ Ваш аккаунт не привязан к компании.')
+    return
+  }
+  await sendBranchLinks(chatId, profile.company_id, {
+    branchId: profile.role === 'branch_manager' ? profile.branch_id : null,
+  })
 }
 
 // ─── 🏆 Рейтинг филиалов ─────────────────────────────────────────────────────

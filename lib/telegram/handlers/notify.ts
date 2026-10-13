@@ -20,6 +20,62 @@ interface Row {
   notify_daily: boolean
 }
 
+export type DailyReportSetup = 'created' | 'attached' | 'moved' | 'kept' | 'error'
+
+/**
+ * Куда слать утренний отчёт компании. Строка telegram_settings создаётся здесь же,
+ * в боте, — заходить для этого в кабинет не нужно.
+ *   · строки нет        → создаём: в этот чат, 08:00, включён;
+ *   · чат не был задан  → подставляем этот;
+ *   · чат уже задан     → оставляем (force — переносим в этот).
+ */
+export async function ensureDailyReport(companyId: string, chatId: number, force = false): Promise<DailyReportSetup> {
+  const supabase = db()
+  const chat = String(chatId)
+
+  const { data: row } = await supabase
+    .from('telegram_settings').select('id, chat_id').eq('company_id', companyId).maybeSingle()
+
+  if (!row) {
+    const base = { company_id: companyId, chat_id: chat, notify_daily: true, active: true }
+    let { error } = await supabase.from('telegram_settings').insert({ ...base, report_hour: 8 })
+    // На старой базе колонки report_hour может не быть — тогда вставляем без неё (час по умолчанию 8)
+    if (error) ({ error } = await supabase.from('telegram_settings').insert(base))
+    if (error) console.error('telegram_settings insert error:', error)
+    return error ? 'error' : 'created'
+  }
+
+  if (!row.chat_id) {
+    const { error } = await supabase
+      .from('telegram_settings').update({ chat_id: chat, notify_daily: true, active: true }).eq('id', row.id)
+    return error ? 'error' : 'attached'
+  }
+
+  if (force && String(row.chat_id) !== chat) {
+    const { error } = await supabase
+      .from('telegram_settings').update({ chat_id: chat, notify_daily: true, active: true }).eq('id', row.id)
+    return error ? 'error' : 'moved'
+  }
+
+  return 'kept'
+}
+
+/** Кнопка «Присылать отчёт сюда» у владельца — вместо отправки в кабинет */
+export async function handleNotifySetup(chatId: number, telegramId: number, cbId: string) {
+  const profile = await findProfile(telegramId)
+  if (!profile?.company_id) {
+    await answerCallback(cbId, '⛔ Нет доступа', true)
+    return
+  }
+  const res = await ensureDailyReport(profile.company_id, chatId)
+  if (res === 'error') {
+    await answerCallback(cbId, '❌ Не удалось включить', true)
+    return
+  }
+  await answerCallback(cbId, '🔔 Отчёт включён')
+  await handleNotifyMenu(chatId, telegramId)
+}
+
 async function loadSettings(companyId: string): Promise<Row | null> {
   const { data } = await db()
     .from('telegram_settings')
@@ -54,9 +110,9 @@ export async function handleNotifyMenu(chatId: number, telegramId: number) {
   if (!row || !row.chat_id) {
     await sendMessage(chatId,
       '🔔 *Ежедневный отчёт*\n\n' +
-      'Пока не настроен: не указан чат, куда его присылать.\n' +
-      'Это делается один раз в кабинете — в разделе Telegram.',
-      { reply_markup: keyboard([[{ text: '⚙️ Настроить в кабинете', url: 'https://birtapcard.vercel.app/telegram' }], navRow()]) }
+      'Пока не включён. Нажмите кнопку — и каждое утро в 08:00 сюда будет приходить ' +
+      'сводка за вчера: касания, переходы по кнопкам, отзывы Google, лучшая точка.',
+      { reply_markup: keyboard([[{ text: '✅ Присылать отчёт сюда', callback_data: 'notify_setup' }], navRow()]) }
     )
     return
   }

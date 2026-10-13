@@ -20,10 +20,10 @@ import {
   handlePayHistory,
 } from '@/lib/telegram/handlers/subscription'
 import { handleAdminApprove, handleAdminReject } from '@/lib/telegram/handlers/admin'
-import { handleBranchRanking } from '@/lib/telegram/handlers/branches'
+import { handleBranchRanking, handleOwnLinks } from '@/lib/telegram/handlers/branches'
 import { handleExportReport } from '@/lib/telegram/handlers/export'
 import { handleLeadsList, handleLeadStatus } from '@/lib/telegram/handlers/leads'
-import { handleNotifyMenu, handleNotifyHour, handleNotifyToggle } from '@/lib/telegram/handlers/notify'
+import { handleNotifyMenu, handleNotifyHour, handleNotifyToggle, handleNotifySetup } from '@/lib/telegram/handlers/notify'
 import {
   handleSupportMenu, handleSupportWrite, handleSupportReplyStart, handleSupportInbox,
 } from '@/lib/telegram/handlers/support'
@@ -104,6 +104,13 @@ const EXACT_ROUTES: Record<string, (chatId: number, telegramId: number, cbId: st
   },
   notify_toggle: async (chatId, telegramId, cbId) => {
     await handleNotifyToggle(chatId, telegramId, cbId)
+  },
+  notify_setup: async (chatId, telegramId, cbId) => {
+    await handleNotifySetup(chatId, telegramId, cbId)
+  },
+  mylinks: async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleOwnLinks(chatId, telegramId)
   },
   main_menu: async (chatId, telegramId, cbId) => {
     await answerCallback(cbId)

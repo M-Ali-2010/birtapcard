@@ -272,6 +272,23 @@ export const setMyCommands = (commands: BotCommand[], scope?: CommandScope) =>
   call('setMyCommands', { commands, ...(scope ? { scope } : {}) })
 export const setChatMenuButton = () => call('setChatMenuButton', { menu_button: { type: 'commands' } })
 
+let cachedUsername: string | null = null
+
+/** Имя бота для ссылок t.me/<имя>?start=… — из TELEGRAM_BOT_USERNAME или через getMe (запоминается) */
+export async function getBotUsername(): Promise<string | null> {
+  const fromEnv = process.env.TELEGRAM_BOT_USERNAME?.replace(/^@/, '').trim()
+  if (fromEnv) return fromEnv
+  if (cachedUsername) return cachedUsername
+  try {
+    const res = await fetch(botUrl('getMe'))
+    const json = await res.json()
+    if (json.ok && json.result?.username) cachedUsername = String(json.result.username)
+  } catch {
+    // без имени бота ссылку-приглашение собрать нельзя — вызывающий покажет подсказку
+  }
+  return cachedUsername
+}
+
 /** Build inline keyboard from 2D array shorthand */
 export function keyboard(rows: InlineButton[][]): { inline_keyboard: InlineButton[][] } {
   return { inline_keyboard: rows }

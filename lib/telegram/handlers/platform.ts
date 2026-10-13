@@ -7,11 +7,14 @@
  */
 
 import { sendMessage, keyboard, escapeMd } from '@/lib/telegram/bot'
+import { sendBranchLinks } from '@/lib/telegram/handlers/branches'
+import { createOwnerInvite } from '@/lib/telegram/handlers/invite'
+import { ensureDailyReport } from '@/lib/telegram/handlers/notify'
 import { db, findProfile, setState, getState, clearState } from '@/lib/telegram/db'
 import { navRow } from '@/lib/telegram/keyboards/main'
 import { menuForRole } from '@/lib/telegram/keyboards/menus'
 import {
-  fetchCompanyReport, fetchOwnerReport, getReportRange, type ReportPeriod,
+  fetchCompanyReport, fetchOwnerReport, formatReport, getReportRange, previousRange, type ReportPeriod,
 } from '@/lib/telegram/reports'
 
 export const BROADCAST_STATE = 'broadcast_text'
@@ -196,8 +199,108 @@ export function companyReportKeyboard(companyId: string, periodKey: string, mode
     [period('today', 'Сегодня'), period('yesterday', 'Вчера')],
     [period('7d', '7 дней'), period('month', 'Месяц')],
     [toggle],
+    [
+      { text: '🔗 Ссылки точек', callback_data: `co:${companyId}:links` },
+      { text: '👤 Пригласить владельца', callback_data: `co:${companyId}:inv` },
+    ],
+    [{ text: '🔔 Отчёт в 08:00 — сюда', callback_data: `co:${companyId}:rep` }],
     navRow('platform:companies'),
   ])
+}
+
+/** Кнопка возврата к отчёту заведения */
+function backToCompany(companyId: string) {
+  return keyboard([[{ text: '🔙 К заведению', callback_data: `co:${companyId}:7d` }], navRow()])
+}
+
+async function companyName(companyId: string): Promise<string | null> {
+  const { data } = await db().from('companies').select('name').eq('id', companyId).maybeSingle()
+  return (data?.name as string | undefined) ?? null
+}
+
+/** «👤 Пригласить владельца»: одноразовая ссылка, по которой человек сразу попадает в бота */
+async function sendOwnerInvite(chatId: number, telegramId: number, companyId: string) {
+  const res = await createOwnerInvite(telegramId, companyId)
+  if (!res.ok) {
+    const why =
+      res.reason === 'no-company' ? 'Заведение не найдено.' :
+      res.reason === 'no-bot-name' ? 'Не удалось определить имя бота. Задайте переменную TELEGRAM_BOT_USERNAME в Vercel.' :
+      'Не удалось создать приглашение. Если ещё не выполнена миграция 0008_bot_clients.sql — запустите её в Supabase.'
+    await sendMessage(chatId, `❌ ${why}`, { reply_markup: backToCompany(companyId) })
+    return
+  }
+  await sendMessage(chatId,
+    `👤 *Приглашение владельца*\n🏢 ${escapeMd(res.companyName)}\n\n` +
+    `Перешлите эту ссылку человеку. Он откроет бота и сразу увидит свои отчёты — ` +
+    `сайт и приложение не нужны:\n\n${res.link}\n\n` +
+    `_Ссылка одноразовая, действует 14 дней. Утренний отчёт в 08:00 включится у него сам._`,
+    { reply_markup: backToCompany(companyId), disable_web_page_preview: true }
+  )
+}
+
+/**
+ * «🔔 Отчёт в 08:00 — сюда»: утренняя сводка заведения уходит в этот чат.
+ * Если отчёт уже идёт в другой чат (например, владельцу), сначала спрашиваем:
+ * молча забирать у человека его отчёт нельзя.
+ */
+async function setReportHere(chatId: number, companyId: string, confirmed = false) {
+  const name = await companyName(companyId)
+  if (!name) {
+    await sendMessage(chatId, '⚠️ Заведение не найдено.', { reply_markup: keyboard([navRow('platform:companies')]) })
+    return
+  }
+
+  if (!confirmed) {
+    const { data: row } = await db()
+      .from('telegram_settings').select('chat_id').eq('company_id', companyId).maybeSingle()
+    if (row?.chat_id && String(row.chat_id) !== String(chatId)) {
+      await sendMessage(chatId,
+        `🔔 *Отчёт уже идёт в другой чат*\n🏢 ${escapeMd(name)}\n\n` +
+        `Если перенести его сюда, прежний получатель утром ничего не получит. Перенести?`,
+        {
+          reply_markup: keyboard([
+            [{ text: '✅ Да, перенести сюда', callback_data: `co:${companyId}:repok` }],
+            [{ text: '🔙 К заведению', callback_data: `co:${companyId}:7d` }],
+          ]),
+        }
+      )
+      return
+    }
+  }
+
+  const res = await ensureDailyReport(companyId, chatId, true)
+  if (res === 'error') {
+    await sendMessage(chatId, '❌ Не удалось сохранить. Проверьте, что в базе есть таблица telegram_settings.', {
+      reply_markup: backToCompany(companyId),
+    })
+    return
+  }
+  await sendMessage(chatId,
+    `🔔 *Отчёт включён*\n🏢 ${escapeMd(name)}\n\n` +
+    `Каждое утро в *08:00* (Ташкент) сюда будет приходить сводка за вчера: касания, ` +
+    `переходы по кнопкам, отзывы Google и лучшая точка.`,
+    {
+      reply_markup: keyboard([
+        [{ text: '📨 Прислать пример сейчас', callback_data: `co:${companyId}:now` }],
+        [{ text: '🔙 К заведению', callback_data: `co:${companyId}:7d` }],
+        navRow(),
+      ]),
+    }
+  )
+}
+
+/** «📨 Прислать пример»: то же сообщение, что уходит утром (отчёт за вчера) */
+async function sendMorningSample(chatId: number, companyId: string) {
+  const supabase = db()
+  const range = getReportRange('yesterday')
+  const data = await fetchCompanyReport(supabase, companyId, range, previousRange(range))
+  if (!data) {
+    await sendMessage(chatId, '😕 У заведения нет активных точек — отчёт строить не из чего.', {
+      reply_markup: backToCompany(companyId),
+    })
+    return
+  }
+  await sendMessage(chatId, formatReport(data), { reply_markup: backToCompany(companyId) })
 }
 
 /**
@@ -213,6 +316,13 @@ export async function handleCompanyReport(chatId: number, telegramId: number, ar
     await sendMessage(chatId, '⚠️ Не понял, какое заведение.', { reply_markup: keyboard([navRow('platform:companies')]) })
     return
   }
+
+  // Действия над заведением: приглашение, ссылки, утренний отчёт
+  if (parts[1] === 'inv') { await sendOwnerInvite(chatId, telegramId, companyId); return }
+  if (parts[1] === 'links') { await sendBranchLinks(chatId, companyId, { back: `co:${companyId}:7d` }); return }
+  if (parts[1] === 'rep') { await setReportHere(chatId, companyId); return }
+  if (parts[1] === 'repok') { await setReportHere(chatId, companyId, true); return }
+  if (parts[1] === 'now') { await sendMorningSample(chatId, companyId); return }
 
   const mode: 'summary' | 'points' = parts[1] === 'pts' ? 'points' : 'summary'
   const periodKey = companyPeriodKey((mode === 'points' ? parts[2] : parts[1]) ?? '7d')
@@ -259,15 +369,24 @@ async function broadcastAudience(): Promise<number[]> {
     .eq('active', true)
     .not('confirmed_at', 'is', null)
 
-  if (!accounts?.length) return []
+  const ids = new Set<number>()
 
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('user_id, role')
-    .in('user_id', accounts.map(a => a.user_id))
+  if (accounts?.length) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, role')
+      .in('user_id', accounts.map(a => a.user_id))
 
-  const allowed = new Set((profiles ?? []).filter(p => p.role !== 'super_admin').map(p => p.user_id))
-  return accounts.filter(a => allowed.has(a.user_id)).map(a => Number(a.telegram_id))
+    const allowed = new Set((profiles ?? []).filter(p => p.role !== 'super_admin').map(p => p.user_id))
+    for (const a of accounts) if (allowed.has(a.user_id)) ids.add(Number(a.telegram_id))
+  }
+
+  // Клиенты, подключённые приглашением из бота (миграция 0008), — тоже получают рассылку
+  const { data: botClients } = await supabase
+    .from('bot_clients').select('telegram_id').eq('active', true)
+  for (const c of botClients ?? []) ids.add(Number(c.telegram_id))
+
+  return [...ids]
 }
 
 export async function handleBroadcastStart(chatId: number, telegramId: number) {
