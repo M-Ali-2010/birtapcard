@@ -10,7 +10,9 @@ import { sendMessage, keyboard, escapeMd } from '@/lib/telegram/bot'
 import { db, findProfile, setState, getState, clearState } from '@/lib/telegram/db'
 import { navRow } from '@/lib/telegram/keyboards/main'
 import { menuForRole } from '@/lib/telegram/keyboards/menus'
-import { getReportRange } from '@/lib/telegram/reports'
+import {
+  fetchCompanyReport, fetchOwnerReport, getReportRange, type ReportPeriod,
+} from '@/lib/telegram/reports'
 
 export const BROADCAST_STATE = 'broadcast_text'
 
@@ -84,45 +86,166 @@ export async function handlePlatformStats(chatId: number, telegramId: number) {
   )
 }
 
-/** «🏢 Компании» — кто сколько принёс за неделю */
-export async function handleCompanies(chatId: number, telegramId: number) {
-  if (!(await requireAdmin(chatId, telegramId))) return
+// ─── Заведения: список и отчёт по каждому ────────────────────────────────────
 
+/** Периоды, которые есть на кнопках отчёта по заведению */
+const COMPANY_PERIODS: Record<string, ReportPeriod> = {
+  today: 'today',
+  yesterday: 'yesterday',
+  '7d': '7d',
+  month: 'month',
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** Ключ периода → тот, что есть на кнопках (week, 30d и т.п. сводим к 7 дням) */
+function companyPeriodKey(period: string): string {
+  if (period in COMPANY_PERIODS) return period
+  if (period === 'week') return '7d'
+  return '7d'
+}
+
+type CompanyRow = { id: string; name: string; active: boolean; points: number; taps: number }
+
+/** Строки списка: сначала включённые по убыванию касаний, затем выключенные */
+export function sortCompanyRows(rows: CompanyRow[]): CompanyRow[] {
+  return [...rows].sort((a, b) =>
+    Number(b.active) - Number(a.active) || b.taps - a.taps || a.name.localeCompare(b.name, 'ru')
+  )
+}
+
+/** Кнопка заведения: «Название · 12», название обрезаем, чтобы влезло в ряд */
+export function companyButtonLabel(row: CompanyRow): string {
+  const name = row.name.length > 22 ? row.name.slice(0, 21) + '…' : row.name
+  return `${row.active ? '' : '⏸ '}${name} · ${row.taps}`
+}
+
+/** Список заведений: касания за период и по кнопке на каждое — открывает отчёт */
+async function sendCompanyList(chatId: number, periodKey: string, heading: string) {
   const supabase = db()
-  const week = getReportRange('7d')
+  const range = getReportRange(COMPANY_PERIODS[periodKey] ?? '7d')
 
   const { data: companies } = await supabase
-    .from('companies').select('id, name').eq('active', true).order('name')
+    .from('companies').select('id, name, active').order('name')
 
   if (!companies?.length) {
-    await sendMessage(chatId, '🏢 Активных компаний нет.', { reply_markup: keyboard([navRow()]) })
+    await sendMessage(chatId, '🏢 Заведений пока нет.', { reply_markup: keyboard([navRow()]) })
     return
   }
 
   const { data: branches } = await supabase
-    .from('branches').select('id, company_id, name').eq('active', true)
+    .from('branches').select('id, company_id').eq('active', true)
 
   const { data: events } = await supabase
     .from('scan_events').select('branch_id')
-    .gte('scanned_at', week.start.toISOString()).limit(20000)
+    .gte('scanned_at', range.start.toISOString())
+    .lte('scanned_at', range.end.toISOString())
+    .limit(20000)
 
   const byBranch = new Map<string, number>()
   for (const e of events ?? []) byBranch.set(e.branch_id, (byBranch.get(e.branch_id) ?? 0) + 1)
 
-  const rows = companies.map(c => {
+  const rows = sortCompanyRows(companies.map(c => {
     const own = (branches ?? []).filter(b => b.company_id === c.id)
     const taps = own.reduce((sum, b) => sum + (byBranch.get(b.id) ?? 0), 0)
-    return { name: c.name, points: own.length, taps }
-  }).sort((a, b) => b.taps - a.taps)
+    return { id: c.id, name: c.name as string, active: c.active !== false, points: own.length, taps }
+  }))
 
   const body = rows.map((r, i) =>
-    `${i + 1}. *${escapeMd(r.name)}* — ${r.taps} касаний _(точек: ${r.points})_`
+    `${i + 1}. ${r.active ? '' : '⏸ '}*${escapeMd(r.name)}* — ${r.taps} касаний _(точек: ${r.points})_`
   ).join('\n')
 
+  // Inline-клавиатура: до 100 кнопок на сообщение — с запасом берём 90
+  const shown = rows.slice(0, 90)
+  const buttons = shown.map(r => ({
+    text: companyButtonLabel(r),
+    callback_data: `co:${r.id}:${periodKey}`,
+  }))
+  const grid: { text: string; callback_data: string }[][] = []
+  for (let i = 0; i < buttons.length; i += 2) grid.push(buttons.slice(i, i + 2))
+
+  const more = rows.length > shown.length ? `\n\n_Показаны первые ${shown.length} из ${rows.length}._` : ''
+
   await sendMessage(chatId,
-    `🏢 *Компании* — касания за 7 дней\n\n${body}`,
-    { reply_markup: keyboard([navRow()]) }
+    `${heading} — ${range.label}\n\n${body}${more}\n\n_Нажмите на заведение — откроется его отчёт._`,
+    { reply_markup: keyboard([...grid, navRow()]) }
   )
+}
+
+/** «🏢 Компании» / «🍽 Рестораны» — все заведения, кто сколько принёс за неделю */
+export async function handleCompanies(chatId: number, telegramId: number) {
+  if (!(await requireAdmin(chatId, telegramId))) return
+  await sendCompanyList(chatId, '7d', '🏢 *Заведения*')
+}
+
+/** Администратор попросил отчёт без компании (/today, «Аналитика») — сначала выбираем заведение */
+export async function handleCompanyPicker(chatId: number, period: string) {
+  await sendCompanyList(chatId, companyPeriodKey(period), '🏢 *Выберите заведение*')
+}
+
+/** Кнопки отчёта по заведению: периоды, переключатель «общий / по точкам», назад к списку */
+export function companyReportKeyboard(companyId: string, periodKey: string, mode: 'summary' | 'points') {
+  const period = (key: string, label: string) => ({
+    text: (key === periodKey ? '● ' : '') + label,
+    callback_data: mode === 'points' ? `co:${companyId}:pts:${key}` : `co:${companyId}:${key}`,
+  })
+  const toggle = mode === 'points'
+    ? { text: '📊 Общий отчёт', callback_data: `co:${companyId}:${periodKey}` }
+    : { text: '🏪 По точкам', callback_data: `co:${companyId}:pts:${periodKey}` }
+  return keyboard([
+    [period('today', 'Сегодня'), period('yesterday', 'Вчера')],
+    [period('7d', '7 дней'), period('month', 'Месяц')],
+    [toggle],
+    navRow('platform:companies'),
+  ])
+}
+
+/**
+ * Отчёт по одному заведению для супер-админа.
+ * arg: «<id>[:период]» — общий отчёт, «<id>:pts:<период>» — разбивка по точкам.
+ */
+export async function handleCompanyReport(chatId: number, telegramId: number, arg: string) {
+  if (!(await requireAdmin(chatId, telegramId))) return
+
+  const parts = arg.split(':')
+  const companyId = parts[0]
+  if (!UUID.test(companyId ?? '')) {
+    await sendMessage(chatId, '⚠️ Не понял, какое заведение.', { reply_markup: keyboard([navRow('platform:companies')]) })
+    return
+  }
+
+  const mode: 'summary' | 'points' = parts[1] === 'pts' ? 'points' : 'summary'
+  const periodKey = companyPeriodKey((mode === 'points' ? parts[2] : parts[1]) ?? '7d')
+  const range = getReportRange(COMPANY_PERIODS[periodKey] ?? '7d')
+  const supabase = db()
+  const kb = companyReportKeyboard(companyId, periodKey, mode)
+
+  if (mode === 'points') {
+    const data = await fetchCompanyReport(supabase, companyId, range)
+    if (!data) {
+      await sendMessage(chatId, '😕 У заведения нет активных точек.', { reply_markup: kb })
+      return
+    }
+    const sorted = [...data.branches].sort((a, b) => b.total - a.total)
+    const medals = ['🥇', '🥈', '🥉']
+    const lines = sorted.map((b, i) =>
+      `${medals[i] && b.total > 0 ? medals[i] : `${i + 1}.`} *${escapeMd(b.branchName)}* — ${b.total}` +
+      `  _(NFC ${b.nfc} · QR ${b.qr} · уникальных ${b.unique})_`
+    )
+    await sendMessage(chatId,
+      `🏪 *Точки · ${range.label}*\n🏢 ${escapeMd(data.companyName)}\n\n${lines.join('\n')}` +
+      (sorted.every(b => b.total === 0) ? '\n\n_Касаний не было._' : ''),
+      { reply_markup: kb }
+    )
+    return
+  }
+
+  const report = await fetchOwnerReport(supabase, companyId, range)
+  if (!report) {
+    await sendMessage(chatId, '😕 У заведения нет активных точек — отчёт строить не из чего.', { reply_markup: kb })
+    return
+  }
+  await sendMessage(chatId, report, { reply_markup: kb })
 }
 
 // ─── Рассылка ────────────────────────────────────────────────────────────────

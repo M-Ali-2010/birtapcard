@@ -28,7 +28,7 @@ import {
   handleSupportMenu, handleSupportWrite, handleSupportReplyStart, handleSupportInbox,
 } from '@/lib/telegram/handlers/support'
 import {
-  handlePlatformStats, handleCompanies, handleBroadcastSend, handleBroadcastCancel,
+  handlePlatformStats, handleCompanies, handleCompanyReport, handleBroadcastSend, handleBroadcastCancel,
 } from '@/lib/telegram/handlers/platform'
 import {
   handleSalesWhat,
@@ -123,6 +123,11 @@ const PREFIX_ROUTES: Record<string, (chatId: number, telegramId: number, arg: st
       return
     }
     await handleReport(chatId, telegramId, arg)
+  },
+  // Супер-админ: отчёт по заведению (co:<id>[:период] / co:<id>:pts:<период>)
+  'co:': async (chatId, telegramId, arg, cbId) => {
+    await answerCallback(cbId)
+    await handleCompanyReport(chatId, telegramId, arg)
   },
   'rank:': async (chatId, telegramId, arg, cbId) => {
     await answerCallback(cbId)
