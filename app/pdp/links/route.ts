@@ -1,16 +1,30 @@
 import { NextResponse } from 'next/server'
-import { pdpWifiFromEnv, renderPdpSchoolScreen } from '@/lib/screens/pdp-school'
+import { createServiceRoleClient } from '@/lib/supabase/server'
+import { pdpWifiFromEnv, renderPdpSchoolScreen, type PdpWifi } from '@/lib/screens/pdp-school'
+import { getPdpSchoolWifi } from '@/lib/venue-wifi'
 
 // Экран ссылок PDP School без токена: открывается по /pdp/links — для показа и проверки.
 // Нажатия здесь не считаются (токена филиала нет). Язык выбирается на самой странице: ?lang=uz|ru|en.
 // Адреса /pdp/* открыты без входа — см. isPublicInfoRoute в lib/supabase/middleware.ts.
 //
-// Wi-Fi берётся из PDP_WIFI_SSID / PDP_WIFI_PASSWORD при каждом запросе, поэтому маршрут динамический.
-// Страница публичная: если переменные заданы, название сети и пароль видит любой, кто её откроет.
+// Wi-Fi читается при каждом запросе, поэтому маршрут динамический. Страница публичная, а пароль
+// из базы (его вводит админ в боте) — не для всех: здесь показывается только название сети, чтобы
+// видеть, как выглядит карточка. Сеть с паролем гость получает на реальном экране после скана.
+// Исключение — переменные PDP_WIFI_*: их владелец задал осознанно, они показываются как есть.
 export const dynamic = 'force-dynamic'
 
-export function GET() {
-  return new NextResponse(renderPdpSchoolScreen({ wifi: pdpWifiFromEnv() }), {
+export async function GET() {
+  let wifi: PdpWifi | null = pdpWifiFromEnv()
+  if (!wifi) {
+    try {
+      const fromDb = await getPdpSchoolWifi(createServiceRoleClient())
+      wifi = fromDb ? { ssid: fromDb.ssid } : null
+    } catch {
+      wifi = null // без базы демо должно открываться — просто без карточки Wi-Fi
+    }
+  }
+
+  return new NextResponse(renderPdpSchoolScreen({ wifi }), {
     status: 200,
     headers: {
       'content-type': 'text/html; charset=utf-8',

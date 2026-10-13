@@ -28,6 +28,7 @@ import { handleMyBranches, handleBranchRankingMenu } from '@/lib/telegram/handle
 import { handleExportMenu } from '@/lib/telegram/handlers/export'
 import { handleLeadsList } from '@/lib/telegram/handlers/leads'
 import { handleNotifyMenu } from '@/lib/telegram/handlers/notify'
+import { handleWifiInput, isWifiState } from '@/lib/telegram/handlers/wifi'
 import {
   handleSupportMenu, handleSupportInput, isWritingSupport, handleSupportInbox,
 } from '@/lib/telegram/handlers/support'
@@ -256,12 +257,16 @@ export async function handleMessage(msg: TgMessage) {
     }
   }
 
-  // Свой период: ждём от пользователя текст с датами (Фаза 2)
-  if (text && !text.startsWith('/')) {
+  // Ждём ввод: свой период с датами (Фаза 2) или название сети / пароль Wi-Fi заведения.
+  // Для Wi-Fi пароль приходит обычным текстом, поэтому «/cancel» здесь тоже пропускаем.
+  if (text && (!text.startsWith('/') || text === '/cancel')) {
     const state = await getState(telegramId)
-    if (state?.state === CUSTOM_RANGE_STATE) {
+    if (state?.state === CUSTOM_RANGE_STATE && !text.startsWith('/')) {
       await handleCustomRangeInput(chatId, telegramId, text)
       return
+    }
+    if (state && isWifiState(state.state)) {
+      if (await handleWifiInput(chatId, telegramId, msg, state)) return
     }
   }
 

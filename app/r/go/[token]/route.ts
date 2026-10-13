@@ -3,6 +3,7 @@ import { createServiceRoleClient } from '@/lib/supabase/server'
 import { renderScanGate } from '@/lib/scan-gate'
 import { isPdpSchoolCompany, pdpWifiFromEnv, renderPdpSchoolScreen } from '@/lib/screens/pdp-school'
 import { isSubscriptionExpired, renderExpiredPage } from '@/lib/scan-lock'
+import { getVenueWifi } from '@/lib/venue-wifi'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,7 +33,7 @@ export async function GET(
   const supabase = createServiceRoleClient()
   const { data: branch } = await supabase
     .from('branches')
-    .select('name, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, active, paid_until, companies(name, logo_url)')
+    .select('company_id, name, google_url, instagram_url, yandex_url, gis_url, telegram_url, bot_url, active, paid_until, companies(name, logo_url)')
     .or(`nfc_token.eq.${token},qr_token.eq.${token}`)
     .maybeSingle()
 
@@ -51,14 +52,16 @@ export async function GET(
     })
   }
 
-  // Отдельный экран под PDP School — вместо общего (lib/screens/pdp-school.ts)
+  // Отдельный экран под PDP School — вместо общего (lib/screens/pdp-school.ts).
+  // Wi-Fi: сначала то, что админ ввёл в боте (venue_wifi), запасной вариант — переменные PDP_WIFI_*
   if (isPdp) {
+    const wifi = (await getVenueWifi(supabase, branch.company_id)) ?? pdpWifiFromEnv()
     const html = renderPdpSchoolScreen({
       token,
       googleUrl: branch.google_url,
       botUrl: branch.bot_url,
       telegramUrl: branch.telegram_url,
-      wifi: pdpWifiFromEnv(),
+      wifi,
     })
     return new NextResponse(html, {
       status: 200,
