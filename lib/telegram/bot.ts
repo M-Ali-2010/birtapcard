@@ -122,6 +122,24 @@ export async function editMessage(
   }
 }
 
+/**
+ * Delete a message. В личном чате бот может удалять и входящие сообщения —
+ * так из переписки убирают введённый пароль.
+ */
+export async function deleteMessage(chatId: number | string, messageId: number): Promise<boolean> {
+  try {
+    const res = await fetch(botUrl('deleteMessage'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, message_id: messageId }),
+    })
+    const json = await res.json()
+    return json.ok === true
+  } catch {
+    return false
+  }
+}
+
 /** Answer a callback query (dismiss the loading spinner on inline buttons) */
 export async function answerCallback(
   callbackQueryId: string,

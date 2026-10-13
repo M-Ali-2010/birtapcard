@@ -85,7 +85,7 @@ export async function handleMyBranches(chatId: number, telegramId: number) {
 // ─── 🔗 Ссылки точек ───────────────────────────────────────────────────────
 
 /** Базовый адрес сайта: по нему открываются карточки (/r/nfc/…, /r/qr/…) */
-function siteUrl(): string {
+export function siteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL || 'https://birtapcard.vercel.app').replace(/\/+$/, '')
 }
 

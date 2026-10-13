@@ -10,10 +10,11 @@
  * там по названию компании (`isPdpSchoolCompany`) выбирается этот экран вместо общего.
  * Без токена экран открывается по адресу /pdp/links — для показа и проверки.
  *
- * Wi-Fi (название сети и пароль) в коде и репозитории не хранится: берётся из переменных
- * окружения PDP_WIFI_SSID и PDP_WIFI_PASSWORD (Vercel → Settings → Environment Variables).
- * Пока PDP_WIFI_SSID не задана, карточка Wi-Fi не показывается. Демо /pdp/links публичное:
- * если переменные заданы, сеть и пароль там видны всем.
+ * Wi-Fi (название сети и пароль) в коде и репозитории не хранится. Источник — таблица
+ * venue_wifi (lib/venue-wifi.ts): админ вводит сеть и пароль в боте, карточка заведения →
+ * «📶 Wi-Fi на карточке». Запасной вариант — переменные окружения PDP_WIFI_SSID и
+ * PDP_WIFI_PASSWORD. Пока сети нет ни там, ни там, карточка Wi-Fi не показывается.
+ * Демо /pdp/links публичное: пароль из базы там не выводится, только название сети.
  *
  * Нажатия считаются так же, как на общем экране: sendBeacon на /api/track с токеном
  * филиала и целью (google, bot, telegram — канал, website, google_play, app_store, wifi).
@@ -57,14 +58,15 @@ export type PdpScreenOptions = {
   botUrl?: string | null
   /** branches.telegram_url — Telegram-канал */
   telegramUrl?: string | null
-  /** Wi-Fi школы; без него карточка не показывается. Источник — `pdpWifiFromEnv()`. */
+  /** Wi-Fi школы; без него карточка не показывается. Источник — getVenueWifi() или `pdpWifiFromEnv()`. */
   wifi?: PdpWifi | null
 }
 
 export type PdpWifi = { ssid: string; password?: string }
 
 /**
- * Wi-Fi школы из переменных окружения. Репозиторий публичный, поэтому пароль в код не кладём.
+ * Запасной вариант Wi-Fi — из переменных окружения: когда в таблице venue_wifi сети ещё нет.
+ * Репозиторий публичный, поэтому пароль в код не кладём.
  * Читается в момент запроса — вызывать из динамических маршрутов (/r/go), не из статических.
  */
 export function pdpWifiFromEnv(): PdpWifi | null {

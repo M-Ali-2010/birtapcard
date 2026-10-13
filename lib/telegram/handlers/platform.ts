@@ -10,12 +10,14 @@ import { sendMessage, keyboard, escapeMd } from '@/lib/telegram/bot'
 import { sendBranchLinks } from '@/lib/telegram/handlers/branches'
 import { createOwnerInvite } from '@/lib/telegram/handlers/invite'
 import { ensureDailyReport } from '@/lib/telegram/handlers/notify'
+import { sendWifiScreen, startWifiEdit, askWifiRemove, removeWifi } from '@/lib/telegram/handlers/wifi'
 import { db, findProfile, setState, getState, clearState } from '@/lib/telegram/db'
 import { navRow } from '@/lib/telegram/keyboards/main'
 import { menuForRole } from '@/lib/telegram/keyboards/menus'
 import {
   fetchCompanyReport, fetchOwnerReport, formatReport, getReportRange, previousRange, type ReportPeriod,
 } from '@/lib/telegram/reports'
+import { venueSupportsWifi } from '@/lib/venue-wifi'
 
 export const BROADCAST_STATE = 'broadcast_text'
 
@@ -186,8 +188,16 @@ export async function handleCompanyPicker(chatId: number, period: string) {
   await sendCompanyList(chatId, companyPeriodKey(period), '🏢 *Выберите заведение*')
 }
 
-/** Кнопки отчёта по заведению: периоды, переключатель «общий / по точкам», назад к списку */
-export function companyReportKeyboard(companyId: string, periodKey: string, mode: 'summary' | 'points') {
+/**
+ * Кнопки отчёта по заведению: периоды, переключатель «общий / по точкам», назад к списку.
+ * wifi — у экрана заведения есть карточка Wi-Fi, и её настройка вынесена сюда отдельной кнопкой.
+ */
+export function companyReportKeyboard(
+  companyId: string,
+  periodKey: string,
+  mode: 'summary' | 'points',
+  opts: { wifi?: boolean } = {}
+) {
   const period = (key: string, label: string) => ({
     text: (key === periodKey ? '● ' : '') + label,
     callback_data: mode === 'points' ? `co:${companyId}:pts:${key}` : `co:${companyId}:${key}`,
@@ -204,6 +214,7 @@ export function companyReportKeyboard(companyId: string, periodKey: string, mode
       { text: '👤 Пригласить владельца', callback_data: `co:${companyId}:inv` },
     ],
     [{ text: '🔔 Отчёт в 08:00 — сюда', callback_data: `co:${companyId}:rep` }],
+    ...(opts.wifi ? [[{ text: '📶 Wi-Fi на карточке', callback_data: `co:${companyId}:wifi` }]] : []),
     navRow('platform:companies'),
   ])
 }
@@ -323,12 +334,18 @@ export async function handleCompanyReport(chatId: number, telegramId: number, ar
   if (parts[1] === 'rep') { await setReportHere(chatId, companyId); return }
   if (parts[1] === 'repok') { await setReportHere(chatId, companyId, true); return }
   if (parts[1] === 'now') { await sendMorningSample(chatId, companyId); return }
+  if (parts[1] === 'wifi') { await sendWifiScreen(chatId, companyId); return }
+  if (parts[1] === 'wifiset') { await startWifiEdit(chatId, telegramId, companyId); return }
+  if (parts[1] === 'wifidel') { await askWifiRemove(chatId, companyId); return }
+  if (parts[1] === 'wifidelok') { await removeWifi(chatId, companyId); return }
 
   const mode: 'summary' | 'points' = parts[1] === 'pts' ? 'points' : 'summary'
   const periodKey = companyPeriodKey((mode === 'points' ? parts[2] : parts[1]) ?? '7d')
   const range = getReportRange(COMPANY_PERIODS[periodKey] ?? '7d')
   const supabase = db()
-  const kb = companyReportKeyboard(companyId, periodKey, mode)
+  const kb = companyReportKeyboard(companyId, periodKey, mode, {
+    wifi: venueSupportsWifi(await companyName(companyId)),
+  })
 
   if (mode === 'points') {
     const data = await fetchCompanyReport(supabase, companyId, range)
