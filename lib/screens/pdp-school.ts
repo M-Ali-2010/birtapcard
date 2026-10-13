@@ -3,8 +3,8 @@
  *
  * Общий экран после скана (`renderScanGate` в lib/scan-gate.ts) одинаковый для всех
  * заведений. PDP School получает свой — в стиле school.pdp.uz и PDP Design System v1.0:
- * шесть карточек (отзыв в Google, сайт, Telegram-бот, Google Play, App Store, Wi-Fi) на
- * синем поле, языки UZ / RU / EN.
+ * семь карточек (отзыв в Google, сайт, Telegram-бот и канал, Google Play, App Store, Wi-Fi)
+ * на синем поле, языки UZ / RU / EN.
  *
  * Как он попадает к гостю: /r/nfc и /r/qr фиксируют скан и ведут на /r/go/[token];
  * там по названию компании (`isPdpSchoolCompany`) выбирается этот экран вместо общего.
@@ -12,10 +12,11 @@
  *
  * Wi-Fi (название сети и пароль) в коде и репозитории не хранится: берётся из переменных
  * окружения PDP_WIFI_SSID и PDP_WIFI_PASSWORD (Vercel → Settings → Environment Variables).
- * Пока PDP_WIFI_SSID не задана, карточка Wi-Fi не показывается. В демо /pdp/links её нет.
+ * Пока PDP_WIFI_SSID не задана, карточка Wi-Fi не показывается. Демо /pdp/links публичное:
+ * если переменные заданы, сеть и пароль там видны всем.
  *
  * Нажатия считаются так же, как на общем экране: sendBeacon на /api/track с токеном
- * филиала и целью (google, bot, website, google_play, app_store, wifi).
+ * филиала и целью (google, bot, telegram — канал, website, google_play, app_store, wifi).
  */
 
 import { PDP_CSS, PDP_FAVICON, PDP_LOGO, PDP_MARK, PDP_SPRITE } from './pdp-school.assets'
@@ -37,6 +38,8 @@ export const PDP_SCHOOL_LINKS = {
   } as Record<PdpLang, string>,
   /** Telegram-бот школы: оценки, посещаемость, расписание, платежи */
   bot: 'https://t.me/PDPUzBot',
+  /** Telegram-канал школы «PDP School | YANGI SAHIFA» (указан в описании бота) */
+  channel: 'https://t.me/pdpmaktabi',
   /** Приложение «PDP School» для учеников, родителей и сотрудников */
   play: 'https://play.google.com/store/apps/details?id=uz.pdpschool.lms',
   ios: 'https://apps.apple.com/uz/app/pdp-school/id6807296022',
@@ -52,6 +55,8 @@ export type PdpScreenOptions = {
   googleUrl?: string | null
   /** branches.bot_url — Telegram-бот */
   botUrl?: string | null
+  /** branches.telegram_url — Telegram-канал */
+  telegramUrl?: string | null
   /** Wi-Fi школы; без него карточка не показывается. Источник — `pdpWifiFromEnv()`. */
   wifi?: PdpWifi | null
 }
@@ -122,6 +127,7 @@ const TEXT: Record<PdpLang, Record<string, string>> = {
     maps_t: 'Google Maps', maps_d: 'Google Maps’da sharh qoldiring',
     web_t: 'Veb-sayt', web_d: 'Rasmiy saytimiz',
     bot_t: 'Telegram bot', bot_d: 'Tezkor ma’lumot va yordam',
+    ch_t: 'Telegram kanal', ch_d: 'Yangiliklar va e’lonlar',
     play_t: 'Google Play', play_d: 'Android ilovasini yuklab oling',
     ios_t: 'App Store', ios_d: 'iOS ilovasini yuklab oling',
     wifi_t: 'Wi-Fi', wifi_d: 'PDP tarmog‘iga ulanish',
@@ -136,6 +142,7 @@ const TEXT: Record<PdpLang, Record<string, string>> = {
     maps_t: 'Google Maps', maps_d: 'Оставьте отзыв в Google Maps',
     web_t: 'Веб-сайт', web_d: 'Официальный сайт',
     bot_t: 'Telegram-бот', bot_d: 'Быстрая информация и помощь',
+    ch_t: 'Telegram-канал', ch_d: 'Новости и объявления',
     play_t: 'Google Play', play_d: 'Скачать для Android',
     ios_t: 'App Store', ios_d: 'Скачать для iOS',
     wifi_t: 'Wi-Fi', wifi_d: 'Подключитесь к сети PDP',
@@ -150,6 +157,7 @@ const TEXT: Record<PdpLang, Record<string, string>> = {
     maps_t: 'Google Maps', maps_d: 'Leave a review on Google Maps',
     web_t: 'Website', web_d: 'Our official site',
     bot_t: 'Telegram bot', bot_d: 'Quick info and help',
+    ch_t: 'Telegram channel', ch_d: 'News and announcements',
     play_t: 'Google Play', play_d: 'Download the Android app',
     ios_t: 'App Store', ios_d: 'Download the iOS app',
     wifi_t: 'Wi-Fi', wifi_d: 'Connect to the PDP network',
@@ -172,6 +180,8 @@ export function renderPdpSchoolScreen(opts: PdpScreenOptions = {}): string {
   const reviewUrl = httpUrl(opts.googleUrl) ?? L.review
   const botUrl = httpUrl(opts.botUrl) ?? L.bot
   const botHandle = telegramHandle(botUrl)
+  const channelUrl = httpUrl(opts.telegramUrl) ?? L.channel
+  const channelHandle = telegramHandle(channelUrl)
   const web = { uz: withUtm(L.web.uz), ru: withUtm(L.web.ru), en: withUtm(L.web.en) }
   const wifi = opts.wifi && opts.wifi.ssid ? opts.wifi : null
 
@@ -190,14 +200,14 @@ export function renderPdpSchoolScreen(opts: PdpScreenOptions = {}): string {
         </li>`
 
   const webCard = `
-        <li>
-          <a class="link" href="${escapeHtml(web.uz)}" ${open} data-t="website" data-web>
+        <li class="is-wide">
+          <a class="link link--wide" href="${escapeHtml(web.uz)}" ${open} data-t="website" data-web>
             ${icon('globe')}
-            ${ARROW}
             <span class="link__body">
               <span class="link__title" data-i="web_t">${t.web_t}</span>
               <span class="link__text"><span class="link__url">school.pdp.uz</span><span data-i="web_d">${t.web_d}</span></span>
             </span>
+            ${ARROW}
           </a>
         </li>`
 
@@ -209,6 +219,18 @@ export function renderPdpSchoolScreen(opts: PdpScreenOptions = {}): string {
             <span class="link__body">
               <span class="link__title" data-i="bot_t">${t.bot_t}</span>
               <span class="link__text">${botHandle ? `<span class="link__url">${escapeHtml(botHandle)}</span>` : ''}<span data-i="bot_d">${t.bot_d}</span></span>
+            </span>
+          </a>
+        </li>`
+
+  const channelCard = `
+        <li>
+          <a class="link" href="${escapeHtml(channelUrl)}" ${open} data-t="telegram">
+            ${icon('megaphone-simple')}
+            ${ARROW}
+            <span class="link__body">
+              <span class="link__title" data-i="ch_t">${t.ch_t}</span>
+              <span class="link__text">${channelHandle ? `<span class="link__url">${escapeHtml(channelHandle)}</span>` : ''}<span data-i="ch_d">${t.ch_d}</span></span>
             </span>
           </a>
         </li>`
@@ -310,7 +332,7 @@ ${PDP_SPRITE}
     </section>
 
     <nav id="links" class="links-nav" aria-label="${escapeHtml(t.nav)}">
-      <ul class="links">${reviewCard}${webCard}${botCard}${playCard}${iosCard}${wifiCard}
+      <ul class="links">${reviewCard}${webCard}${botCard}${channelCard}${playCard}${iosCard}${wifiCard}
       </ul>
     </nav>
 
