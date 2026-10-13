@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { renderScanGate } from '@/lib/scan-gate'
-import { isPdpSchoolCompany, pdpWifiFromEnv, renderPdpSchoolScreen } from '@/lib/screens/pdp-school'
+import { isPdpSchoolCompany, pdpWifiFromEnv, renderPdpScreen } from '@/lib/screens/pdp-school'
 import { isSubscriptionExpired, renderExpiredPage } from '@/lib/scan-lock'
 import { getVenueWifi } from '@/lib/venue-wifi'
 
@@ -56,7 +56,7 @@ export async function GET(
   // Wi-Fi: сначала то, что админ ввёл в боте (venue_wifi), запасной вариант — переменные PDP_WIFI_*
   if (isPdp) {
     const wifi = (await getVenueWifi(supabase, branch.company_id)) ?? pdpWifiFromEnv()
-    const html = renderPdpSchoolScreen({
+    const html = renderPdpScreen({
       token,
       googleUrl: branch.google_url,
       botUrl: branch.bot_url,
