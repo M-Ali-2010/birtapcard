@@ -10,6 +10,10 @@
  * там по названию компании (`isPdpSchoolCompany`) выбирается этот экран вместо общего.
  * Без токена экран открывается по адресу /pdp/links — для показа и проверки.
  *
+ * Wi-Fi (название сети и пароль) в коде и репозитории не хранится: берётся из переменных
+ * окружения PDP_WIFI_SSID и PDP_WIFI_PASSWORD (Vercel → Settings → Environment Variables).
+ * Пока PDP_WIFI_SSID не задана, карточка Wi-Fi не показывается. В демо /pdp/links её нет.
+ *
  * Нажатия считаются так же, как на общем экране: sendBeacon на /api/track с токеном
  * филиала и целью (google, bot, website, google_play, app_store, wifi).
  */
@@ -36,11 +40,6 @@ export const PDP_SCHOOL_LINKS = {
   /** Приложение «PDP School» для учеников, родителей и сотрудников */
   play: 'https://play.google.com/store/apps/details?id=uz.pdpschool.lms',
   ios: 'https://apps.apple.com/uz/app/pdp-school/id6807296022',
-  /**
-   * Wi-Fi: пока не задан — карточка не показывается.
-   * Заполняется так: `{ ssid: 'PDP-Guest', password: '…' }` (лучше гостевая сеть).
-   */
-  wifi: null as { ssid: string; password?: string } | null,
 }
 
 /** Метки для сайта школы: по ним школа видит в своей аналитике, что гость пришёл с карточки */
@@ -53,6 +52,21 @@ export type PdpScreenOptions = {
   googleUrl?: string | null
   /** branches.bot_url — Telegram-бот */
   botUrl?: string | null
+  /** Wi-Fi школы; без него карточка не показывается. Источник — `pdpWifiFromEnv()`. */
+  wifi?: PdpWifi | null
+}
+
+export type PdpWifi = { ssid: string; password?: string }
+
+/**
+ * Wi-Fi школы из переменных окружения. Репозиторий публичный, поэтому пароль в код не кладём.
+ * Читается в момент запроса — вызывать из динамических маршрутов (/r/go), не из статических.
+ */
+export function pdpWifiFromEnv(): PdpWifi | null {
+  const ssid = process.env.PDP_WIFI_SSID?.trim()
+  if (!ssid) return null
+  const password = process.env.PDP_WIFI_PASSWORD?.trim()
+  return { ssid, password: password || undefined }
 }
 
 /** Компания PDP School? Проверка по названию, как оно заведено в кабинете. */
@@ -159,7 +173,7 @@ export function renderPdpSchoolScreen(opts: PdpScreenOptions = {}): string {
   const botUrl = httpUrl(opts.botUrl) ?? L.bot
   const botHandle = telegramHandle(botUrl)
   const web = { uz: withUtm(L.web.uz), ru: withUtm(L.web.ru), en: withUtm(L.web.en) }
-  const wifi = L.wifi && L.wifi.ssid ? L.wifi : null
+  const wifi = opts.wifi && opts.wifi.ssid ? opts.wifi : null
 
   const open = 'target="_blank" rel="noopener"'
 

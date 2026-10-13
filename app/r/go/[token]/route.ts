@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { renderScanGate } from '@/lib/scan-gate'
-import { isPdpSchoolCompany, renderPdpSchoolScreen } from '@/lib/screens/pdp-school'
+import { isPdpSchoolCompany, pdpWifiFromEnv, renderPdpSchoolScreen } from '@/lib/screens/pdp-school'
 import { isSubscriptionExpired, renderExpiredPage } from '@/lib/scan-lock'
 
 export const dynamic = 'force-dynamic'
@@ -57,6 +57,7 @@ export async function GET(
       token,
       googleUrl: branch.google_url,
       botUrl: branch.bot_url,
+      wifi: pdpWifiFromEnv(),
     })
     return new NextResponse(html, {
       status: 200,
