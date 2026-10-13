@@ -20,7 +20,14 @@ interface Row {
   notify_daily: boolean
 }
 
-export type DailyReportSetup = 'created' | 'attached' | 'moved' | 'kept' | 'error'
+/**
+ * Итог ensureDailyReport:
+ *   created / attached / moved — отчёт теперь идёт в этот чат;
+ *   kept  — уже шёл в этот самый чат;
+ *   other — идёт в другой чат, и мы его не трогали (force не просили);
+ *   error — не удалось сохранить.
+ */
+export type DailyReportSetup = 'created' | 'attached' | 'moved' | 'kept' | 'other' | 'error'
 
 /**
  * Куда слать утренний отчёт компании. Строка telegram_settings создаётся здесь же,
@@ -51,13 +58,27 @@ export async function ensureDailyReport(companyId: string, chatId: number, force
     return error ? 'error' : 'attached'
   }
 
-  if (force && String(row.chat_id) !== chat) {
+  if (String(row.chat_id) === chat) return 'kept'
+
+  if (force) {
     const { error } = await supabase
       .from('telegram_settings').update({ chat_id: chat, notify_daily: true, active: true }).eq('id', row.id)
     return error ? 'error' : 'moved'
   }
 
-  return 'kept'
+  return 'other'
+}
+
+/** В какой чат сейчас уходит утренний отчёт заведения (null — не задан) */
+export async function getReportChat(companyId: string): Promise<string | null> {
+  const { data } = await db()
+    .from('telegram_settings').select('chat_id').eq('company_id', companyId).maybeSingle()
+  return data?.chat_id ? String(data.chat_id) : null
+}
+
+/** Забрать отчёт заведения в свой чат могут владелец (директор) и администратор, управляющий филиалом — нет */
+function canTakeOverReport(role: string): boolean {
+  return role === 'owner' || role === 'super_admin'
 }
 
 /** Кнопка «Присылать отчёт сюда» у владельца — вместо отправки в кабинет */
@@ -67,10 +88,22 @@ export async function handleNotifySetup(chatId: number, telegramId: number, cbId
     await answerCallback(cbId, '⛔ Нет доступа', true)
     return
   }
-  const res = await ensureDailyReport(profile.company_id, chatId)
+  const before = await getReportChat(profile.company_id)
+  const res = await ensureDailyReport(profile.company_id, chatId, canTakeOverReport(profile.role))
   if (res === 'error') {
     await answerCallback(cbId, '❌ Не удалось включить', true)
     return
+  }
+  if (res === 'other') {
+    await answerCallback(cbId, '⛔ Отчёт получает владелец заведения — перенести его может только он', true)
+    return
+  }
+  // Прежнему получателю — весточка: молча забирать у человека отчёт нельзя
+  if (res === 'moved' && before && Number(before) !== chatId) {
+    await sendMessage(Number(before),
+      '🔔 Утренний отчёт по заведению перенесён в другой чат. ' +
+      'Вернуть его сюда можно в разделе «🔔 Отчёт» → «Присылать отчёт сюда».'
+    )
   }
   await answerCallback(cbId, '🔔 Отчёт включён')
   await handleNotifyMenu(chatId, telegramId)
@@ -113,6 +146,25 @@ export async function handleNotifyMenu(chatId: number, telegramId: number) {
       'Пока не включён. Нажмите кнопку — и каждое утро в 08:00 сюда будет приходить ' +
       'сводка за вчера: касания, переходы по кнопкам, отзывы Google, лучшая точка.',
       { reply_markup: keyboard([[{ text: '✅ Присылать отчёт сюда', callback_data: 'notify_setup' }], navRow()]) }
+    )
+    return
+  }
+
+  // Отчёт идёт в другой чат: показывать «включён» и часы было бы враньём — сюда он не придёт
+  if (String(row.chat_id) !== String(chatId)) {
+    const canTake = canTakeOverReport(profile.role)
+    await sendMessage(chatId,
+      '🔔 *Ежедневный отчёт*\n\n' +
+      'Сейчас отчёт по заведению приходит в *другой чат* — сюда он не приходит.\n\n' +
+      (canTake
+        ? 'Нажмите кнопку, и утренняя сводка будет приходить сюда.'
+        : 'Получателя отчёта выбирает владелец заведения.'),
+      {
+        reply_markup: keyboard([
+          ...(canTake ? [[{ text: '✅ Присылать отчёт сюда', callback_data: 'notify_setup' }]] : []),
+          navRow(),
+        ]),
+      }
     )
     return
   }

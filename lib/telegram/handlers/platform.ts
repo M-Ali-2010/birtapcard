@@ -8,7 +8,7 @@
 
 import { sendMessage, keyboard, escapeMd } from '@/lib/telegram/bot'
 import { sendBranchLinks } from '@/lib/telegram/handlers/branches'
-import { createOwnerInvite } from '@/lib/telegram/handlers/invite'
+import { createOwnerInvite, inviteForwardText } from '@/lib/telegram/handlers/invite'
 import { ensureDailyReport } from '@/lib/telegram/handlers/notify'
 import { sendWifiScreen, startWifiEdit, askWifiRemove, removeWifi } from '@/lib/telegram/handlers/wifi'
 import { db, findProfile, setState, getState, clearState } from '@/lib/telegram/db'
@@ -240,12 +240,18 @@ async function sendOwnerInvite(chatId: number, telegramId: number, companyId: st
     await sendMessage(chatId, `❌ ${why}`, { reply_markup: backToCompany(companyId) })
     return
   }
+  // Сначала само приглашение — его удобно переслать одним сообщением; кнопка с адресом
+  // запасная: она работает, даже если Telegram по-своему разберёт разметку в тексте
+  await sendMessage(chatId, inviteForwardText(res.companyName, res.link), {
+    reply_markup: keyboard([[{ text: '▶️ Открыть бота', url: res.link }]]),
+    disable_web_page_preview: true,
+  })
   await sendMessage(chatId,
     `👤 *Приглашение владельца*\n🏢 ${escapeMd(res.companyName)}\n\n` +
-    `Перешлите эту ссылку человеку. Он откроет бота и сразу увидит свои отчёты — ` +
-    `сайт и приложение не нужны:\n\n${res.link}\n\n` +
+    `☝️ Перешлите сообщение выше человеку — он откроет бота и сразу увидит свои отчёты, ` +
+    `сайт и приложение не нужны.\n\n` +
     `_Ссылка одноразовая, действует 14 дней. Утренний отчёт в 08:00 включится у него сам._`,
-    { reply_markup: backToCompany(companyId), disable_web_page_preview: true }
+    { reply_markup: backToCompany(companyId) }
   )
 }
 
