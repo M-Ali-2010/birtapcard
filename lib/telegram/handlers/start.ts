@@ -7,7 +7,7 @@
  *   токен не найден, значит это не привязка, а переход по ссылке.
  */
 
-import { sendMessage } from '@/lib/telegram/bot'
+import { sendMessage, escapeMd } from '@/lib/telegram/bot'
 import { db, findProfile } from '@/lib/telegram/db'
 import { menuForRole } from '@/lib/telegram/keyboards/menus'
 import { handleSalesStart, handleLeadStart } from '@/lib/telegram/handlers/sales'
@@ -34,7 +34,7 @@ export async function handleStart(chatId: number, telegramId: number, firstName?
   await applyCommandsForChat(chatId, profile.role)
 
   await sendMessage(chatId,
-    `✅ Привет, *${profile.full_name ?? 'друг'}*!\n\n` +
+    `✅ Привет, *${escapeMd(profile.full_name ?? firstName ?? 'друг')}*!\n\n` +
     `${ROLE_LABEL[profile.role] ?? ''}\n\n` +
     `Ваш аккаунт подключён. Используйте меню для управления.`,
     { reply_markup: menuForRole(profile.role) }
@@ -58,7 +58,7 @@ export async function handleLinkToken(chatId: number, telegramId: number, tgUser
     .single()
 
   // Токена нет в базе — это не привязка, а метка источника из ссылки
-  // (t.me/birtapcard?start=card / pdp / info). Ведём человека в воронку.
+  // (t.me/birtapcard_bot?start=card / pdp / info). Ведём человека в воронку.
   if (!acc) {
     const profile = await findProfile(telegramId)
     if (profile) {
