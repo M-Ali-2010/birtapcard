@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
       { source: "/info", destination: "/info.html" },
       // Персональное предложение для PDP School
       { source: "/pdp", destination: "/pdp.html" },
+      // Макет экрана ссылок под дизайн PDP University — для показа
+      { source: "/pdp/university", destination: "/pdp/university.html" },
     ];
   },
 };
