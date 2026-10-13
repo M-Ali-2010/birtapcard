@@ -11,6 +11,7 @@ import { sendBranchLinks } from '@/lib/telegram/handlers/branches'
 import { createOwnerInvite, inviteForwardText } from '@/lib/telegram/handlers/invite'
 import { ensureDailyReport } from '@/lib/telegram/handlers/notify'
 import { sendWifiScreen, startWifiEdit, askWifiRemove, removeWifi } from '@/lib/telegram/handlers/wifi'
+import { sendLinksScreen, startLinkEdit, startAddPoint } from '@/lib/telegram/handlers/screen'
 import { db, findProfile, setState, getState, clearState } from '@/lib/telegram/db'
 import { navRow } from '@/lib/telegram/keyboards/main'
 import { menuForRole } from '@/lib/telegram/keyboards/menus'
@@ -18,6 +19,7 @@ import {
   fetchCompanyReport, fetchOwnerReport, formatReport, getReportRange, previousRange, type ReportPeriod,
 } from '@/lib/telegram/reports'
 import { venueSupportsWifi } from '@/lib/venue-wifi'
+import { venueHasLinksScreen } from '@/lib/venue-links'
 
 export const BROADCAST_STATE = 'broadcast_text'
 
@@ -196,7 +198,7 @@ export function companyReportKeyboard(
   companyId: string,
   periodKey: string,
   mode: 'summary' | 'points',
-  opts: { wifi?: boolean } = {}
+  opts: { wifi?: boolean; links?: boolean } = {}
 ) {
   const period = (key: string, label: string) => ({
     text: (key === periodKey ? '● ' : '') + label,
@@ -214,6 +216,10 @@ export function companyReportKeyboard(
       { text: '👤 Пригласить владельца', callback_data: `co:${companyId}:inv` },
     ],
     [{ text: '🔔 Отчёт в 08:00 — сюда', callback_data: `co:${companyId}:rep` }],
+    [
+      { text: '➕ Новая точка', callback_data: `co:${companyId}:np` },
+      ...(opts.links ? [{ text: '🖼 Ссылки на экране', callback_data: `co:${companyId}:lk` }] : []),
+    ],
     ...(opts.wifi ? [[{ text: '📶 Wi-Fi на карточке', callback_data: `co:${companyId}:wifi` }]] : []),
     navRow('platform:companies'),
   ])
@@ -340,6 +346,12 @@ export async function handleCompanyReport(chatId: number, telegramId: number, ar
   if (parts[1] === 'rep') { await setReportHere(chatId, companyId); return }
   if (parts[1] === 'repok') { await setReportHere(chatId, companyId, true); return }
   if (parts[1] === 'now') { await sendMorningSample(chatId, companyId); return }
+  if (parts[1] === 'lk') {
+    if (parts[2]) await startLinkEdit(chatId, telegramId, companyId, parts[2])
+    else await sendLinksScreen(chatId, companyId)
+    return
+  }
+  if (parts[1] === 'np') { await startAddPoint(chatId, telegramId, companyId); return }
   if (parts[1] === 'wifi') { await sendWifiScreen(chatId, companyId); return }
   if (parts[1] === 'wifiset') { await startWifiEdit(chatId, telegramId, companyId); return }
   if (parts[1] === 'wifidel') { await askWifiRemove(chatId, companyId); return }
@@ -349,8 +361,10 @@ export async function handleCompanyReport(chatId: number, telegramId: number, ar
   const periodKey = companyPeriodKey((mode === 'points' ? parts[2] : parts[1]) ?? '7d')
   const range = getReportRange(COMPANY_PERIODS[periodKey] ?? '7d')
   const supabase = db()
+  const venueName = await companyName(companyId)
   const kb = companyReportKeyboard(companyId, periodKey, mode, {
-    wifi: venueSupportsWifi(await companyName(companyId)),
+    wifi: venueSupportsWifi(venueName),
+    links: venueHasLinksScreen(venueName),
   })
 
   if (mode === 'points') {

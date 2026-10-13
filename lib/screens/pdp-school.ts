@@ -32,6 +32,11 @@ export type PdpLang = 'uz' | 'ru' | 'en'
 /** Оформление экрана: PDP EcoSystem (по умолчанию) или прежнее — PDP School */
 export type PdpBrand = 'ecosystem' | 'school'
 
+/** Ссылки экрана, которые можно переопределить (хранятся в venue_links, правятся в боте) */
+export const LINK_KEYS = ['review', 'website', 'bot', 'channel', 'instagram', 'play', 'ios'] as const
+export type LinkKey = (typeof LINK_KEYS)[number]
+export type VenueLinks = Partial<Record<LinkKey, string>>
+
 /**
  * Ссылки по умолчанию. Всё, что заведено у филиала в кабинете (google_url, bot_url),
  * перекрывает эти значения — здесь только то, чего в базе нет.
@@ -80,6 +85,8 @@ export type PdpScreenOptions = {
   wifi?: PdpWifi | null
   /** Оформление; по умолчанию PDP EcoSystem */
   brand?: PdpBrand
+  /** Ссылки, заданные администратором в боте (venue_links): важнее филиала и значений по умолчанию */
+  links?: VenueLinks
 }
 
 export type PdpWifi = { ssid: string; password?: string }
@@ -130,6 +137,11 @@ function withUtm(url: string): string {
 function telegramHandle(url: string): string | null {
   const m = url.match(/^https?:\/\/(?:t\.me|telegram\.me)\/([A-Za-z0-9_]{3,})\/?(?:\?.*)?$/i)
   return m ? '@' + m[1] : null
+}
+
+/** https://www.school.pdp.uz/ru → «school.pdp.uz» (для подписи на карточке сайта) */
+function hostOf(url: string): string {
+  try { return new URL(url).hostname.replace(/^www\./, '') } catch { return url }
 }
 
 /** instagram.com/pdp_ecosystem → «@pdp_ecosystem» */
@@ -229,15 +241,23 @@ export function renderPdpScreen(opts: PdpScreenOptions = {}): string {
   const TEXT = eco ? TEXT_ECO : TEXT_SCHOOL
   const t = TEXT.uz // первичная отрисовка; язык гостя выбирает скрипт ниже
 
-  const reviewUrl = httpUrl(opts.googleUrl) ?? L.review
-  const botUrl = httpUrl(opts.botUrl) ?? (eco ? PDP_ECOSYSTEM_LINKS.bot : L.bot)
+  // Порядок: ссылка, заданная в боте → ссылка филиала из кабинета → значение по умолчанию
+  const custom = opts.links ?? {}
+  const reviewUrl = httpUrl(custom.review) ?? httpUrl(opts.googleUrl) ?? L.review
+  const botUrl = httpUrl(custom.bot) ?? httpUrl(opts.botUrl) ?? (eco ? PDP_ECOSYSTEM_LINKS.bot : L.bot)
   const botHandle = telegramHandle(botUrl)
-  const channelUrl = httpUrl(opts.telegramUrl) ?? (eco ? PDP_ECOSYSTEM_LINKS.channel : L.channel)
+  const channelUrl = httpUrl(custom.channel) ?? httpUrl(opts.telegramUrl) ?? (eco ? PDP_ECOSYSTEM_LINKS.channel : L.channel)
   const channelHandle = telegramHandle(channelUrl)
-  const igUrl = PDP_ECOSYSTEM_LINKS.instagram
+  const igUrl = httpUrl(custom.instagram) ?? PDP_ECOSYSTEM_LINKS.instagram
   const igHandle = instagramHandle(igUrl)
+  const playUrl = httpUrl(custom.play) ?? L.play
+  const iosUrl = httpUrl(custom.ios) ?? L.ios
+  const customSite = httpUrl(custom.website)
+  const siteHost = hostOf(customSite ?? L.web.uz)
   const brandName = eco ? 'PDP EcoSystem' : 'PDP School'
-  const web = { uz: withUtm(L.web.uz), ru: withUtm(L.web.ru), en: withUtm(L.web.en) }
+  const web = customSite
+    ? { uz: withUtm(customSite), ru: withUtm(customSite), en: withUtm(customSite) }
+    : { uz: withUtm(L.web.uz), ru: withUtm(L.web.ru), en: withUtm(L.web.en) }
   const wifi = opts.wifi && opts.wifi.ssid ? opts.wifi : null
 
   const open = 'target="_blank" rel="noopener"'
@@ -260,7 +280,7 @@ export function renderPdpScreen(opts: PdpScreenOptions = {}): string {
             ${icon('globe')}
             <span class="link__body">
               <span class="link__title" data-i="web_t">${t.web_t}</span>
-              <span class="link__text"><span class="link__url">school.pdp.uz</span><span data-i="web_d">${t.web_d}</span></span>
+              <span class="link__text"><span class="link__url">${escapeHtml(siteHost)}</span><span data-i="web_d">${t.web_d}</span></span>
             </span>
             ${ARROW}
           </a>
@@ -304,7 +324,7 @@ export function renderPdpScreen(opts: PdpScreenOptions = {}): string {
 
   const playCard = `
         <li>
-          <a class="link" href="${escapeHtml(L.play)}" ${open} data-t="google_play">
+          <a class="link" href="${escapeHtml(playUrl)}" ${open} data-t="google_play">
             ${icon('google-play-logo')}
             ${ARROW}
             <span class="link__body">
@@ -316,7 +336,7 @@ export function renderPdpScreen(opts: PdpScreenOptions = {}): string {
 
   const iosCard = `
         <li>
-          <a class="link" href="${escapeHtml(L.ios)}" ${open} data-t="app_store">
+          <a class="link" href="${escapeHtml(iosUrl)}" ${open} data-t="app_store">
             ${icon('app-store-logo')}
             ${ARROW}
             <span class="link__body">
@@ -407,7 +427,7 @@ ${eco ? ECO_SPRITE : PDP_SPRITE}
 
     <footer class="foot">
       <p class="foot__brand">${brandName}</p>
-      <a class="foot__site" href="${escapeHtml(web.uz)}" ${open} data-t="website" data-web>school.pdp.uz <svg aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+      <a class="foot__site" href="${escapeHtml(web.uz)}" ${open} data-t="website" data-web>${escapeHtml(siteHost)} <svg aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
       <p class="foot__tag" data-i="tag">${t.tag}</p>
     </footer>
   </main>

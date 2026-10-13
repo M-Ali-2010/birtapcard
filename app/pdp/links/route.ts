@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { pdpWifiFromEnv, renderPdpScreen, type PdpWifi } from '@/lib/screens/pdp-school'
 import { getPdpSchoolWifi } from '@/lib/venue-wifi'
+import { getPdpSchoolLinks } from '@/lib/venue-links'
 
 // Экран ссылок PDP без токена: открывается по /pdp/links — для показа и проверки.
 // Оформление по умолчанию — PDP EcoSystem; прежний вид School: /pdp/links?brand=school.
@@ -26,7 +27,11 @@ export async function GET(request: Request) {
     }
   }
 
-  return new NextResponse(renderPdpScreen({ wifi, brand }), {
+  // Ссылки, заданные в боте, видны и в демо
+  let links = {}
+  try { links = await getPdpSchoolLinks(createServiceRoleClient()) } catch { links = {} }
+
+  return new NextResponse(renderPdpScreen({ wifi, brand, links }), {
     status: 200,
     headers: {
       'content-type': 'text/html; charset=utf-8',
