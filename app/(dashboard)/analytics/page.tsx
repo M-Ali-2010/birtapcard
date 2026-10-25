@@ -37,7 +37,7 @@ type BranchRow = {
   clicks: number; byTarget: Clicks
   reviews: number; reviewsTotal: number; rating: number | null   // реальные отзывы Google за период / всего / рейтинг
 }
-type SortKey = 'total' | 'nfc' | 'qr' | 'unique' | 'conversion' | 'clicks' | 'reviews'
+type SortKey = 'total' | 'nfc' | 'qr' | 'unique' | 'clicks' | 'conversion' | 'reviews'
 
 const TARGET_LABEL: Record<string, string> = {
   google: 'Google', yandex: 'Яндекс', gis: '2ГИС', instagram: 'Instagram', telegram: 'Telegram', bot: 'Бот',
@@ -53,7 +53,13 @@ function clicksSummary(byTarget: Clicks): string {
 const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
 const SORT_LABELS: Record<SortKey, string> = {
-  total: 'Всего', nfc: 'NFC', qr: 'QR', unique: 'Уникальных', conversion: 'Конверсия', clicks: 'Переходы', reviews: 'Отзывы',
+  total: 'Всего',
+  nfc: 'NFC',
+  qr: 'QR',
+  unique: 'Уникальных',
+  clicks: 'Переходы',
+  conversion: '% переходов',
+  reviews: 'Отзывы Google',
 }
 
 /* ─── Страница ───────────────────────────────────────────────────────────── */
@@ -278,7 +284,7 @@ function AnalyticsView() {
 
     const q = search.trim().toLowerCase()
     return Object.values(map)
-      .map(r => ({ ...r, conversion: pct(r.unique, r.total) }))
+      .map(r => ({ ...r, conversion: pct(r.clicks, r.total) }))
       .filter(r => !q || r.name.toLowerCase().includes(q) || r.company.toLowerCase().includes(q))
       .sort((a, b) => (sortAsc ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey]))
   }, [events, clicks, snaps, since, sortKey, sortAsc, search])
@@ -291,9 +297,10 @@ function AnalyticsView() {
   function exportCsv() {
     downloadCsv(
       `birtapcard-analytics-${new Date().toISOString().slice(0, 10)}.csv`,
-      ['Филиал', 'Заведение', 'NFC', 'QR', 'Всего', 'Уникальных', 'Конверсия %', 'Переходы', 'Google', 'Яндекс', '2ГИС', 'Instagram', 'Telegram', 'Бот', 'Новых отзывов Google', 'Всего отзывов Google', 'Рейтинг Google'],
+      ['Филиал', 'Заведение', 'Всего', 'NFC', 'QR', 'Уникальных устройств', 'Переходы', '% переходов', 'Google', 'Яндекс', '2ГИС', 'Instagram', 'Telegram', 'Бот', 'Сайт', 'Google Play', 'App Store', 'Wi-Fi', 'Новых отзывов Google', 'Всего отзывов Google', 'Рейтинг Google'],
       branchRows.map(r => [
-        r.name, r.company, r.nfc, r.qr, r.total, r.unique, r.conversion, r.clicks,
+        r.name, r.company, r.total, r.nfc, r.qr, r.unique, r.clicks,
+        r.total >= 20 ? `${r.conversion}%` : 'мало данных',
         ...TARGET_ORDER.map(k => r.byTarget[k] ?? 0),
         r.reviews, r.reviewsTotal, r.rating ?? '',
       ]),
@@ -366,17 +373,19 @@ function AnalyticsView() {
               value={totalScans} sub={`За ${daysCount} дн.`}
             />
             <KpiCard
-              label="Уникальных гостей" icon="user" accent="orange"
+              label="Уникальные устройства" icon="user" accent="blue"
               value={uniqueTotal}
-              sub={totalScans > 0 ? `${pct(uniqueTotal, totalScans)}% от всех сканов` : 'Нет данных'}
+              sub={totalScans > 0 ? `${pct(uniqueTotal, totalScans)}% от сканов (браузеры)` : 'Нет данных'}
             />
             <KpiCard
-              label="Сканов в день" icon="calendar" accent="blue"
+              label="Сканов в день" icon="calendar" accent="champagne"
               value={avgPerDay} sub={`NFC ${nf(nfcTotal)} · QR ${nf(qrTotal)}`}
             />
             <KpiCard
-              label="Повторных визитов" icon="refresh" accent="purple"
-              value={repeatRate} suffix="%" sub="Те же устройства повторно"
+              label="% переходов (конверсия)" icon="refresh" accent="mint"
+              value={totalScans >= 20 ? pct(clicks.length, totalScans) : 'мало данных'}
+              suffix={totalScans >= 20 ? '%' : ''}
+              sub={totalScans >= 20 ? `${clicks.length} переходов из ${totalScans} сканов` : `${clicks.length} переходов (база < 20)`}
             />
           </>
         )}
@@ -490,8 +499,8 @@ function AnalyticsView() {
                 <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
                   <Badge tone="mint">NFC {r.nfc}</Badge>
                   <Badge tone="orange">QR {r.qr}</Badge>
-                  <Badge tone="blue">уник. {r.unique}</Badge>
-                  <Badge tone="purple">{r.conversion}%</Badge>
+                  <Badge tone="blue">устройств {r.unique}</Badge>
+                  <Badge tone="mint">{r.total >= 20 ? `${r.conversion}% переходов` : 'мало данных'}</Badge>
                   {r.reviewsTotal > 0 && (
                     <Badge tone="orange">★ {r.rating?.toFixed(1) ?? '—'} · +{r.reviews}</Badge>
                   )}
@@ -528,15 +537,16 @@ function AnalyticsView() {
                   <tr key={r.id}>
                     <td style={{ fontWeight: 600 }}>{r.name}</td>
                     <td style={{ color: 'var(--text-muted)' }}>{r.company}</td>
-                    <td className="ta-r mono">{r.nfc}</td>
-                    <td className="ta-r mono">{r.qr}</td>
                     <td className="ta-r mono" style={{ fontWeight: 700 }}>{r.total}</td>
+                    <td className="ta-r mono" style={{ color: 'var(--mint)' }}>{r.nfc}</td>
+                    <td className="ta-r mono" style={{ color: 'var(--qr-gold)' }}>{r.qr}</td>
                     <td className="ta-r mono">{r.unique}</td>
-                    <td className="ta-r mono" style={{ color: 'var(--mint)', fontWeight: 650 }}>{r.conversion}%</td>
-                    <td className="ta-r">
-                      <div className="mono" style={{ fontWeight: 700 }}>{r.clicks}</div>
-                      {r.clicks > 0 && (
-                        <div style={{ fontSize: 10.5, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{clicksSummary(r.byTarget)}</div>
+                    <td className="ta-r mono" style={{ fontWeight: 650 }}>{r.clicks}</td>
+                    <td className="ta-r mono" style={{ color: 'var(--mint)', fontWeight: 650 }}>
+                      {r.total < 20 ? (
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>мало данных</span>
+                      ) : (
+                        `${r.conversion}%`
                       )}
                     </td>
                     <td className="ta-r">

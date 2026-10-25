@@ -5,48 +5,50 @@
    Токены → база → лейаут → компоненты → адаптив → анимации → печать
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ─── 1. ТОКЕНЫ (тёмная тема — по умолчанию) ─────────────────────────────── */
+/* ─── 1. ТОКЕНЫ (Obsidian Luxury — по умолчанию) ─────────────────────────── */
 
 :root {
-  /* Поверхности */
-  --bg:            #060A14;
-  --bg2:           #0B1222;
-  --card:          #101a2e;
-  --card2:         #16223c;
-  --surface-hover: #1a2745;
-  --border:        #1E2D4A;
-  --border-soft:   rgba(120, 160, 220, 0.10);
-  --border-strong: #2A3E63;
+  /* Obsidian Luxury Поверхности */
+  --bg:            #0E0F11;
+  --bg2:           #15171A;
+  --card:          #15171A;
+  --card2:         #1C1F23;
+  --surface-hover: #22262B;
+  --border:        #262A2F;
+  --border-soft:   rgba(255, 255, 255, 0.06);
+  --border-strong: #383D45;
 
-  /* Бренд */
-  --mint:      #00D4AA;
-  --mint-2:    #00A882;
-  --mint-dim:  rgba(0, 212, 170, 0.12);
-  --mint-glow: rgba(0, 212, 170, 0.28);
-  --orange:     #FF6B35;
-  --orange-dim: rgba(255, 107, 53, 0.12);
-  --blue:       #3B82F6;
-  --blue-dim:   rgba(59, 130, 246, 0.12);
-  --purple:     #8B5CF6;
-  --purple-dim: rgba(139, 92, 246, 0.12);
+  /* Бренд: Изумрудный NFC & Шампань QR */
+  --mint:        #3DDBA8;
+  --mint-2:      #2BC493;
+  --mint-dim:    rgba(61, 219, 168, 0.12);
+  --mint-glow:   rgba(61, 219, 168, 0.28);
+  --qr-gold:     #D2BE8F;
+  --qr-gold-dim: rgba(210, 190, 143, 0.14);
+  --orange:      #D2BE8F;
+  --orange-dim:  rgba(210, 190, 143, 0.14);
+  --blue:        #4E80EE;
+  --blue-dim:    rgba(78, 128, 238, 0.12);
+  --purple:      #9370DB;
+  --purple-dim:  rgba(147, 112, 219, 0.12);
 
   /* Текст */
-  --text:       #E8EEF7;
+  --text:       #EEF0F2;
   --text-dim:   #9FB0C8;
-  --text-muted: #64748B;
+  --text-muted: #6B7684;
 
   /* Статусы */
-  --success:     #10B981;
-  --success-dim: rgba(16, 185, 129, 0.12);
-  --danger:      #F04747;
-  --danger-dim:  rgba(240, 71, 71, 0.12);
-  --warning:     #F5A524;
-  --warning-dim: rgba(245, 165, 36, 0.12);
+  --success:     #3DDBA8;
+  --success-dim: rgba(61, 219, 168, 0.12);
+  --danger:      #E8806F;
+  --danger-dim:  rgba(232, 128, 111, 0.12);
+  --warning:     #C9771F;
+  --warning-dim: rgba(201, 119, 31, 0.14);
 
   /* Стекло / оверлеи */
-  --glass:    rgba(9, 15, 28, 0.72);
-  --overlay:  rgba(2, 5, 12, 0.72);
-  --sheen:    rgba(255, 255, 255, 0.04);
+  --glass:    rgba(14, 15, 17, 0.85);
+  --overlay:  rgba(7, 8, 10, 0.78);
+  --sheen:    rgba(255, 255, 255, 0.03);
 
   /* Радиусы */
   --r-xs: 6px;
@@ -57,10 +59,10 @@
   --r-full: 999px;
 
   /* Тени */
-  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.30);
-  --sh-2: 0 10px 28px -12px rgba(0, 0, 0, 0.65);
-  --sh-3: 0 28px 70px -20px rgba(0, 0, 0, 0.75);
-  --sh-mint: 0 8px 28px -10px rgba(0, 212, 170, 0.45);
+  --sh-1: 0 1px 3px rgba(0, 0, 0, 0.40);
+  --sh-2: 0 12px 30px -10px rgba(0, 0, 0, 0.70);
+  --sh-3: 0 28px 70px -20px rgba(0, 0, 0, 0.85);
+  --sh-mint: 0 8px 28px -8px rgba(61, 219, 168, 0.35);
 
   /* Метрики лейаута */
   --sidebar-w: 264px;
@@ -77,48 +79,50 @@
   color-scheme: dark;
 }
 
-/* ─── Светлая тема ────────────────────────────────────────────────────────── */
+/* ─── Светлая тема (Swiss Precision) ──────────────────────────────────────── */
 
 [data-theme="light"] {
-  --bg:            #F4F7FB;
+  --bg:            #ECEEF1;
   --bg2:           #FFFFFF;
   --card:          #FFFFFF;
-  --card2:         #F1F5F9;
-  --surface-hover: #E9EFF7;
-  --border:        #E2E8F0;
-  --border-soft:   rgba(15, 23, 42, 0.07);
-  --border-strong: #CBD5E1;
+  --card2:         #F5F7FA;
+  --surface-hover: #E8ECF2;
+  --border:        #DDE1E6;
+  --border-soft:   rgba(20, 23, 27, 0.06);
+  --border-strong: #CBD1DA;
 
-  --mint:      #00A882;
-  --mint-2:    #008E6E;
-  --mint-dim:  rgba(0, 168, 130, 0.10);
-  --mint-glow: rgba(0, 168, 130, 0.22);
-  --orange:     #E85520;
-  --orange-dim: rgba(232, 85, 32, 0.10);
-  --blue:       #2563EB;
-  --blue-dim:   rgba(37, 99, 235, 0.10);
-  --purple:     #7C3AED;
-  --purple-dim: rgba(124, 58, 237, 0.10);
+  --mint:        #0E9F7E;
+  --mint-2:      #0B7A5C;
+  --mint-dim:    rgba(14, 159, 126, 0.10);
+  --mint-glow:   rgba(14, 159, 126, 0.22);
+  --qr-gold:     #B59B58;
+  --qr-gold-dim: rgba(181, 155, 88, 0.12);
+  --orange:      #B59B58;
+  --orange-dim:  rgba(181, 155, 88, 0.12);
+  --blue:        #2563EB;
+  --blue-dim:    rgba(37, 99, 235, 0.10);
+  --purple:      #7C3AED;
+  --purple-dim:  rgba(124, 58, 237, 0.10);
 
-  --text:       #0F172A;
-  --text-dim:   #475569;
-  --text-muted: #8496AC;
+  --text:       #14171B;
+  --text-dim:   #495057;
+  --text-muted: #7E8997;
 
-  --success:     #059669;
-  --success-dim: rgba(5, 150, 105, 0.10);
-  --danger:      #DC2626;
-  --danger-dim:  rgba(220, 38, 38, 0.10);
-  --warning:     #D97706;
-  --warning-dim: rgba(217, 119, 6, 0.10);
+  --success:     #0B7A5C;
+  --success-dim: rgba(11, 122, 92, 0.10);
+  --danger:      #C8372D;
+  --danger-dim:  rgba(200, 55, 45, 0.10);
+  --warning:     #C9771F;
+  --warning-dim: rgba(201, 119, 31, 0.10);
 
-  --glass:   rgba(255, 255, 255, 0.80);
-  --overlay: rgba(15, 23, 42, 0.42);
-  --sheen:   rgba(15, 23, 42, 0.02);
+  --glass:   rgba(255, 255, 255, 0.88);
+  --overlay: rgba(14, 17, 22, 0.45);
+  --sheen:   rgba(20, 23, 27, 0.02);
 
   --sh-1: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --sh-2: 0 10px 28px -14px rgba(15, 23, 42, 0.22);
-  --sh-3: 0 28px 70px -24px rgba(15, 23, 42, 0.28);
-  --sh-mint: 0 8px 28px -12px rgba(0, 168, 130, 0.35);
+  --sh-2: 0 10px 28px -14px rgba(15, 23, 42, 0.18);
+  --sh-3: 0 28px 70px -24px rgba(15, 23, 42, 0.24);
+  --sh-mint: 0 8px 28px -12px rgba(14, 159, 126, 0.30);
 
   color-scheme: light;
 }
@@ -1451,3 +1455,288 @@ button { font-family: inherit; }
 .langsw__btn.is-on { background: var(--card); color: var(--text); box-shadow: var(--sh-1); }
 .langsw__flag { font-size: 15px; line-height: 1; }
 .langsw--compact .langsw__btn { padding: 6px 8px; }
+
+/* ───── 18. Трёхзонный лейаут Next-Gen Business OS (Концепция E + A) ───── */
+
+.dash-3zone {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 300px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1400px) {
+  .dash-3zone {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+  .dash-3zone__right {
+    display: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .dash-3zone {
+    grid-template-columns: 1fr;
+  }
+  .dash-3zone__left {
+    display: none;
+  }
+}
+
+/* Левая колонка: дерево филиалов */
+.dash-tree {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: sticky;
+  top: calc(var(--topbar-h) + 16px);
+}
+
+.dash-tree__title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 4px 8px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dash-tree__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: var(--r-md);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  transition: all var(--fast) var(--ease);
+}
+
+.dash-tree__item:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.dash-tree__item--active {
+  background: var(--card2);
+  border-color: var(--border-strong);
+  color: var(--mint);
+  font-weight: 600;
+}
+
+.dash-tree__badge {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: var(--r-full);
+  background: var(--surface-hover);
+  color: var(--text-muted);
+}
+
+.dash-tree__item--active .dash-tree__badge {
+  background: var(--mint-dim);
+  color: var(--mint);
+}
+
+/* Центральная зона */
+.dash-center {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+/* Правая колонка: инспекция выбранного филиала */
+.dash-detail {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: calc(var(--topbar-h) + 16px);
+}
+
+.dash-detail__head {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.dash-detail__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.dash-detail__sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.dash-detail__device-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dash-detail__device-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--card2);
+  border: 1px solid var(--border-soft);
+  font-size: 12.5px;
+}
+
+/* Блок «Требует внимания» (Сигналы Aurora & Business OS) */
+.signals-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signal-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--fast) var(--ease);
+}
+
+.signal-card--risk {
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--danger) 8%, var(--card)), var(--card));
+}
+
+.signal-card--spike {
+  border-color: color-mix(in srgb, var(--mint) 35%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--mint) 8%, var(--card)), var(--card));
+}
+
+.signal-card--opportunity {
+  border-color: color-mix(in srgb, var(--qr-gold) 35%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--qr-gold) 8%, var(--card)), var(--card));
+}
+
+.signal-card--info {
+  border-color: var(--border-strong);
+  background: var(--card2);
+}
+
+.signal-card__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.signal-card--risk .signal-card__icon {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
+.signal-card--spike .signal-card__icon {
+  background: var(--mint-dim);
+  color: var(--mint);
+}
+
+.signal-card--opportunity .signal-card__icon {
+  background: var(--qr-gold-dim);
+  color: var(--qr-gold);
+}
+
+.signal-card--info .signal-card__icon {
+  background: var(--surface-hover);
+  color: var(--text-dim);
+}
+
+.signal-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.signal-card__title {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.signal-card__text {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 3px;
+  line-height: 1.45;
+}
+
+/* Топ-бар управления ролью и периодом */
+.dash-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+
+.role-switcher {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: var(--r-md);
+  background: var(--card2);
+  border: 1px solid var(--border);
+}
+
+.role-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: var(--r-sm);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--fast) var(--ease);
+}
+
+.role-btn:hover {
+  color: var(--text);
+}
+
+.role-btn--active {
+  background: var(--card);
+  color: var(--mint);
+  box-shadow: var(--sh-1);
+}
+

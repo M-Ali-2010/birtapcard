@@ -628,13 +628,14 @@ export function Sparkline({
 
 /* ─── KPI-карточка ────────────────────────────────────────────────────────── */
 
-export type Accent = 'mint' | 'orange' | 'blue' | 'purple'
+export type Accent = 'mint' | 'orange' | 'blue' | 'purple' | 'champagne'
 
 const ACCENTS: Record<Accent, { color: string; dim: string }> = {
-  mint:   { color: 'var(--mint)',   dim: 'var(--mint-dim)' },
-  orange: { color: 'var(--orange)', dim: 'var(--orange-dim)' },
-  blue:   { color: 'var(--blue)',   dim: 'var(--blue-dim)' },
-  purple: { color: 'var(--purple)', dim: 'var(--purple-dim)' },
+  mint:      { color: 'var(--mint)',   dim: 'var(--mint-dim)' },
+  orange:    { color: 'var(--orange)', dim: 'var(--orange-dim)' },
+  blue:      { color: 'var(--blue)',   dim: 'var(--blue-dim)' },
+  purple:    { color: 'var(--purple)', dim: 'var(--purple-dim)' },
+  champagne: { color: 'var(--qr-gold)', dim: 'var(--qr-gold-dim)' },
 }
 
 export function KpiCard({

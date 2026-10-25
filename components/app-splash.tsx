@@ -66,7 +66,7 @@ export function AppSplash() {
   // Ушли со страницы входа (вошли) — онбординг больше не нужен
   useEffect(() => {
     if (phase === 'onboarding' && !pathname.startsWith('/login')) finish()
-  }, [pathname]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pathname])
 
   function finish() {
     try { localStorage.setItem(ONBOARDED_KEY, '1') } catch {}
