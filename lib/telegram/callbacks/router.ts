@@ -28,8 +28,16 @@ import {
   handleSupportMenu, handleSupportWrite, handleSupportReplyStart, handleSupportInbox,
 } from '@/lib/telegram/handlers/support'
 import {
-  handlePlatformStats, handleCompanies, handleCompanyReport, handleBroadcastSend, handleBroadcastCancel,
+  handlePlatformStats, handleCompanies, handleCompanyReport, handleBroadcastSend, handleBroadcastCancel, handleBroadcastStart,
 } from '@/lib/telegram/handlers/platform'
+import {
+  handleAdminSubscriptions,
+  handleAdminBranchSubDetail,
+  handleAdminExtendSub,
+} from '@/lib/telegram/handlers/subscriptionsAdmin'
+import { handleAdminPayments } from '@/lib/telegram/handlers/paymentsAdmin'
+import { handleAdminUsers } from '@/lib/telegram/handlers/usersAdmin'
+import { handleAdminBotControl, handleAdminSendTestReport } from '@/lib/telegram/handlers/botAdmin'
 import {
   handleSalesWhat,
   handleSalesPlans,
@@ -117,6 +125,14 @@ const EXACT_ROUTES: Record<string, (chatId: number, telegramId: number, cbId: st
     const profile = await findProfile(telegramId)
     await sendMessage(chatId, '🏠 Главное меню:', { reply_markup: menuForRole(profile?.role) })
   },
+  'platform:broadcast': async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleBroadcastStart(chatId, telegramId)
+  },
+  'admin:users': async (chatId, telegramId, cbId) => {
+    await answerCallback(cbId)
+    await handleAdminUsers(chatId, telegramId)
+  },
 }
 
 /**
@@ -180,6 +196,31 @@ const PREFIX_ROUTES: Record<string, (chatId: number, telegramId: number, arg: st
   },
   'reject_receipt:': async (_chatId, telegramId, arg, cbId) => {
     await handleAdminReject(cbId, telegramId, arg)
+  },
+  'sub_adm:': async (chatId, telegramId, arg, cbId) => {
+    if (arg.startsWith('f:')) {
+      await answerCallback(cbId)
+      await handleAdminSubscriptions(chatId, telegramId, arg.slice(2))
+    } else if (arg.startsWith('view:')) {
+      await answerCallback(cbId)
+      await handleAdminBranchSubDetail(chatId, telegramId, arg.slice(5))
+    } else if (arg.startsWith('ext:')) {
+      await handleAdminExtendSub(cbId, chatId, telegramId, arg.slice(4))
+    }
+  },
+  'pay_adm:': async (chatId, telegramId, arg, cbId) => {
+    if (arg.startsWith('f:')) {
+      await answerCallback(cbId)
+      await handleAdminPayments(chatId, telegramId, arg.slice(2))
+    }
+  },
+  'tg_adm:': async (chatId, telegramId, arg, cbId) => {
+    await answerCallback(cbId)
+    if (arg === 'test_report') {
+      await handleAdminSendTestReport(chatId, telegramId)
+    } else if (arg === 'refresh') {
+      await handleAdminBotControl(chatId, telegramId)
+    }
   },
 }
 
