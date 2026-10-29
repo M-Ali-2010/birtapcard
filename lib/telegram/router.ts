@@ -78,6 +78,15 @@ async function sendPeriodPicker(chatId: number) {
  * Возвращает true, если сообщение было обработано.
  */
 async function dispatchSalesText(chatId: number, telegramId: number, text: string): Promise<boolean> {
+  if (text === '📱 Попробовать Demo App' || text === '📱 Открыть Mini App' || text === '/app' || text === '/tma') {
+    const tmaUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://birtapcard.vercel.app').replace(/\/+$/, '') + '/tma'
+    await sendMessage(chatId, '📱 *BirTapCard Telegram Mini App*\n\nНажмите кнопку ниже, чтобы открыть интерактивную панель прямо в Telegram:', {
+      reply_markup: keyboard([
+        [{ text: '🚀 Запустить Mini App', web_app: { url: tmaUrl } }],
+      ]),
+    })
+    return true
+  }
   if (text === '🚀 Что это' || text === '/about') {
     await handleSalesWhat(chatId)
     return true
@@ -107,6 +116,16 @@ async function dispatchSalesText(chatId: number, telegramId: number, text: strin
  */
 async function dispatchMenuText(chatId: number, telegramId: number, profile: BotProfile, text: string): Promise<boolean> {
   // ─── Общие для всех ролей ──────────────────────────────────────────────
+  if (text === '📱 Открыть Mini App' || text === '📱 Попробовать Demo App' || text === '/app' || text === '/tma') {
+    const tmaUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://birtapcard.vercel.app').replace(/\/+$/, '') + '/tma'
+    await sendMessage(chatId, '📱 *BirTapCard Telegram Mini App*\n\nНажмите кнопку ниже, чтобы открыть интерактивную панель управления:', {
+      reply_markup: keyboard([
+        [{ text: '🚀 Открыть Mini App', web_app: { url: tmaUrl } }],
+      ]),
+    })
+    return true
+  }
+
   if (COMMAND_MAP[text] !== undefined) {
     await handleReport(chatId, telegramId, COMMAND_MAP[text])
     return true

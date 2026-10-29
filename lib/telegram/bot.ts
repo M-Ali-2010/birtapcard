@@ -19,12 +19,14 @@ export interface InlineButton {
   text: string
   callback_data?: string
   url?: string
+  web_app?: { url: string }
 }
 
 export interface ReplyKeyboardButton {
   text: string
   /** Кнопка «поделиться номером» — Telegram пришлёт msg.contact */
   request_contact?: boolean
+  web_app?: { url: string }
 }
 
 export interface ReplyMarkup {

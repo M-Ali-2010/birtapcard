@@ -14,9 +14,14 @@
 import type { ReplyMarkup } from '@/lib/telegram/bot'
 import type { BotProfile } from '@/lib/telegram/db'
 
+function tmaUrl(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL || 'https://birtapcard.vercel.app').replace(/\/+$/, '') + '/tma'
+}
+
 export function superAdminMenu(): ReplyMarkup {
   return {
     keyboard: [
+      [{ text: '📱 Открыть Mini App', web_app: { url: tmaUrl() } }],
       [{ text: '📊 Статистика платформы' }, { text: '🏢 Заведения' }],
       [{ text: '🏪 Филиалы' }, { text: '👥 Пользователи' }],
       [{ text: '💳 Подписки' }, { text: '💰 Оплаты' }],
@@ -37,6 +42,7 @@ export function superAdminMenu(): ReplyMarkup {
 export function ownerMenu(): ReplyMarkup {
   return {
     keyboard: [
+      [{ text: '📱 Открыть Mini App', web_app: { url: tmaUrl() } }],
       [{ text: '📊 Сегодня' }, { text: '📈 Статистика' }],
       [{ text: '🏪 По точкам' }, { text: '🔔 Отчёт' }],
       [{ text: '🆘 Поддержка' }],
@@ -49,6 +55,7 @@ export function ownerMenu(): ReplyMarkup {
 export function branchMenu(): ReplyMarkup {
   return {
     keyboard: [
+      [{ text: '📱 Открыть Mini App', web_app: { url: tmaUrl() } }],
       [{ text: '📊 Сегодня' }, { text: '📈 Статистика' }],
       [{ text: '📄 Отчёт' }, { text: 'ℹ Информация' }],
     ],
