@@ -22,6 +22,14 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;')
 }
 
+export function isShoesMaster(name?: string | null, slug?: string | null, token?: string | null): boolean {
+  if (token && (token === 'fb132ed8-298f-40f9-bae6-4c18194c7241' || token === '17dd4885-174d-4e1c-b0fb-e7aa51d6ea65')) {
+    return true
+  }
+  const str = `${name || ''} ${slug || ''}`.toLowerCase()
+  return str.includes('shoes-master') || str.includes('shoes master') || str.includes('abdulvali')
+}
+
 export function renderScanGate(opts: {
   token: string
   branchName: string
@@ -32,6 +40,7 @@ export function renderScanGate(opts: {
   telegramUrl?: string | null
   botUrl?: string | null
   logoUrl?: string | null
+  bgUrl?: string | null
 }): string {
   const name = escapeHtml(opts.branchName)
   const key = JSON.stringify('btc_gate_' + opts.token)
@@ -52,6 +61,8 @@ export function renderScanGate(opts: {
   const headingRu = hasFollow
     ? 'Оставьте отзыв<br>и подпишитесь'
     : 'Оставьте, пожалуйста,<br>отзыв о нас'
+
+  const hasBg = !!opts.bgUrl
 
   const yandexBtn = hasYa ? `
   <a class="btn btn-ya rev" data-k="ya" data-t="yandex" href="${escapeHtml(opts.yandexUrl!)}" target="_blank" rel="noopener">
@@ -229,9 +240,85 @@ h1{font-size:23px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin-
   display:inline-flex;align-items:center;gap:7px;margin-bottom:16px;
   color:#00D9AE;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase
 }
+${hasBg ? `
+body.has-bg {
+  background-color: #06080E;
+}
+body.has-bg::before {
+  display: none !important;
+}
+.bg-wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 7, 14, 0.35) 0%,
+    rgba(5, 7, 14, 0.50) 40%,
+    rgba(5, 7, 14, 0.78) 100%
+  );
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  pointer-events: none;
+}
+.has-bg .box {
+  background: rgba(11, 14, 20, 0.60);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 28px;
+  padding: 24px 20px 22px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+.has-bg h1 {
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 0 24px rgba(0, 0, 0, 0.7);
+}
+.has-bg .thanks {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+.has-bg .name {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 217, 174, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+.has-bg .sub {
+  color: #EDF2FA;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+}
+.has-bg .langs {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+@media (max-height: 720px) {
+  body { padding: 12px; }
+  .has-bg .box { padding: 18px 16px 16px; border-radius: 22px; }
+  h1 { font-size: 20px; margin-bottom: 8px; }
+  .name { margin-bottom: 14px; }
+  .btn { padding: 14px 18px; font-size: 15px; }
+  .brand { margin-top: 22px; }
+}
+` : ''}
 </style>
 </head>
-<body>
+<body${hasBg ? ' class="has-bg"' : ''}>
+${hasBg ? `
+  <div class="bg-wallpaper" style="background-image:url('${escapeHtml(opts.bgUrl!)}');"></div>
+  <div class="bg-overlay"></div>
+` : ''}
 <div class="box">
 
   <div class="langs" role="group" aria-label="Language">
