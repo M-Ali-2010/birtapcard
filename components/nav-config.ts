@@ -15,6 +15,9 @@ const ANALYTICS: NavItem[] = [
 
 export const SUPER_ADMIN_NAV: NavGroup[] = [
   { group: 'Главная', items: ANALYTICS },
+  { group: 'Ресторанный сервис', items: [
+    { href: '/restaurant-admin', label: 'Ресторанная система', icon: 'restaurants', desc: 'Меню, заказы, кухня и столы' },
+  ] },
   {
     group: 'Управление',
     items: [
@@ -35,6 +38,9 @@ export const SUPER_ADMIN_NAV: NavGroup[] = [
 
 export const READONLY_NAV: NavGroup[] = [
   { group: 'Аналитика', items: ANALYTICS },
+  { group: 'Ресторанный сервис', items: [
+    { href: '/restaurant-admin', label: 'Ресторанная система', icon: 'restaurants', desc: 'Меню, заказы, кухня и столы' },
+  ] },
 ]
 
 export function getNavByRole(role: string | null): NavGroup[] {
