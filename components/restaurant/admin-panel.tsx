@@ -68,7 +68,7 @@ export default function RestaurantAdminPanel({ restaurantId, slug, section }: { 
   }
   async function createProduct(event: React.FormEvent) {
     event.preventDefault(); setBusy(true); setError('')
-    try { const response = await fetch(`${base}/menu`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind: 'product', ...newProduct, price_uzs: Number(newProduct.price_uzs) }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error); setNewProduct((current) => ({ ...current, name: '', price_uzs: '', description: '', portion: '', image_url: '' })); await load() }
+    try { const response = await fetch(`${base}/menu`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind: 'product', ...newProduct, category_id: newProduct.category_id || categories[0]?.id, price_uzs: Number(newProduct.price_uzs) }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error); setNewProduct((current) => ({ ...current, name: '', price_uzs: '', description: '', portion: '', image_url: '' })); await load() }
     catch (e) { setError(e instanceof Error ? e.message : 'Не удалось добавить блюдо') }
     finally { setBusy(false) }
   }

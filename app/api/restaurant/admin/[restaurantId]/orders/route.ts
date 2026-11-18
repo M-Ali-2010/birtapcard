@@ -20,6 +20,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   let body: { orderId?: string; status?: string; payment_method?: string }
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Некорректный запрос' }, { status: 400 }) }
   if (!body.orderId || (!body.status && !body.payment_method)) return NextResponse.json({ error: 'Укажите изменение заказа' }, { status: 400 })
+  if (body.payment_method && access.role === 'kitchen') return NextResponse.json({ error: 'Кухня не может записывать оплату' }, { status: 403 })
   const { error } = await access.service.rpc('transition_restaurant_order', { p_restaurant_id: restaurantId, p_order_id: body.orderId, p_status: body.status ?? null, p_payment_method: body.payment_method ?? null, p_actor_user_id: access.userId })
   if (error) return NextResponse.json({ error: 'Статус нельзя изменить или заказ уже оплачен' }, { status: 409 })
   return NextResponse.json({ ok: true })
