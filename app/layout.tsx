@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
+import './restaurant-ui.css'
 import { ThemeProvider, themeInitScript } from '@/components/ui/theme'
 import { ToastProvider } from '@/components/ui/toast'
 import { ConfirmProvider } from '@/components/ui/kit'
