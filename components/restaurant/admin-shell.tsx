@@ -10,7 +10,7 @@ const navigation: { section: string; label: string; icon: IconName }[] = [
   { section: 'orders', label: 'Заказы', icon: 'dashboard' },
   { section: 'kitchen', label: 'Кухня', icon: 'clock' },
   { section: 'menu', label: 'Меню', icon: 'restaurants' },
-  { section: 'tables', label: 'Столы и QR', icon: 'qrcodes' },
+  { section: 'tables', label: 'Столы, QR и NFC', icon: 'qrcodes' },
   { section: 'feedback', label: 'Отзывы гостей', icon: 'star' },
   { section: 'team', label: 'Команда', icon: 'users' },
 ]

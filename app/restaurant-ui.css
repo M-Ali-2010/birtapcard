@@ -1596,8 +1596,36 @@
   font-size: 10px;
 }
 
-.ra-table button {
+.ra-table-link-label {
+  color: var(--mint-2) !important;
+  font-size: 10px !important;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.ra-nfc-feedback {
   width: 100%;
+  font-size: 11px !important;
+  line-height: 1.5;
+}
+
+.ra-nfc-feedback.is-success {
+  color: var(--mint-2) !important;
+}
+
+.ra-nfc-feedback.is-error {
+  color: var(--danger) !important;
+}
+
+.ra-nfc-feedback.is-pending {
+  color: var(--qr-gold) !important;
+}
+
+.ra-table-actions {
+  width: 100%;
+  display: grid;
+  gap: 8px;
 }
 
 .ra-reviews {
@@ -2142,7 +2170,7 @@
   .ra-topbar,
   .ra-title-row,
   .ra-add-table,
-  .ra-table button {
+  .ra-table-actions {
     display: none !important;
   }
 
