@@ -3485,3 +3485,561 @@
   text-decoration: none;
   transition: all .15s ease;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ORDER TRACKING - ПОЛНОСТЬЮ НОВЫЙ МИНИМАЛИСТИЧНЫЙ ДИЗАЙН
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.ot-page {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.ot-container {
+  width: min(100%, 480px);
+  margin: 0 auto;
+  padding: 16px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+/* Header */
+.ot-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ot-back {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: all .15s ease;
+}
+
+.ot-back:hover {
+  border-color: var(--mint);
+  color: var(--mint-2);
+}
+
+.ot-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ot-header-info strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ot-header-info span {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.ot-live {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+}
+
+.ot-live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--mint);
+  animation: ot-pulse 2s infinite ease-in-out;
+}
+
+@keyframes ot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .6; transform: scale(.85); }
+}
+
+/* Main Card */
+.ot-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.ot-order-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ot-order-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -.02em;
+}
+
+.ot-time {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.ot-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--surface2);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+
+.ot-badge-new,
+.ot-badge-accepted {
+  background: var(--mint-dim);
+  border-color: var(--mint);
+  color: var(--mint-2);
+}
+
+.ot-badge-preparing {
+  background: rgba(245, 158, 11, .15);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+.ot-badge-ready {
+  background: rgba(59, 130, 246, .15);
+  border-color: #3b82f6;
+  color: #60a5fa;
+}
+
+.ot-badge-delivered,
+.ot-badge-completed {
+  background: var(--mint-dim);
+  border-color: var(--mint);
+  color: var(--mint-2);
+}
+
+.ot-badge-cancelled {
+  background: rgba(239, 68, 68, .15);
+  border-color: #ef4444;
+  color: #f87171;
+}
+
+/* Progress Bar */
+.ot-progress {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 8px;
+}
+
+.ot-progress-line {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  right: 20px;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  z-index: 0;
+}
+
+.ot-progress-fill {
+  height: 100%;
+  background: var(--mint);
+  border-radius: 2px;
+  transition: width .4s ease;
+}
+
+.ot-step {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ot-step-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  display: grid;
+  place-items: center;
+  color: var(--text-dim);
+  transition: all .2s ease;
+}
+
+.ot-step.is-done .ot-step-dot {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: #0a110e;
+}
+
+.ot-step.is-current .ot-step-dot {
+  border-color: var(--mint);
+  box-shadow: 0 0 0 4px var(--mint-dim);
+}
+
+.ot-step span {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.ot-step.is-done span {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Cancelled */
+.ot-cancelled {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(239, 68, 68, .1);
+  border: 1px solid rgba(239, 68, 68, .3);
+  border-radius: 10px;
+  color: #f87171;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Items */
+.ot-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+}
+
+.ot-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.ot-item-qty {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mint-2);
+  min-width: 28px;
+}
+
+.ot-item-name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.ot-item-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* Total */
+.ot-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+}
+
+.ot-total span {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.ot-total strong {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Cancel Button */
+.ot-cancel-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, .4);
+  border-radius: 10px;
+  color: #f87171;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.ot-cancel-btn:hover {
+  background: rgba(239, 68, 68, .1);
+  border-color: #ef4444;
+}
+
+/* Cancel Confirm */
+.ot-cancel-confirm {
+  margin-top: 12px;
+  padding: 16px;
+  background: rgba(239, 68, 68, .08);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.ot-cancel-confirm > span {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.ot-cancel-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ot-btn-danger {
+  flex: 1;
+  padding: 12px;
+  background: #ef4444;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ot-btn-secondary {
+  flex: 1;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ot-error-text {
+  color: #f87171;
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+/* Review */
+.ot-review {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.ot-review-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.ot-stars {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ot-stars button {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.ot-stars button.is-on {
+  background: rgba(251, 191, 36, .15);
+  border-color: #fbbf24;
+  color: #fbbf24;
+}
+
+.ot-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ot-tags button {
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.ot-tags button.is-selected {
+  background: var(--mint-dim);
+  border-color: var(--mint);
+  color: var(--mint-2);
+  font-weight: 600;
+}
+
+.ot-review textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+
+.ot-review textarea::placeholder {
+  color: var(--text-dim);
+}
+
+.ot-btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: var(--mint);
+  border: none;
+  border-radius: 10px;
+  color: #0a110e;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.ot-btn-primary:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* Thanks */
+.ot-thanks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  background: var(--mint-dim);
+  border-radius: 10px;
+  color: var(--mint-2);
+  font-weight: 600;
+}
+
+/* CTA Button */
+.ot-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  margin-top: 16px;
+  background: var(--mint);
+  border-radius: 12px;
+  color: #0a110e;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all .15s ease;
+}
+
+.ot-cta:hover {
+  background: var(--mint-2);
+  transform: translateY(-1px);
+}
+
+/* Hint */
+.ot-hint {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+/* Loading */
+.ot-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px 20px;
+  color: var(--text-dim);
+}
+
+.ot-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--mint);
+  border-radius: 50%;
+  animation: ot-spin .8s linear infinite;
+}
+
+@keyframes ot-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error */
+.ot-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.ot-error h1 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.ot-error p {
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.ot-error button {
+  margin-top: 8px;
+  padding: 12px 24px;
+  background: var(--mint);
+  border: none;
+  border-radius: 10px;
+  color: #0a110e;
+  font-weight: 600;
+  cursor: pointer;
+}
