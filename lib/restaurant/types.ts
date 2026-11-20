@@ -112,6 +112,38 @@ export const ORDER_STATUS_NEXT: Partial<Record<RestaurantOrderStatus, Restaurant
   delivered: 'completed',
 }
 
+export const KNOWN_ALLERGENS = [
+  { id: 'milk', label: 'Молоко', icon: '🥛' },
+  { id: 'gluten', label: 'Глютен', icon: '🌾' },
+  { id: 'nuts', label: 'Орехи', icon: '🥜' },
+  { id: 'eggs', label: 'Яйца', icon: '🥚' },
+  { id: 'fish', label: 'Рыба', icon: '🐟' },
+  { id: 'spicy', label: 'Острое', icon: '🌶️' },
+] as const
+
+export type AllergenId = (typeof KNOWN_ALLERGENS)[number]['id']
+
+export type GuestCartItem = {
+  productId: string
+  quantity: number
+  note?: string
+}
+
+export type GuestOrderSummary = {
+  token: string
+  orderNumber: number
+  totalUzs: number
+  createdAt: string
+  status: RestaurantOrderStatus
+}
+
+export type GuestSessionData = {
+  cart: Record<string, GuestCartItem>
+  activeOrders: GuestOrderSummary[]
+  activeAllergenFilters: string[]
+  updatedAt: number
+}
+
 export function formatUzs(value: number): string {
   return `${new Intl.NumberFormat('ru-RU').format(value)} сум`
 }
