@@ -4,19 +4,42 @@ import { createServiceRoleClient } from '@/lib/supabase/server'
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
   if (!/^[0-9a-f-]{36}$/i.test(token)) return NextResponse.json({ error: 'Заказ не найден' }, { status: 404 })
-  const { data, error } = await createServiceRoleClient()
+
+  const supabase = createServiceRoleClient()
+  const { data, error } = await supabase
     .from('restaurant_orders')
-    .select('id, order_number, status, payment_status, total_uzs, created_at, restaurants(name, slug), dining_tables(table_number), restaurant_order_items(product_name, quantity, unit_price_uzs, modifiers, line_total_uzs)')
-    .eq('tracking_token', token).maybeSingle()
+    .select(
+      'id, order_number, status, payment_status, total_uzs, created_at, restaurants(name, slug), dining_tables(table_number), restaurant_order_items(product_name, quantity, unit_price_uzs, modifiers, line_total_uzs), restaurant_reviews(id, rating)',
+    )
+    .eq('tracking_token', token)
+    .maybeSingle()
+
   if (error || !data) return NextResponse.json({ error: 'Заказ не найден' }, { status: 404 })
-  return NextResponse.json(data, { headers: { 'Cache-Control': 'no-store' } })
+
+  const reviewsList = Array.isArray(data.restaurant_reviews)
+    ? data.restaurant_reviews
+    : data.restaurant_reviews
+    ? [data.restaurant_reviews]
+    : []
+
+  const responsePayload = {
+    ...data,
+    has_review: reviewsList.length > 0,
+    review_rating: reviewsList[0]?.rating ?? null,
+  }
+
+  return NextResponse.json(responsePayload, { headers: { 'Cache-Control': 'no-store' } })
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
   if (!/^[0-9a-f-]{36}$/i.test(token)) return NextResponse.json({ error: 'Заказ не найден' }, { status: 404 })
   let body: { action?: string; reason?: string }
-  try { body = await request.json() } catch { return NextResponse.json({ error: 'Некорректный запрос' }, { status: 400 }) }
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Некорректный запрос' }, { status: 400 })
+  }
 
   if (body.action === 'cancel') {
     const supabase = createServiceRoleClient()
@@ -28,7 +51,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     if (findError || !order) return NextResponse.json({ error: 'Заказ не найден' }, { status: 404 })
     if (order.status !== 'new') {
-      return NextResponse.json({ error: 'Заказ уже принят кухней и не может быть отменён автоматически' }, { status: 409 })
+      return NextResponse.json(
+        { error: 'Заказ уже принят кухней и не может быть отменён автоматически' },
+        { status: 409 },
+      )
     }
 
     const { error: updateError } = await supabase

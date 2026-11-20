@@ -18,6 +18,8 @@ type OrderData = {
   payment_status: string
   total_uzs: number
   created_at: string
+  has_review?: boolean
+  review_rating?: number | null
   restaurants: { name: string; slug: string } | null
   dining_tables: { table_number: string } | null
   restaurant_order_items: { product_name: string; quantity: number; line_total_uzs: number }[]
@@ -69,6 +71,9 @@ export default function OrderTracking({ token }: { token: string }) {
         if (active) {
           setOrder(result)
           setError('')
+          if (result.has_review) {
+            setReviewed(true)
+          }
           if (result.restaurants?.slug && result.dining_tables?.table_number) {
             updateGuestOrderStatus(
               result.restaurants.slug,
@@ -109,7 +114,14 @@ export default function OrderTracking({ token }: { token: string }) {
         body: JSON.stringify({ token, rating, comment, tags: selectedTags }),
       })
       const result = await response.json()
-      if (!response.ok) throw new Error(result.error ?? 'Не удалось отправить оценку')
+      if (!response.ok) {
+        // If already reviewed, switch to reviewed state so user is never stuck
+        if (response.status === 409 && result.error?.includes('уже оценили')) {
+          setReviewed(true)
+          return
+        }
+        throw new Error(result.error ?? 'Не удалось отправить оценку')
+      }
       setReviewed(true)
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         try { navigator.vibrate(20) } catch {}
@@ -196,11 +208,11 @@ export default function OrderTracking({ token }: { token: string }) {
 
   return (
     <main className="rt-page">
-      {/* 1. Постоянная заметная шапка (A1) */}
+      {/* 1. Постоянная заметная шапка с большой кнопкой НАЗАД В МЕНЮ (A1) */}
       <header className="rt-nav-header">
         <Link href={menuHref} className="rt-nav-back">
           <Icon name="arrowLeft" size={18} />
-          <span>Меню</span>
+          <span>← Назад в меню</span>
         </Link>
         <div className="rt-nav-info">
           <strong>{order.restaurants?.name ?? 'Ресторан'}</strong>
@@ -212,7 +224,10 @@ export default function OrderTracking({ token }: { token: string }) {
         <div className="rt-order-heading">
           <div>
             <h1>Заказ №{order.order_number}</h1>
-            <p>Стол {order.dining_tables?.table_number ?? '—'} · {new Date(order.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</p>
+            <p>
+              Стол {order.dining_tables?.table_number ?? '—'} ·{' '}
+              {new Date(order.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+            </p>
           </div>
           <span className={'rt-status rt-status-' + order.status}>
             {ORDER_STATUS_LABELS[order.status] ?? order.status}
@@ -314,6 +329,18 @@ export default function OrderTracking({ token }: { token: string }) {
           Статус обновляется автоматически каждые 5 сек
         </p>
 
+        {/* Прямой блок действий в теле страницы: Назад в меню и Заказать ещё */}
+        <div className="rt-inline-nav-box">
+          <Link href={menuHref} className="rt-btn-menu-highlight">
+            <Icon name="arrowLeft" size={18} />
+            <span>Вернуться в меню стола {order.dining_tables?.table_number ?? ''}</span>
+          </Link>
+          <Link href={menuHref} className="rt-btn-reorder-highlight">
+            <Icon name="plus" size={18} />
+            <span>Дозаказать ещё блюда</span>
+          </Link>
+        </div>
+
         {/* Отзыв после получения (A9, A1) */}
         {['delivered', 'completed'].includes(order.status) && (
           <div className="rt-review">
@@ -324,13 +351,15 @@ export default function OrderTracking({ token }: { token: string }) {
                   <Icon name="check" size={28} />
                 </div>
                 <h3>Спасибо за ваш отзыв!</h3>
-                <p>Мы ценим ваше мнение и становимся лучше для вас.</p>
+                <p>Ваша оценка сохранена. Приятного отдыха в нашем заведении!</p>
                 <div className="rt-thanks-actions">
                   <Link href={menuHref} className="rt-send rt-thanks-reorder">
-                    Заказать ещё
+                    <Icon name="plus" size={16} />
+                    <span>Заказать ещё</span>
                   </Link>
                   <Link href={menuHref} className="rt-secondary-btn">
-                    Вернуться в меню
+                    <Icon name="arrowLeft" size={16} />
+                    <span>Вернуться в меню</span>
                   </Link>
                 </div>
                 <div className="rt-bill-hint">
@@ -406,7 +435,8 @@ export default function OrderTracking({ token }: { token: string }) {
           <span>Заказать ещё</span>
         </Link>
         <Link href={menuHref} className="rt-bottom-menu">
-          Вернуться в меню
+          <Icon name="arrowLeft" size={16} />
+          <span>В меню</span>
         </Link>
       </footer>
     </main>

@@ -3402,3 +3402,52 @@
   background: var(--mint-dim);
   color: var(--mint-2);
 }
+
+/* ─── Direct Menu Back & Reorder Buttons in Body ────────────────────────────── */
+
+.rt-inline-nav-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0 16px;
+  padding: 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+}
+
+.rt-btn-menu-highlight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 50px;
+  background: var(--surface);
+  border: 1px solid var(--mint-dim);
+  border-radius: 12px;
+  color: var(--mint-2);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all .15s ease;
+}
+
+.rt-btn-menu-highlight:hover {
+  background: var(--mint-dim);
+  border-color: var(--mint);
+}
+
+.rt-btn-reorder-highlight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  background: var(--mint);
+  color: #0b1411;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all .15s ease;
+}
