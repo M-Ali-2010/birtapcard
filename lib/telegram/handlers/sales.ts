@@ -77,8 +77,10 @@ const PLANS: Record<PlanId, { name: string; price: string; per: string; for: str
 
 /** Нижнее меню для непривязанного собеседника */
 export function salesMenu(): ReplyMarkup {
+  const tmaUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://birtapcard.vercel.app').replace(/\/+$/, '') + '/tma'
   return {
     keyboard: [
+      [{ text: '📱 Попробовать Demo App', web_app: { url: tmaUrl } }],
       [{ text: '🚀 Что это' }, { text: '💳 Тарифы' }],
       [{ text: '📝 Оставить заявку' }],
       [{ text: '🆘 Связаться с нами' }],

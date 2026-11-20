@@ -23,7 +23,6 @@ import {
   isAwaitingReceipt,
 } from '@/lib/telegram/handlers/subscription'
 import { handleSettings, handleHelp } from '@/lib/telegram/handlers/settings'
-import { comingSoon } from '@/lib/telegram/handlers/comingSoon'
 import { handleMyBranches, handleBranchRankingMenu } from '@/lib/telegram/handlers/branches'
 import { handleExportMenu } from '@/lib/telegram/handlers/export'
 import { handleLeadsList } from '@/lib/telegram/handlers/leads'
@@ -37,6 +36,10 @@ import {
   handlePlatformStats, handleCompanies, handleCompanyPicker, handleBroadcastStart,
   handleBroadcastText, isComposingBroadcast,
 } from '@/lib/telegram/handlers/platform'
+import { handleAdminSubscriptions } from '@/lib/telegram/handlers/subscriptionsAdmin'
+import { handleAdminPayments } from '@/lib/telegram/handlers/paymentsAdmin'
+import { handleAdminUsers } from '@/lib/telegram/handlers/usersAdmin'
+import { handleAdminBotControl } from '@/lib/telegram/handlers/botAdmin'
 import {
   salesMenu,
   handleSalesStart,
@@ -75,6 +78,15 @@ async function sendPeriodPicker(chatId: number) {
  * Возвращает true, если сообщение было обработано.
  */
 async function dispatchSalesText(chatId: number, telegramId: number, text: string): Promise<boolean> {
+  if (text === '📱 Попробовать Demo App' || text === '📱 Открыть Mini App' || text === '/app' || text === '/tma') {
+    const tmaUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://birtapcard.vercel.app').replace(/\/+$/, '') + '/tma'
+    await sendMessage(chatId, '📱 *BirTapCard Telegram Mini App*\n\nНажмите кнопку ниже, чтобы открыть интерактивную панель прямо в Telegram:', {
+      reply_markup: keyboard([
+        [{ text: '🚀 Запустить Mini App', web_app: { url: tmaUrl } }],
+      ]),
+    })
+    return true
+  }
   if (text === '🚀 Что это' || text === '/about') {
     await handleSalesWhat(chatId)
     return true
@@ -104,6 +116,16 @@ async function dispatchSalesText(chatId: number, telegramId: number, text: strin
  */
 async function dispatchMenuText(chatId: number, telegramId: number, profile: BotProfile, text: string): Promise<boolean> {
   // ─── Общие для всех ролей ──────────────────────────────────────────────
+  if (text === '📱 Открыть Mini App' || text === '📱 Попробовать Demo App' || text === '/app' || text === '/tma') {
+    const tmaUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://birtapcard.vercel.app').replace(/\/+$/, '') + '/tma'
+    await sendMessage(chatId, '📱 *BirTapCard Telegram Mini App*\n\nНажмите кнопку ниже, чтобы открыть интерактивную панель управления:', {
+      reply_markup: keyboard([
+        [{ text: '🚀 Открыть Mini App', web_app: { url: tmaUrl } }],
+      ]),
+    })
+    return true
+  }
+
   if (COMMAND_MAP[text] !== undefined) {
     await handleReport(chatId, telegramId, COMMAND_MAP[text])
     return true
@@ -175,7 +197,7 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
     if (profile.role === 'super_admin') {
       await handleLeadsList(chatId, telegramId)
     } else {
-      await comingSoon(chatId, 'Заявки', 'Фазе 4')
+      await sendMessage(chatId, 'ℹ️ Раздел заявок доступен только администраторам платформы.')
     }
     return true
   }
@@ -211,19 +233,22 @@ async function dispatchMenuText(chatId: number, telegramId: number, profile: Bot
       await handleSupportInbox(chatId, telegramId)
       return true
     }
-  }
-
-  const adminStubs: Record<string, string> = {
-    '👥 Пользователи': 'Пользователи',
-    '💳 Подписки': 'Подписки клиентов',
-    '💰 Оплаты': 'Оплаты',
-    '📩 Новые чеки': 'Новые чеки',
-    '📢 Рассылка': 'Рассылка',
-    '🤖 Telegram': 'Управление Telegram-ботом',
-  }
-  if (adminStubs[text]) {
-    await comingSoon(chatId, adminStubs[text], 'Фазе 4')
-    return true
+    if (text === '💳 Подписки' || text === '/subscriptions') {
+      await handleAdminSubscriptions(chatId, telegramId)
+      return true
+    }
+    if (text === '💰 Оплаты' || text === '📩 Новые чеки' || text === '/payments') {
+      await handleAdminPayments(chatId, telegramId)
+      return true
+    }
+    if (text === '👥 Пользователи' || text === '/users') {
+      await handleAdminUsers(chatId, telegramId)
+      return true
+    }
+    if (text === '🤖 Telegram' || text === '/bot') {
+      await handleAdminBotControl(chatId, telegramId)
+      return true
+    }
   }
 
   return false

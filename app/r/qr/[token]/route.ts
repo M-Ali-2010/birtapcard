@@ -3,6 +3,7 @@ import { createServiceRoleClient } from '@/lib/supabase/server'
 import { getVisitorDevice, getClientIp, getBrowserLang, isBot } from '@/lib/visitor-hash'
 import { isSubscriptionExpired, renderExpiredPage } from '@/lib/scan-lock'
 import { isPdpSchoolCompany } from '@/lib/screens/pdp-school'
+import { isShoesMaster } from '@/lib/scan-gate'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,9 +78,10 @@ export async function GET(
     })
   }
 
-  // У PDP School свой экран ссылок — ведём на него, даже если дополнительных ссылок в кабинете нет
+  // У PDP School или Shoes Master свой экран ссылок — ведём на него
   const company = Array.isArray(branch?.companies) ? branch?.companies[0] : branch?.companies
-  if (isPdpSchoolCompany(company?.name) || branch?.instagram_url || branch?.yandex_url || branch?.gis_url || branch?.telegram_url || branch?.bot_url) {
+  const isShoes = isShoesMaster(branch?.name, null, token) || isShoesMaster(company?.name, null, token)
+  if (isPdpSchoolCompany(company?.name) || isShoes || branch?.instagram_url || branch?.yandex_url || branch?.gis_url || branch?.telegram_url || branch?.bot_url) {
     return NextResponse.redirect(new URL(`/r/go/${token}`, request.url))
   }
 
