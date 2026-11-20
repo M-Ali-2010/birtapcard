@@ -3225,6 +3225,18 @@
 
 .ra-kds-card.is-kds-delayed {
   border-color: #ef4444;
+  background: rgba(239, 68, 68, .06);
+  animation: kds-delayed-pulse 2s infinite ease-in-out;
+}
+
+@keyframes kds-delayed-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+
+.ra-kds-card.is-kds-delayed .ra-kds-time-pill {
+  background: rgba(239, 68, 68, .2);
+  color: #fca5a5;
 }
 
 .ra-kds-head {
@@ -3245,9 +3257,19 @@
 }
 
 .ra-kds-head h3 {
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 700;
   margin: 2px 0 0;
   color: var(--text);
+}
+
+.ra-kitchen-summary {
+  margin-bottom: 20px;
+}
+
+.ra-kitchen-summary > span {
+  min-width: 140px;
+  padding: 16px 18px;
 }
 
 .ra-kds-time-pill {
@@ -3276,14 +3298,15 @@
 }
 
 .ra-kds-item-qty {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 800;
   color: var(--mint-2);
-  min-width: 28px;
+  min-width: 36px;
 }
 
 .ra-kds-item-info strong {
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 600;
   color: var(--text);
 }
 
@@ -3311,13 +3334,24 @@
 
 .ra-kds-btn {
   width: 100%;
-  min-height: 56px; /* Touch target 56px for tablet KDS */
-  border-radius: 12px;
-  font-size: 16px;
+  min-height: 64px; /* Large touch target for tablet KDS */
+  border-radius: 14px;
+  font-size: 17px;
   font-weight: 800;
   cursor: pointer;
   border: none;
   transition: all .15s ease;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+.ra-kds-btn:active {
+  transform: scale(.97);
+}
+
+.ra-kds-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
 
 .ra-kds-btn-start {

@@ -98,9 +98,14 @@ export default function OrderTracking({ token }: { token: string }) {
   }, [token, retry])
 
   function toggleTag(tag: string) {
+    const isRemoving = selectedTags.includes(tag)
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+      isRemoving ? prev.filter((t) => t !== tag) : [...prev, tag],
     )
+    // Haptic feedback
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try { navigator.vibrate(isRemoving ? 5 : 10) } catch {}
+    }
   }
 
   async function sendReview() {
@@ -329,18 +334,6 @@ export default function OrderTracking({ token }: { token: string }) {
           Статус обновляется автоматически каждые 5 сек
         </p>
 
-        {/* Прямой блок действий в теле страницы: Назад в меню и Заказать ещё */}
-        <div className="rt-inline-nav-box">
-          <Link href={menuHref} className="rt-btn-menu-highlight">
-            <Icon name="arrowLeft" size={18} />
-            <span>Вернуться в меню стола {order.dining_tables?.table_number ?? ''}</span>
-          </Link>
-          <Link href={menuHref} className="rt-btn-reorder-highlight">
-            <Icon name="plus" size={18} />
-            <span>Дозаказать ещё блюда</span>
-          </Link>
-        </div>
-
         {/* Отзыв после получения (A9, A1) */}
         {['delivered', 'completed'].includes(order.status) && (
           <div className="rt-review">
@@ -351,20 +344,10 @@ export default function OrderTracking({ token }: { token: string }) {
                   <Icon name="check" size={28} />
                 </div>
                 <h3>Спасибо за ваш отзыв!</h3>
-                <p>Ваша оценка сохранена. Приятного отдыха в нашем заведении!</p>
-                <div className="rt-thanks-actions">
-                  <Link href={menuHref} className="rt-send rt-thanks-reorder">
-                    <Icon name="plus" size={16} />
-                    <span>Заказать ещё</span>
-                  </Link>
-                  <Link href={menuHref} className="rt-secondary-btn">
-                    <Icon name="arrowLeft" size={16} />
-                    <span>Вернуться в меню</span>
-                  </Link>
-                </div>
+                <p>Ваша оценка сохранена. Приятного аппетита!</p>
                 <div className="rt-bill-hint">
                   <Icon name="clock" size={16} />
-                  <span>Оплата производится у официанта или на кассе</span>
+                  <span>Оплата у официанта или на кассе</span>
                 </div>
               </div>
             ) : (
@@ -378,7 +361,13 @@ export default function OrderTracking({ token }: { token: string }) {
                       aria-pressed={rating === value}
                       aria-label={`${value} из 5 звёзд`}
                       className={rating >= value ? 'is-on' : ''}
-                      onClick={() => setRating(value)}
+                      onClick={() => {
+                        setRating(value)
+                        // Haptic feedback - stronger for higher ratings
+                        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                          try { navigator.vibrate(5 + value * 3) } catch {}
+                        }
+                      }}
                     >
                       <Icon name="star" size={28} />
                     </button>

@@ -57,6 +57,7 @@ export default function RestaurantMenu({ menu }: { menu: PublicRestaurantMenu })
 
   const cartButtonRef = useRef<HTMLButtonElement>(null)
   const cartDialogRef = useRef<HTMLElement>(null)
+  const categoriesNavRef = useRef<HTMLElement>(null)
 
   // All available products flat map for quick lookup
   const productsMap = useMemo(() => {
@@ -150,13 +151,18 @@ export default function RestaurantMenu({ menu }: { menu: PublicRestaurantMenu })
   const count = lines.reduce((sum, line) => sum + line.quantity, 0)
   const total = lines.reduce((sum, line) => sum + line.product.price_uzs * line.quantity, 0)
 
-  // Allergen toggle
+  // Allergen toggle with haptic feedback
   function toggleAllergen(id: string) {
-    const next = selectedAllergens.includes(id)
+    const isRemoving = selectedAllergens.includes(id)
+    const next = isRemoving
       ? selectedAllergens.filter((item) => item !== id)
       : [...selectedAllergens, id]
     setSelectedAllergens(next)
     saveGuestAllergenFilters(slug, tableNumber, next)
+    // Haptic feedback
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try { navigator.vibrate(isRemoving ? 5 : 10) } catch {}
+    }
   }
 
   // Filtering products by query and allergens
@@ -181,7 +187,7 @@ export default function RestaurantMenu({ menu }: { menu: PublicRestaurantMenu })
       .filter((category) => category.menu_products.length > 0)
   }, [menu.categories, query, selectedAllergens])
 
-  // Category scroll spy
+  // Category scroll spy with auto-scroll for nav buttons
   useEffect(() => {
     const sections = Array.from(document.querySelectorAll<HTMLElement>('.rm-category'))
     if (!sections.length || !('IntersectionObserver' in window)) return
@@ -190,7 +196,15 @@ export default function RestaurantMenu({ menu }: { menu: PublicRestaurantMenu })
         const firstVisible = entries
           .filter((entry) => entry.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]
-        if (firstVisible) setSelectedCategory(firstVisible.target.id.replace('category-', ''))
+        if (firstVisible) {
+          const categoryId = firstVisible.target.id.replace('category-', '')
+          setSelectedCategory(categoryId)
+          // Auto-scroll the category button into view in the nav
+          const navBtn = categoriesNavRef.current?.querySelector(`[data-category-id="${categoryId}"]`)
+          if (navBtn) {
+            navBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+          }
+        }
       },
       { rootMargin: '-145px 0px -68% 0px' },
     )
@@ -202,6 +216,19 @@ export default function RestaurantMenu({ menu }: { menu: PublicRestaurantMenu })
     const next = { ...cart }
     const currentLine = next[product.id]
     const quantity = (currentLine?.quantity ?? 0) + delta
+
+    // Haptic feedback on quantity change
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        if (delta > 0) {
+          navigator.vibrate(8) // Light tap for add
+        } else if (quantity <= 0) {
+          navigator.vibrate([10, 30, 10]) // Double tap for remove
+        } else {
+          navigator.vibrate(5) // Lighter tap for decrease
+        }
+      } catch {}
+    }
 
     if (quantity <= 0) {
       if (currentLine) {
@@ -226,6 +253,10 @@ export default function RestaurantMenu({ menu }: { menu: PublicRestaurantMenu })
     updateCartState(next)
     setUndoDeletedItem(null)
     if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current)
+    // Haptic feedback for restore
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try { navigator.vibrate([10, 20, 10]) } catch {}
+    }
   }
 
   function handleClearCart() {
@@ -435,17 +466,26 @@ export default function RestaurantMenu({ menu }: { menu: PublicRestaurantMenu })
 
         {/* Навигация по категориям */}
         {visibleCategories.length > 0 && (
-          <nav className="rm-categories" aria-label="Категории меню">
+          <nav className="rm-categories" aria-label="Категории меню" ref={categoriesNavRef}>
             {visibleCategories.map((category) => (
               <button
                 key={category.id}
+                data-category-id={category.id}
                 className={selectedCategory === category.id ? 'is-selected' : ''}
                 aria-pressed={selectedCategory === category.id}
-                onClick={() => {
+                onClick={(e) => {
                   setSelectedCategory(category.id)
+                  // Scroll the category button into view in the nav
+                  const btn = e.currentTarget
+                  btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+                  // Scroll the category section into view
                   document
                     .getElementById('category-' + category.id)
                     ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  // Light haptic feedback
+                  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                    try { navigator.vibrate(5) } catch {}
+                  }
                 }}
               >
                 {category.name}
