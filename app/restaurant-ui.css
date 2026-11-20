@@ -2931,3 +2931,474 @@
   color: var(--mint-2);
   text-decoration: none;
 }
+
+/* ─── Admin & Staff UX Enhancements (Safe Payment, Filters, KDS) ────────────── */
+
+.ra-order-filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+.ra-order-filters button {
+  padding: 8px 14px;
+  min-height: 40px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+
+.ra-order-filters button.is-active {
+  background: var(--mint-dim);
+  border-color: var(--mint);
+  color: var(--mint-2);
+}
+
+.ra-undo-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: #18201a;
+  border: 1px solid var(--mint);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .3);
+}
+
+.ra-undo-toast button {
+  background: var(--mint);
+  color: #0b1411;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ra-order-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.ra-elapsed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--surface2);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.ra-elapsed-badge.is-delayed {
+  background: rgba(239, 68, 68, .15);
+  color: #f87171;
+  font-weight: 600;
+}
+
+.ra-order.is-delayed {
+  border-left: 3px solid #ef4444;
+}
+
+.ra-item-note {
+  color: var(--mint-2);
+  font-style: italic;
+}
+
+.ra-paid-badge {
+  color: var(--mint-2);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.ra-unpaid-badge {
+  color: #f59e0b;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.ra-btn-next-status {
+  min-height: 44px;
+  padding: 8px 16px;
+  background: var(--mint);
+  color: #0b1411;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.ra-btn-pay {
+  min-height: 44px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1px solid var(--mint-dim);
+  color: var(--mint-2);
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.ra-btn-pay:hover {
+  background: var(--mint-dim);
+}
+
+/* ─── Payment Modal ─────────────────────────────────────────────────────────── */
+
+.ra-payment-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 440px);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .5);
+  z-index: 50;
+}
+
+.ra-payment-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.ra-payment-modal-head h3 {
+  font-size: 18px;
+  margin: 0;
+  color: var(--text);
+}
+
+.ra-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.ra-payment-modal-info {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+
+.ra-pay-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.ra-pay-row span {
+  color: var(--text-dim);
+}
+
+.ra-pay-total-row {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 16px;
+}
+
+.ra-pay-total-row strong {
+  color: var(--mint-2);
+  font-size: 18px;
+}
+
+.ra-methods-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.ra-methods-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.ra-method-btn {
+  min-height: 52px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.ra-method-btn.is-selected {
+  background: var(--mint-dim);
+  border-color: var(--mint);
+  color: var(--mint-2);
+}
+
+.ra-payment-modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.ra-btn-confirm-pay {
+  flex: 1.5;
+  min-height: 48px;
+  background: var(--mint);
+  color: #0b1411;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ra-btn-cancel-pay {
+  flex: 1;
+  min-height: 48px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ─── KDS Kitchen Grid & Tablet Mode (B6) ──────────────────────────────────── */
+
+.ra-kitchen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.ra-kitchen-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.ra-kds-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ra-kds-card.is-kds-new {
+  border-color: var(--mint);
+  background: rgba(52, 211, 153, .04);
+}
+
+.ra-kds-card.is-kds-delayed {
+  border-color: #ef4444;
+}
+
+.ra-kds-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.ra-kds-table {
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: .08em;
+  color: var(--mint-2);
+  text-transform: uppercase;
+}
+
+.ra-kds-head h3 {
+  font-size: 18px;
+  margin: 2px 0 0;
+  color: var(--text);
+}
+
+.ra-kds-time-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface2);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.ra-kds-items {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.ra-kds-item-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.ra-kds-item-qty {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--mint-2);
+  min-width: 28px;
+}
+
+.ra-kds-item-info strong {
+  font-size: 16px;
+  color: var(--text);
+}
+
+.ra-kds-note {
+  display: block;
+  font-size: 13px;
+  color: #f59e0b;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.ra-kds-order-note {
+  background: rgba(245, 158, 11, .1);
+  border-left: 3px solid #f59e0b;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #fbbf24;
+  margin-bottom: 14px;
+}
+
+.ra-kds-actions {
+  margin-top: auto;
+}
+
+.ra-kds-btn {
+  width: 100%;
+  min-height: 56px; /* Touch target 56px for tablet KDS */
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  transition: all .15s ease;
+}
+
+.ra-kds-btn-start {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.ra-kds-btn-cook {
+  background: #f59e0b;
+  color: #1a1202;
+}
+
+.ra-kds-btn-ready {
+  background: var(--mint);
+  color: #0b1411;
+}
+
+.ra-kds-btn-deliver {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+/* ─── Stoplist 1-Click Toggle (B7) ─────────────────────────────────────────── */
+
+.ra-btn-stoplist {
+  min-height: 38px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.ra-btn-stoplist.is-available {
+  background: rgba(52, 211, 153, .12);
+  color: var(--mint-2);
+  border: 1px solid rgba(52, 211, 153, .25);
+}
+
+.ra-btn-stoplist.is-stopped {
+  background: rgba(239, 68, 68, .12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, .25);
+}
+
+/* ─── Feedback Tags & Team Pills ───────────────────────────────────────────── */
+
+.ra-review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.ra-review-tag-pill {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--mint-dim);
+  color: var(--mint-2);
+}
+
+.ra-role-pill {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.ra-role-pill.is-kitchen {
+  background: rgba(245, 158, 11, .15);
+  color: #fbbf24;
+}
+
+.ra-role-pill.is-staff {
+  background: rgba(59, 130, 246, .15);
+  color: #60a5fa;
+}
+
+.ra-role-pill.is-restaurant_admin {
+  background: var(--mint-dim);
+  color: var(--mint-2);
+}

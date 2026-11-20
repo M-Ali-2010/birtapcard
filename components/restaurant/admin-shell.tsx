@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Icon, Logo, type IconName } from '@/components/ui/icons'
 import type { RestaurantRole } from '@/lib/restaurant/types'
 
-const navigation: { section: string; label: string; icon: IconName }[] = [
+const allNavigation: { section: string; label: string; icon: IconName }[] = [
   { section: 'orders', label: 'Заказы', icon: 'dashboard' },
   { section: 'kitchen', label: 'Кухня', icon: 'clock' },
   { section: 'menu', label: 'Меню', icon: 'restaurants' },
@@ -15,10 +15,17 @@ const navigation: { section: string; label: string; icon: IconName }[] = [
   { section: 'team', label: 'Команда', icon: 'users' },
 ]
 
+const roleAllowedSections: Record<RestaurantRole, string[]> = {
+  kitchen: ['kitchen', 'orders'],
+  staff: ['orders', 'kitchen', 'tables', 'feedback'],
+  restaurant_admin: ['orders', 'kitchen', 'menu', 'tables', 'feedback', 'team'],
+  super_admin: ['orders', 'kitchen', 'menu', 'tables', 'feedback', 'team'],
+}
+
 const roleNames: Record<RestaurantRole, string> = {
   restaurant_admin: 'Администратор ресторана',
   staff: 'Сотрудник зала',
-  kitchen: 'Кухня',
+  kitchen: 'Кухня (KDS)',
   super_admin: 'Суперадминистратор',
 }
 
@@ -36,7 +43,10 @@ export default function RestaurantAdminShell({
   const pathname = usePathname()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const activeSection = pathname.split('/').at(-1) ?? 'orders'
-  const activeItem = navigation.find((item) => item.section === activeSection)
+
+  const allowedSections = roleAllowedSections[role] || ['orders']
+  const visibleNavigation = allNavigation.filter((item) => allowedSections.includes(item.section))
+  const activeItem = visibleNavigation.find((item) => item.section === activeSection)
 
   useEffect(() => {
     setDrawerOpen(false)
@@ -70,7 +80,7 @@ export default function RestaurantAdminShell({
         <nav className="sidebar__nav" aria-label="Разделы ресторана">
           <div className="nav-group">
             <div className="nav-group__label">Рабочее место</div>
-            {navigation.map((item) => {
+            {visibleNavigation.map((item) => {
               const href = '/restaurant-admin/' + restaurantId + '/' + item.section
               const isActive = pathname === href
               return (
@@ -110,11 +120,21 @@ export default function RestaurantAdminShell({
         </div>
       </aside>
 
-      {drawerOpen && <button className="backdrop ra-backdrop" aria-label="Закрыть меню" onClick={() => setDrawerOpen(false)} />}
+      {drawerOpen && (
+        <button
+          className="backdrop ra-backdrop"
+          aria-label="Закрыть меню"
+          onClick={() => setDrawerOpen(false)}
+        />
+      )}
 
       <div className="main">
         <header className="topbar ra-topbar">
-          <button className="icon-btn only-mobile" onClick={() => setDrawerOpen(true)} aria-label="Открыть меню ресторана">
+          <button
+            className="icon-btn only-mobile"
+            onClick={() => setDrawerOpen(true)}
+            aria-label="Открыть меню ресторана"
+          >
             <Icon name="menu" size={18} />
           </button>
           <div className="ra-topbar-heading">
